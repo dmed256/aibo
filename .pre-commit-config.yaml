@@ -1,0 +1,42 @@
+default_install_hook_types: [pre-push]
+repos:
+- repo: https://github.com/psf/black
+  rev: 23.3.0
+  hooks:
+  - id: black
+    types_or: [python]
+    stages: [push]
+
+- repo: https://github.com/pre-commit/mirrors-mypy
+  rev: v1.5.1
+  hooks:
+  - id: mypy
+    args: ["--config-file", "python/pyproject.toml"]
+    types_or: [python]
+    stages: [push]
+    additional_dependencies:
+      [
+        "aiocache",
+        "aiosqlite",
+        "alembic",
+        "async-lru",
+        "cachetools",
+        "fastapi",
+        "fire",
+        "greenlet",
+        "numpy",
+        "openai",
+        "Pillow",
+        "pydantic",
+        "sqlalchemy[asyncio]",
+        "termcolor",
+        "tiktoken",
+        "types-cachetools",
+      ]
+
+- repo: https://github.com/pycqa/isort
+  rev: 5.12.0
+  hooks:
+  - id: isort
+    types_or: [python]
+    stages: [push]

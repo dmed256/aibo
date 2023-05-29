@@ -1,0 +1,3 @@
+__all__ = ["LSP_HEADER_DELIMITER"]
+
+LSP_HEADER_DELIMITER = "\r\n"

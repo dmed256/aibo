@@ -1,0 +1,7 @@
+# Python
+*.egg-info
+*.pyc
+__pycache__
+python/dist
+
+# ELisp
