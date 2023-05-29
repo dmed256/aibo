@@ -1,0 +1,24 @@
+[project]
+name = "aibo"
+version = "0.1.0"
+authors = [
+  { name="dmed", email="dmed256@gmail.com" },
+]
+description = "AI partner"
+requires-python = ">=3.11"
+dependencies = [
+  "aiocache==0.12.*",
+  "black==23.*",
+  "fastapi==0.*",
+  "fire==0.5.*",
+  "isort==5.*",
+  "openai==0.*",
+  "pydantic==1.*",
+  "pymongo==4.*",
+  "tenacity==8.*",
+  "termcolor==2.*",
+  "uvicorn==0.22.*",
+]
+
+[tool.isort]
+profile = "black"
