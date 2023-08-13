@@ -1,4 +1,5 @@
 ;;; aibo-api.el --- API calls to the Python server -*- lexical-binding: t -*-
+(require 'aibo-custom)
 (require 'aibo-types)
 (require 'aibo-utils)
 
@@ -6,16 +7,6 @@
 (require 'eieio)
 (require 'json)
 (require 'request)
-
-(defcustom aibo:python "python"
-  "The python executable used to start the backend service"
-  :type 'string
-  :group 'aibo)
-
-(defcustom aibo:model-name "gpt-3.5-turbo"
-  "The OpenAI model name used for completions"
-  :type 'string
-  :group 'aibo)
 
 (defun aibo:start-server (&rest args)
   (interactive)
@@ -26,7 +17,10 @@
      (lambda (buffer)
        (with-current-buffer buffer
          (add-hook 'after-change-functions 'aibo:--ansi-buffer nil t)
-         (start-process "aibo-server" buffer aibo:python "-m" "aibo.cli.start")))
+         (start-process "aibo-server" buffer
+                        aibo:python
+                        "-m" "aibo.cli.start"
+                        "--port" (number-to-string aibo:python-port))))
      :on-load
      (lambda (buffer)
        (funcall on-success)))))
@@ -40,7 +34,7 @@
          (bypass-server-check (plist-get args :bypass-server-check))
          (do-request
           (lambda ()
-            (request (format "http://localhost:5000%s" path)
+            (request (format "http://localhost:%s%s" aibo:python-port path)
               :type type
               :headers '(("Content-Type" . "application/json"))
               :parser 'json-read
