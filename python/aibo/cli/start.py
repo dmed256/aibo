@@ -16,7 +16,7 @@ from aibo.cli.common import PKG_DIR
 
 def main(port: int = 5000):
     uvicorn.run(
-        'aibo.server.main:app',
+        "aibo.server.main:app",
         port=port,
         reload=True,
         reload_dirs=[PKG_DIR],

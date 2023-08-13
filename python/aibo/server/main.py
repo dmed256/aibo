@@ -1,8 +1,7 @@
 from fastapi import FastAPI
 
 from aibo.db import migrate_documents
-from aibo.server.routes import chat_routes
-from aibo.server.routes import healthcheck_routes
+from aibo.server.routes import chat_routes, healthcheck_routes
 
 migrate_documents()
 

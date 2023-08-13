@@ -1,9 +1,9 @@
-import pymongo
 import datetime as dt
 import json
 from typing import Annotated, Any, Literal, Optional, Self, Union
 from uuid import UUID, uuid4
 
+import pymongo
 from pydantic import BaseModel, Field
 
 from aibo.common.time import now_utc

@@ -1,8 +1,8 @@
-import pymongo
 import datetime as dt
 from typing import Optional, Self, Union
 from uuid import UUID, uuid4
 
+import pymongo
 from pydantic import BaseModel, Field
 
 from aibo.common.time import now_utc
@@ -50,19 +50,28 @@ class MessageDocument(BaseDocument):
             ),
             Index(
                 name="children",
-                fields=[("conversation_id", pymongo.DESCENDING), ("parent_id", pymongo.DESCENDING)],
+                fields=[
+                    ("conversation_id", pymongo.DESCENDING),
+                    ("parent_id", pymongo.DESCENDING),
+                ],
+                unique=False,
+            ),
+            Index(name="source", fields=[("source", pymongo.TEXT)], unique=False),
+            Index(
+                name="source_kind",
+                fields=[("source.kind", pymongo.DESCENDING)],
                 unique=False,
             ),
             Index(
-                name="source", fields=[("source", pymongo.TEXT)], unique=False
+                name="content_kind",
+                fields=[("content.kind", pymongo.DESCENDING)],
+                unique=False,
             ),
             Index(
-                name="source_kind", fields=[("source.kind", pymongo.DESCENDING)], unique=False
+                name="created_at",
+                fields=[("created_at", pymongo.DESCENDING)],
+                unique=False,
             ),
-            Index(
-                name="content_kind", fields=[("content.kind", pymongo.DESCENDING)], unique=False
-            ),
-            Index(name="created_at", fields=[("created_at", pymongo.DESCENDING)], unique=False),
         ]
 
     def insert(self) -> Self:

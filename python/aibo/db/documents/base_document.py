@@ -1,6 +1,6 @@
 import abc
 import functools
-from typing import Optional, Self, Literal
+from typing import Literal, Optional, Self
 from uuid import UUID, uuid4
 
 import pymongo
@@ -21,11 +21,13 @@ class Order(StrEnum):
             return pymongo.ASCENDING
         return pymongo.DESCENDING
 
+
 IndexType = Literal[
     pymongo.ASCENDING,
     pymongo.DESCENDING,
     pymongo.TEXT,
 ]
+
 
 class Index(BaseModel):
     name: str
@@ -64,11 +66,7 @@ class BaseDocument(BaseModel, abc.ABC):
         ]
         for index in unmigrated_indices:
             fields = [
-                (
-                    field_name,
-                    index_type
-                )
-                for field_name, index_type in index.fields
+                (field_name, index_type) for field_name, index_type in index.fields
             ]
             cls.collection.create_index(fields, unique=index.unique, name=index.name)
 
@@ -111,7 +109,9 @@ class BaseDocument(BaseModel, abc.ABC):
 
     @classmethod
     def aggregate(cls, query, **kwargs):
-        return [cls(**doc_dict) for doc_dict in cls.collection.aggregate(query, **kwargs)]
+        return [
+            cls(**doc_dict) for doc_dict in cls.collection.aggregate(query, **kwargs)
+        ]
 
     @classmethod
     def count(cls, *args, **kwargs):

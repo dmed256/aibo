@@ -410,7 +410,7 @@ class Conversation(ConversationSummary):
         env = Env.get()
 
         title_conversation = Conversation.create(
-            title=f'Title for {self.id}',
+            title=f"Title for {self.id}",
             openai_model_source=OpenAIModelSource.build(),
             enabled_tools=[],
             system_message_inputs=CreateMessageInputs(
@@ -448,7 +448,7 @@ Example of good summaries include:
 
 [ASSISTANT]
 """.strip(),
-            )
+            ),
         )
         generated_message = await title_conversation.generate_assistant_message()
         title_conversation.soft_delete()
@@ -527,7 +527,7 @@ Example of good summaries include:
             MessageRole.ASSISTANT: "yellow",
         }
 
-        conversation_str = ''
+        conversation_str = ""
         for message in self.get_current_history(sync=True):
             role_color = role_colors[message.role]
 

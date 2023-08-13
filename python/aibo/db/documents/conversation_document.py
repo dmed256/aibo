@@ -1,8 +1,8 @@
-import pymongo
 import datetime as dt
 from typing import Optional, Self
 from uuid import UUID
 
+import pymongo
 from pydantic import BaseModel, Field
 
 from aibo.common.time import now_utc
@@ -36,7 +36,11 @@ class ConversationDocument(BaseDocument):
     def indices(cls) -> list[Index]:
         return [
             Index(name="title", fields=[("title", pymongo.DESCENDING)], unique=False),
-            Index(name="created_at", fields=[("created_at", pymongo.DESCENDING)], unique=False),
+            Index(
+                name="created_at",
+                fields=[("created_at", pymongo.DESCENDING)],
+                unique=False,
+            ),
         ]
 
     @classmethod
