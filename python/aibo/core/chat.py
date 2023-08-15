@@ -433,7 +433,7 @@ Please summarize the conversation below:
 --------------------
 
 [USER]
-Only use 3-6 words to succinctly and accurately describe the conversation above as much as possible without any punctuation followed by 2 useful short lowercase tags at the end.
+Only use THREE to SIX words to succinctly describe the conversation above as much as possible without any punctuation followed by TWO useful short lowercase tags at the end.
 DO NOT speak about yourself in the summary.
 
 Example of good summaries include:
@@ -443,7 +443,8 @@ Example of good summaries include:
 
 [SYSTEM]
 **IT'S IMPORTANT**
-**ONLY OUTPUT 3-6 WORDS WITHOUT NEWLINES AND 2 LOWERCASE TAGS, NOTHING MORE!!**
+**ONLY OUTPUT LESS THAN SIX WORDS WITHOUT NEWLINES AND TWO LOWERCASE TAGS, NOTHING MORE!!**
+**PRIORITIZE WORD COUNT OVER 100% ACCURACY OVER THE CONVERSATION**
 **NO NEWLINES**
 
 [ASSISTANT]

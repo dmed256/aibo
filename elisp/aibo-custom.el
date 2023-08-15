@@ -14,3 +14,5 @@
   "The OpenAI model name used for completions"
   :type 'string
   :group 'aibo)
+
+(provide 'aibo-custom)

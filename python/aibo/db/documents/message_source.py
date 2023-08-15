@@ -32,7 +32,7 @@ class OpenAIModelSource(BaseModel):
     kind: Literal["openai_model"] = "openai_model"
     model: str
     temperature: float
-    max_tokens: int
+    max_tokens: Optional[int]
 
     @classmethod
     def build(
@@ -46,7 +46,7 @@ class OpenAIModelSource(BaseModel):
         return cls(
             model=model or env.OPENAI_MODEL_NAME,
             temperature=env.OPENAI_TEMPERATURE if temperature is None else temperature,
-            max_tokens=max_tokens or env.OPENAI_MAX_TOKENS,
+            max_tokens=max_tokens,
         )
 
     def __str__(self):

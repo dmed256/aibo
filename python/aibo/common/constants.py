@@ -17,7 +17,6 @@ class Env(BaseModel):
     # OpenAI
     OPENAI_MODEL_NAME: str
     OPENAI_TEMPERATURE: float
-    OPENAI_MAX_TOKENS: int
 
     # Misc
     CURRENT_USER: str
@@ -35,7 +34,6 @@ class Env(BaseModel):
             # OpenAI
             OPENAI_MODEL_NAME=os.environ.get("OPENAI_MODEL_NAME", "gpt-3.5-turbo"),
             OPENAI_TEMPERATURE=float(os.environ.get("OPENAI_TEMPERATURE", "0.9")),
-            OPENAI_MAX_TOKENS=int(os.environ.get("OPENAI_MAX_TOKENS", "1024")),
             # Misc
             CURRENT_USER=os.environ.get("USER", "unknown"),
             MAX_AIBO_MESSAGES=int(os.environ.get("MAX_AIBO_MESSAGES", "15")),
