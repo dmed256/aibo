@@ -18,9 +18,9 @@
        (with-current-buffer buffer
          (add-hook 'after-change-functions 'aibo:--ansi-buffer nil t)
          (start-process "aibo-server" buffer
-                        aibo:python
+                        aibo:server-python
                         "-m" "aibo.cli.start"
-                        "--port" (number-to-string aibo:python-port))))
+                        "--port" (number-to-string aibo:server-port))))
      :on-load
      (lambda (buffer)
        (funcall on-success)))))
@@ -34,7 +34,7 @@
          (bypass-server-check (plist-get args :bypass-server-check))
          (do-request
           (lambda ()
-            (request (format "http://localhost:%s%s" aibo:python-port path)
+            (request (format "http://localhost:%s%s" aibo:server-port path)
               :type type
               :headers '(("Content-Type" . "application/json"))
               :parser 'json-read
