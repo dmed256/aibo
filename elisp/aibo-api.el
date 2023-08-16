@@ -113,6 +113,44 @@
                              (Conversation-from-api api-conversation)))
      :on-success on-success)))
 
+(defun aibo:api-edit-message (&rest args)
+  (let* ((conversation-id (plist-get args :conversation-id))
+         (message-id (plist-get args :message-id))
+         (text (plist-get args :text))
+         (on-success (plist-get args :on-success)))
+    (aibo:--api-put
+     :path (format "/chat/conversations/%s/messages/%s" conversation-id message-id)
+     :data `(("text" . ,text))
+     :response-transform (lambda (response)
+                           (let* ((api-conversation (cdr (assoc 'conversation response))))
+                             (Conversation-from-api api-conversation)))
+     :on-success on-success)))
+
+(defun aibo:api-delete-message (&rest args)
+  (let* ((conversation-id (plist-get args :conversation-id))
+         (message-id (plist-get args :message-id))
+         (delete-after (plist-get args :delete-after))
+         (on-success (plist-get args :on-success)))
+    (aibo:--api-delete
+     :path (format "/chat/conversations/%s/messages/%s?delete-after=%s"
+                   conversation-id
+                   message-id
+                   (if delete-after "true" "false"))
+     :response-transform (lambda (response)
+                           (let* ((api-conversation (cdr (assoc 'conversation response))))
+                             (Conversation-from-api api-conversation)))
+     :on-success on-success)))
+
+(defun aibo:api-regenerate-assistant-message (&rest args)
+  (let* ((conversation-id (plist-get args :conversation-id))
+         (on-success (plist-get args :on-success)))
+    (aibo:--api-post
+     :path (format "/chat/conversations/%s/regenerate-assistant-message" conversation-id)
+     :response-transform (lambda (response)
+                           (let* ((api-conversation (cdr (assoc 'conversation response))))
+                             (Conversation-from-api api-conversation)))
+     :on-success on-success)))
+
 (defun aibo:api-set-conversation-title (&rest args)
   (let* ((id (plist-get args :id))
          (title (plist-get args :title))

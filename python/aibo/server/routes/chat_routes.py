@@ -66,18 +66,20 @@ class SubmitUserMessageResponse(BaseModel):
     conversation: api_models.Conversation
 
 
+class RegenerateAssistantMessageResponse(BaseModel):
+    conversation: api_models.Conversation
+
+
 class EditMessageRequest(BaseModel):
-    source: chat.MessageSource
-    role: chat.MessageRole
-    content: chat.MessageContent
+    text: str
 
 
 class EditMessageResponse(BaseModel):
-    updated_messages: list[api_models.Message]
+    conversation: api_models.Conversation
 
 
 class DeleteMessageResponse(BaseModel):
-    updated_messages: list[api_models.Message]
+    conversation: api_models.Conversation
 
 
 class GetConversationEdgesResponse(BaseModel):
@@ -230,7 +232,24 @@ async def submit_user_message(
     )
 
 
-@router.put("/message/{message_id}")
+@router.post("/conversations/{conversation_id}/regenerate-assistant-message")
+async def regenerate_assistant_message(
+    conversation_id: UUID,
+) -> RegenerateAssistantMessageResponse:
+    conversation = chat.Conversation.get(conversation_id)
+
+    current_message = conversation.current_message
+    if current_message.role == chat.MessageRole.ASSISTANT:
+        conversation.delete_message(current_message)
+
+    await conversation.generate_assistant_message()
+
+    return RegenerateAssistantMessageResponse(
+        conversation=api_models.Conversation.from_chat(conversation)
+    )
+
+
+@router.put("/conversations/{conversation_id}/messages/{message_id}")
 async def edit_message(
     conversation_id: UUID,
     message_id: UUID,
@@ -238,37 +257,55 @@ async def edit_message(
 ) -> EditMessageResponse:
     conversation = chat.Conversation.get(conversation_id)
     message = conversation.all_messages.get(message_id)
+
     if not message:
-        return EditMessageResponse(updated_messages=[])
+        raise Exception("Message not found")
 
-    new_message = conversation.edit_message(
+    if not isinstance(message.content, TextMessageContent):
+        raise Exception(
+            f"Expected TextMessageContent, found {message.content.__class__}"
+        )
+
+    if message.role != chat.MessageRole.USER:
+        raise Exception(
+            f"Expected last message to be an user role, found: {message.role}"
+        )
+
+    conversation.edit_message(
         message,
-        source=request.source,
-        role=request.role,
-        content=request.content,
+        source=message.source,
+        role=message.role,
+        content=TextMessageContent(text=request.text),
     )
+
     return EditMessageResponse(
-        updated_messages=[
-            new_message,
-            *new_message.get_children(),
-        ]
+        conversation=api_models.Conversation.from_chat(conversation),
     )
 
 
-@router.delete("/message/{message_id}")
+@router.delete("/conversations/{conversation_id}/messages/{message_id}")
 async def delete_message(
     conversation_id: UUID,
     message_id: UUID,
+    delete_after: bool = False,
 ) -> None:
     conversation = chat.Conversation.get(conversation_id)
     message = conversation.all_messages.get(message_id)
+
     if not message:
-        return DeleteMessageResponse(updated_messages=[])
+        raise Exception("Message not found")
 
-    parent_message = conversation.all_messages.get(message.parent_id)
-    conversation.delete_message(message)
+    messages_to_delete = [message]
+    if delete_after:
+        message_index = len(conversation.get_message_history(message))
+        messages_to_delete = conversation.get_current_history()[message_index:]
 
-    return DeleteMessageResponse(updated_messages=parent_message.get_children())
+    for message in messages_to_delete:
+        conversation.delete_message(message)
+
+    return DeleteMessageResponse(
+        conversation=api_models.Conversation.from_chat(conversation),
+    )
 
 
 @router.get("/conversations/{conversation_id}/edges")

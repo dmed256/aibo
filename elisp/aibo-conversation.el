@@ -207,10 +207,12 @@
      (propertize
       (aibo::--get-message-header message)
       'read-only t
+      'message message
       'font-lock-face `(:background ,message-header-color))
      (propertize
       (format "\n%s\n\n" (oref message :content-text))
       'read-only t
+      'message message
       'font-lock-face `(:foreground ,message-content-color)))))
 
 (defun aibo:--render-message-widget (message)
@@ -240,6 +242,51 @@
 
     (--each rendered-messages (aibo:--render-message-widget it))))
 
+
+;; ---[ Conversation editing ]--------------------
+(defun aibo:--message-at-point ()
+  (interactive)
+  (get-char-property (point) 'message))
+
+(defun aibo:--widget-at-point ()
+  (interactive)
+  (let* ((message (aibo:--message-at-point)))
+    (ht-get aibo:b-message-widgets (oref message :id))))
+
+(defun aibo:remove-message-at-point ()
+  (interactive)
+  (let* ((message (aibo:--message-at-point))
+         (message-id (oref message :id)))
+    (aibo:api-delete-message
+     :conversation-id (oref aibo:b-conversation :id)
+     :message-id message-id
+     :delete-after nil
+     :on-success (lambda (conversation)
+                   (aibo:go-to-conversation conversation)))))
+
+(defun aibo:remove-messages-after-point ()
+  (interactive)
+  (let* ((message (aibo:--message-at-point))
+         (message-id (oref message :id)))
+    (aibo:api-delete-message
+     :conversation-id (oref aibo:b-conversation :id)
+     :message-id message-id
+     :delete-after t
+     :on-success (lambda (conversation)
+                   (aibo:go-to-conversation conversation)))))
+
+;; TODO
+(defun aibo:edit-message-at-point ()
+  (interactive)
+  (let* ((message (aibo:--message-at-point))
+         (message-id (oref message :id)))))
+
+(defun aibo:regenerate-last-message ()
+  (interactive)
+  (aibo:api-regenerate-assistant-message
+   :conversation-id (oref aibo:b-conversation :id)
+   :on-success (lambda (conversation)
+                 (aibo:go-to-conversation conversation))))
 
 ;; ---[ Create a conversation ]-------------------
 (defvar aibo:--create-conversation-history nil
