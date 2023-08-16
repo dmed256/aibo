@@ -15,4 +15,9 @@
   :type 'string
   :group 'aibo)
 
+(defcustom aibo:enable-debug-logging t
+  "If set to t, adds logging in *Aibo logs*"
+  :type 'boolean
+  :group 'aibo)
+
 (provide 'aibo-custom)

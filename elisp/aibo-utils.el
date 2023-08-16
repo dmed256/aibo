@@ -1,8 +1,6 @@
 ;;; aibo-utils.el --- Common helper utils -*- lexical-binding: t -*-
 
 ;; ---[ Logger ]----------------------------------
-(setq aibo:enable-debug-logging t)
-
 (defun aibo:--log (level value)
   (if aibo:enable-debug-logging
       (aibo:--get-or-create-buffer
