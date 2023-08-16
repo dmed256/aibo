@@ -13,6 +13,10 @@
   (let ((map (make-sparse-keymap)))
     (define-key map (kbd "C-c C-x C-r") 'aibo:refresh-current-conversation)
     (define-key map (kbd "C-c C-t") 'aibo:set-current-conversation-title)
+    (define-key map (kbd "C-c C-k") 'aibo:remove-message-at-point) ;; TODO
+    (define-key map (kbd "C-c C-x C-k") 'aibo:remove-messages-after-point) ;; TODO
+    (define-key map (kbd "C-c C-e") 'aibo:edit-message-at-point) ;; TODO
+    (define-key map (kbd "C-c C-c") 'aibo:regenerate-last-message) ;; TODO
     (define-key map (kbd "C-c C-x C-t") 'aibo:generate-current-conversation-title)
     (define-key map (kbd "M-RET") 'aibo:submit-user-message)
     map))
