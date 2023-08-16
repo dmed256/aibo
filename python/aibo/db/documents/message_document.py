@@ -22,6 +22,7 @@ class MessageRole(StrEnum):
     USER = "user"
     ASSISTANT = "assistant"
     FUNCTION = "function"
+    ERROR = "error"
 
 
 class MessageDocument(BaseDocument):

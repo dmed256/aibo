@@ -1,11 +1,15 @@
+import abc
 import json
 from typing import Annotated, Any, Literal, Optional, Union
 
+import openai
+import openai.error as oai_error
 from pydantic import BaseModel, Field
 
 from aibo.common.types import StrEnum
 
 __all__ = [
+    "CompletionErrorContent",
     "ToolRequestContent",
     "ToolResponseContent",
     "ToolResponseStatus",
@@ -15,7 +19,24 @@ __all__ = [
 ]
 
 
-class TextMessageContent(BaseModel):
+class BaseMessageContent(BaseModel, abc.ABC):
+    """
+    Each message content must be derived from BaseMessageContent
+    """
+
+    # Unique to each message content type
+    kind: str
+
+    @abc.abstractmethod
+    def to_openai(self, *, conversation: "Conversation") -> Optional[str]:
+        ...
+
+    @abc.abstractmethod
+    def __str__(self) -> str:
+        ...
+
+
+class TextMessageContent(BaseMessageContent):
     """
     Regular text content
     """
@@ -30,7 +51,50 @@ class TextMessageContent(BaseModel):
         return self.text
 
 
-class ToolRequestContent(BaseModel):
+class CompletionErrorContent(BaseMessageContent):
+    """
+    Error from sampling a message completion
+    """
+
+    class ErrorType(StrEnum):
+        API = "api"
+        AUTHENTICATION = "authentication"
+        PERMISSION = "permission"
+        RATE_LIMIT = "rate_limit"
+        SERVICE = "service"
+        TIMEOUT = "timeout"
+        UNKNOWN = "UNKNOWN"
+
+    kind: Literal["completion_error"] = "completion_error"
+    error_type: ErrorType
+    text: str
+
+    @classmethod
+    def from_openai(cls, error: openai.OpenAIError):
+        error_type = {
+            oai_error.APIConnectionError: cls.ErrorType.SERVICE,
+            oai_error.AuthenticationError: cls.ErrorType.AUTHENTICATION,
+            oai_error.InvalidAPIType: cls.ErrorType.API,
+            oai_error.InvalidRequestError: cls.ErrorType.API,
+            oai_error.PermissionError: cls.ErrorType.PERMISSION,
+            oai_error.RateLimitError: cls.ErrorType.RATE_LIMIT,
+            oai_error.ServiceUnavailableError: cls.ErrorType.SERVICE,
+            oai_error.Timeout: cls.ErrorType.TIMEOUT,
+        }.get(error.__class__, cls.ErrorType.UNKNOWN)
+
+        return cls(
+            error_type=error_type,
+            text=str(error),
+        )
+
+    def to_openai(self, *, conversation: "Conversation"):
+        return None
+
+    def __str__(self):
+        return f"Error {self.error_type}: {self.text}"
+
+
+class ToolRequestContent(BaseMessageContent):
     """
     Message request to an tool. Check below for a few examples
 
@@ -74,7 +138,7 @@ class ToolResponseErrorType(StrEnum):
     TOOL_ERROR = "tool_error"
 
 
-class ToolResponseContent(BaseModel):
+class ToolResponseContent(BaseMessageContent):
     """
     Response from an tool. Check below for a few examples
 
@@ -120,6 +184,7 @@ class ToolResponseContent(BaseModel):
 
 MessageContent = Annotated[
     Union[
+        CompletionErrorContent,
         ToolRequestContent,
         ToolResponseContent,
         TextMessageContent,

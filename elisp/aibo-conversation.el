@@ -19,7 +19,9 @@
         ("user-dark" . "#ba7a13")
         ("user-light" . "#fae2b9")
         ("assistant-dark" . "#384a8f")
-        ("assistant-light" . "#dce9fc")))
+        ("assistant-light" . "#dce9fc")
+        ("error-dark" . "#8f3838")
+        ("error-light" . "#fcdcdc")))
 
 (setq aibo:--new-user-message-keymap
       (let ((keymap (copy-keymap widget-keymap)))
@@ -38,7 +40,8 @@
     (cond
      ((string= role "system") "[System]")
      ((string= role "user") "[User]")
-     ((string= role "assistant") (format "[Assistant: %s]" (aibo::--get-message-source message))))))
+     ((string= role "assistant") (format "[Assistant: %s]" (aibo::--get-message-source message)))
+     ((string= role "error") "[Error]"))))
 
 (defun aibo::--get-message-source (message)
   (let* ((source (oref message :source))

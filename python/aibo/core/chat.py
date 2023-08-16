@@ -15,6 +15,7 @@ from aibo.common.openai import OpenAIMessage
 from aibo.common.result import Error, Result
 from aibo.common.time import now_utc
 from aibo.db.documents import (
+    CompletionErrorContent,
     ConversationDocument,
     HumanSource,
     MessageContent,
@@ -33,6 +34,7 @@ from aibo.db.documents import (
 
 __all__ = [
     "Message",
+    "CompletionErrorContent",
     "ConversationSummary",
     "Conversation",
     "ConversationDocument",
@@ -50,6 +52,14 @@ __all__ = [
     "ProgrammaticSource",
     "TextMessageContent",
 ]
+
+
+ROLE_COLORS = {
+    MessageRole.SYSTEM: "green",
+    MessageRole.USER: "cyan",
+    MessageRole.ASSISTANT: "yellow",
+    MessageRole.ERROR: "light_gray",
+}
 
 
 class CreateMessageInputs(BaseModel):
@@ -104,7 +114,11 @@ class Message(BaseModel):
     def content_text(self):
         return str(self.content)
 
-    def to_openai(self, *, conversation: "Conversation") -> OpenAIMessage:
+    def to_openai(self, *, conversation: "Conversation") -> Optional[OpenAIMessage]:
+        content = self.content.to_openai(conversation=conversation)
+        if content is None:
+            return None
+
         openai_role = {
             MessageRole.SYSTEM: "system",
             MessageRole.USER: "user",
@@ -114,7 +128,7 @@ class Message(BaseModel):
 
         message = OpenAIMessage(
             role=openai_role,
-            content=self.content.to_openai(conversation=conversation),
+            content=content,
         )
         if isinstance(self.content, ToolResponseContent):
             message.name = self.content.tool
@@ -386,18 +400,27 @@ class Conversation(ConversationSummary):
             for tool in self.enabled_tools
             for function in tool.to_openai()
         ]
-        response = openai.ChatCompletion.create(
-            model=source.model,
-            n=1,
-            temperature=source.temperature,
-            max_tokens=source.max_tokens,
-            messages=[
-                message.to_openai(conversation=self).dict(exclude_none=True)
-                for message in self.get_current_history()
-            ],
-            # API expects functions to only be defined if it's a non-empty list
-            **(dict(functions=functions) if functions else {}),
-        )
+
+        try:
+            response = openai.ChatCompletion.create(
+                model=source.model,
+                n=1,
+                temperature=source.temperature,
+                max_tokens=source.max_tokens,
+                messages=[
+                    openai_message.dict(exclude_none=True)
+                    for message in self.get_current_history()
+                    if (openai_message := message.to_openai(conversation=self))
+                ],
+                # API expects functions to only be defined if it's a non-empty list
+                **(dict(functions=functions) if functions else {}),
+            )
+        except openai.OpenAIError as exc:
+            return self.insert_message(
+                source=ProgrammaticSource(source="api_error"),
+                role=MessageRole.ERROR,
+                content=CompletionErrorContent.from_openai(exc),
+            )
 
         content = response.choices[0]["message"]["content"]
         return self.insert_message(
@@ -522,20 +545,13 @@ Example of good summaries include:
         return messages
 
     def stringify_conversation(self, *, colored=False) -> str:
-        role_colors = {
-            MessageRole.SYSTEM: "green",
-            MessageRole.USER: "cyan",
-            MessageRole.ASSISTANT: "yellow",
-        }
-
         conversation_str = ""
         for message in self.get_current_history(sync=True):
-            role_color = role_colors[message.role]
-
             role = f"[{message.role.upper()}]"
-            content = message.to_openai(conversation=self).content
+            content = str(message.content)
 
             if colored:
+                role_color = ROLE_COLORS[message.role]
                 role = colored(role, role_color)
                 content = colored(content, f"light_{role_color}")
 
