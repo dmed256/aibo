@@ -449,28 +449,16 @@ class Conversation(ConversationSummary):
             role=MessageRole.USER,
             content=TextMessageContent(
                 text=f"""
-Please summarize the conversation below:
-
 --------------------
 {self.stringify_conversation()}
 --------------------
 
-[USER]
-Only use THREE to SIX words to succinctly describe the conversation above as much as possible without any punctuation followed by TWO useful short lowercase tags at the end.
-DO NOT speak about yourself in the summary.
+Capture the intent of the above within three to six words and 2 tags
 
 Example of good summaries include:
 - Docstrings for generate_title #docstring #python
-- Capital of Thailand #question #geography #thailand
+- Capital of Thailand #geography #thailand
 - Pokemon guessing game #fun #pokemon
-
-[SYSTEM]
-**IT'S IMPORTANT**
-**ONLY OUTPUT LESS THAN SIX WORDS WITHOUT NEWLINES AND TWO LOWERCASE TAGS, NOTHING MORE!!**
-**PRIORITIZE WORD COUNT OVER 100% ACCURACY OVER THE CONVERSATION**
-**NO NEWLINES**
-
-[ASSISTANT]
 """.strip(),
             ),
         )
