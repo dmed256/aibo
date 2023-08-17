@@ -546,6 +546,8 @@ Example of good summaries include:
 - Docstrings for generate_title #docstring #python
 - Capital of Thailand #geography #thailand
 - Pokemon guessing game #fun #pokemon
+
+Remember, only use less than ten words in total!
 """.strip(),
             ),
         )
