@@ -1,7 +1,18 @@
 import inspect
 import typing
+from typing import Literal
+from uuid import UUID
 
 from fastapi import WebSocket
+from pydantic import BaseModel
+
+
+class BaseEvent(BaseModel):
+    id: UUID
+
+
+class EventCompleted(BaseEvent):
+    kind: Literal["event_completed"] = "event_completed"
 
 
 class WebsocketRouter:
@@ -49,4 +60,9 @@ class WebsocketRouter:
         if not event_route:
             raise ValueError(f"No route for event: {event.__class__}")
 
-        await event_route(websocket, event)
+        async for event in event_route(websocket, event):
+            await websocket.send_text(event.json())
+
+        await websocket.send_text(
+            EventCompleted(id=event.id).json(),
+        )

@@ -3,23 +3,23 @@ from typing import Annotated, Literal, Union
 from uuid import UUID
 
 from fastapi import APIRouter, WebSocket
-from pydantic import BaseModel, Field
+from pydantic import Field
 
 from aibo.core import chat
 from aibo.server.routes import api_models
-from aibo.server.routes.websocket_route import WebsocketRouter
+from aibo.server.routes.websocket_route import BaseEvent, WebsocketRouter
 
 router = APIRouter()
 ws_router = WebsocketRouter()
 
 
-class SubmitUserMessageEventRequest(BaseModel):
+class SubmitUserMessageEventRequest(BaseEvent):
     kind: Literal["submit_user_message"] = "submit_user_message"
     conversation_id: UUID
     text: str
 
 
-class SubmitUserMessageEventResponse(BaseModel):
+class SubmitUserMessageEventResponse(BaseEvent):
     kind: Literal["submit_user_message"] = "submit_user_message"
     message: chat.Message
 
@@ -42,10 +42,9 @@ async def submit_user_message(
     conversation.insert_user_message(event.text)
 
     async for message in conversation.stream_assistant_message():
-        await websocket.send_text(
-            SubmitUserMessageEventResponse(
-                message=message,
-            ).json()
+        yield SubmitUserMessageEventResponse(
+            id=event.id,
+            message=message,
         )
 
 

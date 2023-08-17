@@ -5,8 +5,10 @@
 
 (require 'dash)
 (require 'eieio)
+(require 'ht)
 (require 'json)
 (require 'request)
+(require 'uuidgen)
 
 (defun aibo:start-server (&rest args)
   (interactive)
@@ -25,6 +27,8 @@
      (lambda (buffer)
        (funcall on-success)))))
 
+
+;; ---[ Request Wrappers ]------------------------
 (defun aibo:--api-request (&rest args)
   (let* ((path (plist-get args :path))
          (type (plist-get args :type))
@@ -63,6 +67,8 @@
 (defun aibo:--api-delete (&rest args)
   (apply 'aibo:--api-request :type "DELETE" args))
 
+
+;; ---[ API Methods ]-----------------------------
 (defun aibo:api-get-conversations (&rest args)
   (let* ((on-success (plist-get args :on-success)))
     (aibo:--api-post
@@ -172,5 +178,57 @@
                            (let* ((api-conversation (cdr (assoc 'conversation response))))
                              (Conversation-from-api api-conversation)))
      :on-success on-success)))
+
+
+;; ---[ Websocket ]-------------------------------
+(setq aibo:--websocket-callbacks (ht-create))
+(setq aibo:--websocket nil)
+
+(defun aibo:websocket ()
+  (interactive)
+  (or aibo:--websocket (aibo:--connect-websocket)))
+
+(defun aibo:--connect-websocket ()
+  (interactive)
+  (setq aibo:--websocket
+        (websocket-open
+         (format "ws://localhost:%s/ws" aibo:server-port)
+         :on-message
+         (lambda (websocket frame)
+           (let* ((event (json-parse-string (websocket-frame-payload frame)))
+                  (event-id (ht-get event "id"))
+                  (event-kind (ht-get event "kind"))
+                  (is-completed (string= event-kind "event_completed"))
+                  (callback (ht-get aibo:--websocket-callbacks event-id)))
+             (cond
+              (is-completed (ht-remove! aibo:--websocket-callbacks event-id))
+              (callback (funcall callback event)))))
+         :on-close
+         (lambda (websocket)
+           (setq aibo:--websocket nil)
+           (setq aibo:--websocket-callbacks (ht-create))))))
+
+(defun aibo:--api-ws-send (&rest args)
+  (let* ((partial-event (plist-get args :event))
+         (response-transform (plist-get args :response-transform))
+         (on-message (plist-get args :on-message))
+         (event-id (uuidgen-4))
+         (event (add-to-list 'partial-event '("id" . event-id))))
+    (ht-set! aibo:--websocket-callbacks
+             event-id
+             (lambda (event)
+               (funcall on-message (response-transform event))))
+    (websocket-send-text (aibo:websocket) (json-encode event))))
+
+(defun aibo:api-ws-submit-user-message (&rest args)
+  (let* ((conversation-id (plist-get args :conversation-id))
+         (text (plist-get args :text))
+         (on-message (plist-get args :on-message)))
+    (aibo:--api-ws-send
+     :event `(("conversation_id" . conversation-id)
+              ("text" . text))
+     :response-transform (lambda (api-message)
+                           (Message-from-api api-message))
+     :on-message on-message)))
 
 (provide 'aibo-api)
