@@ -540,7 +540,7 @@ class Conversation(ConversationSummary):
 {self.stringify_conversation()}
 --------------------
 
-Capture the intent of the above within three to six words and 2 tags
+Capture the intent of the above within three to six words and 2 tags without newlines
 
 Example of good summaries include:
 - Docstrings for generate_title #docstring #python
