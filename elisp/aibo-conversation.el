@@ -45,11 +45,11 @@
 
 (defun aibo::--get-message-source (message)
   (let* ((source (oref message :source))
-         (source-kind (cdr (assoc 'kind source))))
+         (source-kind (aibo:xref source :kind)))
     (cond
      ((string= source-kind "human") "User")
-     ((string= source-kind "openai_model") (cdr (assoc 'model source)))
-     ((string= source-kind "programmatic") (cdr (assoc 'source source))))))
+     ((string= source-kind "openai_model") (aibo:xref source :model))
+     ((string= source-kind "programmatic") (aibo:xref source :source)))))
 
 (defun aibo:refresh-current-conversation ()
   (interactive)
@@ -230,13 +230,14 @@
           'message message
           'font-lock-face `(:background ,message-header-color))
          (propertize
-          (format "\n%s\n\n" (oref message :content-text))
+          (format "\n%s" (oref message :content-text))
           'read-only t
           'message message
           'font-lock-face `(:foreground ,message-content-color))
          (cond
           ((string= (oref message :status) "streaming") "█")
-          (t ""))))
+          (t ""))
+         "\n\n"))
     ""))
 
 (defun aibo:--render-message-widget (message)
