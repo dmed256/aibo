@@ -225,7 +225,6 @@ async def submit_user_message(
 ) -> SubmitUserMessageResponse:
     conversation = chat.Conversation.get(conversation_id)
     conversation.insert_user_message(request.text)
-    await conversation.generate_assistant_message()
 
     return SubmitUserMessageResponse(
         conversation=api_models.Conversation.from_chat(conversation)

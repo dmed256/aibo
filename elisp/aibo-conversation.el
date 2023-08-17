@@ -189,25 +189,21 @@
   (interactive)
   (let* ((text (widget-value aibo:b-new-user-message-widget)))
     (widget-value-set aibo:b-new-user-message-widget "")
-    (aibo:api-ws-submit-user-message
-     :conversation-id (oref aibo:b-conversation :id)
-     :text text
-     :on-message (lambda (message)
-                   (widget-value-set
-                    aibo:b-streaming-assistant-message-widget
-                    message))
-     :on-success (lambda ()
-                   (aibo:refresh-current-conversation)))))
-
-(defun aibo:sync-submit-user-message ()
-  (interactive)
-  (let* ((text (widget-value aibo:b-new-user-message-widget)))
-    (widget-value-set aibo:b-new-user-message-widget "")
     (aibo:api-submit-user-message
      :conversation-id (oref aibo:b-conversation :id)
      :text text
-     :on-success (lambda (conversation)
-                   (aibo:go-to-conversation conversation)))))
+     :on-success
+     (lambda (conversation)
+       (aibo:go-to-conversation conversation)
+       (aibo:api-ws-stream-assistant-message
+        :conversation-id (oref aibo:b-conversation :id)
+        :text text
+        :on-message (lambda (message)
+                      (widget-value-set
+                       aibo:b-streaming-assistant-message-widget
+                       message))
+        :on-success (lambda ()
+                      (aibo:refresh-current-conversation)))))))
 
 ;; ---[ Render conversation ]---------------------
 (define-widget 'chat-message 'default

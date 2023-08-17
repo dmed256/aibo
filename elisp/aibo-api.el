@@ -225,14 +225,12 @@
                    (funcall on-message (funcall response-transform event)))))
     (websocket-send-text (aibo:websocket) (json-encode event))))
 
-(defun aibo:api-ws-submit-user-message (&rest args)
+(defun aibo:api-ws-stream-assistant-message (&rest args)
   (let* ((conversation-id (plist-get args :conversation-id))
-         (text (plist-get args :text))
          (on-message (plist-get args :on-message))
          (on-success (plist-get args :on-success)))
     (aibo:--api-ws-send
-     :event `(("conversation_id" . ,conversation-id)
-              ("text" . ,text))
+     :event `(("conversation_id" . ,conversation-id))
      :response-transform (lambda (response)
                            (let* ((api-message (ht-get response "message")))
                              (Message-from-api api-message)))

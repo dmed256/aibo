@@ -13,19 +13,18 @@ router = APIRouter()
 ws_router = WebsocketRouter()
 
 
-class SubmitUserMessageEventRequest(BaseEvent):
-    kind: Literal["submit_user_message"] = "submit_user_message"
+class StreamAssistantMessageEventRequest(BaseEvent):
+    kind: Literal["stream_assistant_message"] = "stream_assistant_message"
     conversation_id: UUID
-    text: str
 
 
 class SubmitUserMessageEventResponse(BaseEvent):
-    kind: Literal["submit_user_message"] = "submit_user_message"
+    kind: Literal["stream_assistant_message"] = "stream_assistant_message"
     message: api_models.Message
 
 
 WebsocketEventRequest = Annotated[
-    Union[SubmitUserMessageEventRequest,],
+    Union[StreamAssistantMessageEventRequest,],
     Field(discriminator="kind"),
 ]
 
@@ -34,13 +33,11 @@ ws_router.set_event_class(WebsocketEventRequest)
 
 
 @ws_router.route
-async def submit_user_message(
+async def stream_assistant_message(
     websocket: WebSocket,
-    event: SubmitUserMessageEventRequest,
+    event: StreamAssistantMessageEventRequest,
 ):
     conversation = chat.Conversation.get(event.conversation_id)
-    conversation.insert_user_message(event.text)
-
     async for message in conversation.stream_assistant_message():
         yield SubmitUserMessageEventResponse(
             id=event.id,
