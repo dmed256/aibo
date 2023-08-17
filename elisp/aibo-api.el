@@ -148,16 +148,6 @@
                              (Conversation-from-api api-conversation)))
      :on-success on-success)))
 
-(defun aibo:api-regenerate-assistant-message (&rest args)
-  (let* ((conversation-id (plist-get args :conversation-id))
-         (on-success (plist-get args :on-success)))
-    (aibo:--api-post
-     :path (format "/chat/conversations/%s/regenerate-assistant-message" conversation-id)
-     :response-transform (lambda (response)
-                           (let* ((api-conversation (cdr (assoc 'conversation response))))
-                             (Conversation-from-api api-conversation)))
-     :on-success on-success)))
-
 (defun aibo:api-set-conversation-title (&rest args)
   (let* ((id (plist-get args :id))
          (title (plist-get args :title))

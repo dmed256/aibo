@@ -311,10 +311,13 @@
 
 (defun aibo:regenerate-last-message ()
   (interactive)
-  (aibo:api-regenerate-assistant-message
+  (aibo:api-delete-message
    :conversation-id (oref aibo:b-conversation :id)
+   :message-id (oref aibo:b-conversation :current-message-id)
+   :delete-after nil
    :on-success (lambda (conversation)
-                 (aibo:go-to-conversation conversation))))
+                 (aibo:go-to-conversation conversation)
+                 (aibo:stream-assistant-message))))
 
 ;; ---[ Create a conversation ]-------------------
 (defvar aibo:--create-conversation-history nil
