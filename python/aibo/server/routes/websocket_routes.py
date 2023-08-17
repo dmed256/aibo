@@ -22,7 +22,6 @@ class SubmitUserMessageEventRequest(BaseModel):
 class SubmitUserMessageEventResponse(BaseModel):
     kind: Literal["submit_user_message"] = "submit_user_message"
     message: chat.Message
-    is_done: bool
 
 
 WebsocketEventRequest = Annotated[
@@ -42,11 +41,10 @@ async def submit_user_message(
     conversation = chat.Conversation.get(event.conversation_id)
     conversation.insert_user_message(event.text)
 
-    async for streamed_message in conversation.stream_assistant_message():
+    async for message in conversation.stream_assistant_message():
         await websocket.send_text(
             SubmitUserMessageEventResponse(
-                message=streamed_message.message,
-                is_done=streamed_message.is_done,
+                message=message,
             ).json()
         )
 

@@ -11,6 +11,7 @@ __all__ = ["Message", "ConversationSummary", "Conversation", "MessageEdge"]
 
 class Message(BaseModel):
     id: UUID
+    status: chat.Message.Status
     conversation_id: UUID
     parent_id: Optional[UUID] = None
     source: chat.MessageSource
@@ -25,6 +26,7 @@ class Message(BaseModel):
     def from_chat(cls, message: chat.Message):
         return cls(
             id=message.id,
+            status=message.status,
             conversation_id=message.conversation_id,
             parent_id=message.parent_id,
             source=message.source,

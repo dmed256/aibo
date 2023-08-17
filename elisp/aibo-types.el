@@ -54,6 +54,10 @@
     :documentation "The primary ID of the message"
     :initarg :id
     :type string)
+   (status
+    :documentation "The status, such as 'streaming' or 'completed'"
+    :initarg :status
+    :type string)
    (parent-id
     :documentation "If set, the parent message ID"
     :initarg :parent-id
@@ -73,6 +77,7 @@
 (defun Message-from-api (api-message)
   (Message
    :id (cdr (assoc 'id api-message))
+   :status (cdr (assoc 'status api-message))
    :parent-id (cdr (assoc 'parent_id api-message))
    :source (cdr (assoc 'source api-message))
    :role (cdr (assoc 'role api-message))

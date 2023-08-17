@@ -92,6 +92,7 @@
        ;; All the buffer-specific variables should be defined here (even if set to nil by default)
        (setq-local aibo:b-conversation conversation)
        (setq-local aibo:b-message-widgets (ht-create))
+       (setq-local aibo:b-streaming-assistant-message-widget nil)
        (setq-local aibo:b-new-user-message-widget nil)
 
        ;; Render header
@@ -110,6 +111,10 @@
 
        ;; Render conversation
        (aibo:--render-conversation conversation)
+
+       ;; Render streamed assistant completion
+       (setq-local aibo:b-streaming-assistant-message-widget
+                   (widget-create 'chat-message :value nil))
 
        ;; Render User input
        (widget-insert (propertize
@@ -201,19 +206,24 @@
   (widget-insert (widget-get widget :value)))
 
 (defun aibo:--chat-message-widget-value-to-internal (widget message)
-  (let* ((message-header-color (aibo::--get-message-color message "dark"))
-         (message-content-color (aibo::--get-message-color message "light")))
-    (concat
-     (propertize
-      (aibo::--get-message-header message)
-      'read-only t
-      'message message
-      'font-lock-face `(:background ,message-header-color))
-     (propertize
-      (format "\n%s\n\n" (oref message :content-text))
-      'read-only t
-      'message message
-      'font-lock-face `(:foreground ,message-content-color)))))
+  (if message
+      (let* ((message-header-color (aibo::--get-message-color message "dark"))
+             (message-content-color (aibo::--get-message-color message "light")))
+        (concat
+         (propertize
+          (aibo::--get-message-header message)
+          'read-only t
+          'message message
+          'font-lock-face `(:background ,message-header-color))
+         (propertize
+          (format "\n%s\n\n" (oref message :content-text))
+          'read-only t
+          'message message
+          'font-lock-face `(:foreground ,message-content-color))
+         (cond
+          ((string= (oref message :status) "streaming") "█")
+          (t ""))))
+    ""))
 
 (defun aibo:--render-message-widget (message)
   (let* ((message-widget (widget-create 'chat-message :value message)))

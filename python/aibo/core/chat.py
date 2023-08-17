@@ -14,6 +14,7 @@ from aibo.common.constants import NULL_UUID, Env
 from aibo.common.openai import OpenAIMessage
 from aibo.common.result import Error, Result
 from aibo.common.time import now_utc
+from aibo.common.types import StrEnum
 from aibo.db.documents import (
     CompletionErrorContent,
     ConversationDocument,
@@ -68,7 +69,12 @@ class CreateMessageInputs(BaseModel):
 
 
 class Message(BaseModel):
+    class Status(StrEnum):
+        STREAMING = "streaming"
+        COMPLETED = "completed"
+
     id: UUID
+    status: Status
     conversation_id: UUID
     parent_id: Optional[UUID] = None
     source: MessageSource
@@ -82,6 +88,7 @@ class Message(BaseModel):
     def from_document(cls, doc: MessageDocument, *, history: list[Self]):
         return Message(
             id=doc.id,
+            status=cls.Status.COMPLETED,
             conversation_id=doc.conversation_id,
             parent_id=doc.parent_id,
             source=doc.source,
@@ -211,11 +218,6 @@ class ConversationSummary(BaseModel):
             id=self.id,
             title=title,
         )
-
-
-class StreamedMessage(BaseModel):
-    message: Message
-    is_done: bool
 
 
 class Conversation(ConversationSummary):
@@ -481,8 +483,9 @@ class Conversation(ConversationSummary):
                     break
 
                 content += delta
-                message = Message(
+                yield Message(
                     id=temp_id,
+                    status=Message.Status.STREAMING,
                     conversation_id=self.id,
                     parent_id=self.current_message.id,
                     source=source,
@@ -491,21 +494,20 @@ class Conversation(ConversationSummary):
                     created_at=temp_created_at,
                     history=[],
                 )
-                yield StreamedMessage(message=message, is_done=False)
 
-            final_message = self.insert_message(
+            yield self.insert_message(
                 source=source,
                 role=MessageRole.ASSISTANT,
                 content=TextMessageContent(text=content),
             )
         except openai.OpenAIError as exc:
-            final_message = self.insert_message(
+            yield self.insert_message(
                 source=ProgrammaticSource(source="api_error"),
                 role=MessageRole.ERROR,
                 content=CompletionErrorContent.from_openai(exc),
             )
         except Exception as exc:
-            final_message = self.insert_message(
+            yield self.insert_message(
                 source=ProgrammaticSource(source="server_error"),
                 role=MessageRole.ERROR,
                 content=CompletionErrorContent(
@@ -513,8 +515,6 @@ class Conversation(ConversationSummary):
                     text=str(exc),
                 ),
             )
-
-        yield StreamedMessage(message=final_message, is_done=True)
 
     async def generate_title(self):
         env = Env.get()
