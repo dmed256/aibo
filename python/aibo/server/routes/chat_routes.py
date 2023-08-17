@@ -160,11 +160,6 @@ async def create_conversation(
             content=message_input.content,
         )
 
-    if conversation.current_message.role == chat.MessageRole.USER:
-        await conversation.generate_assistant_message()
-
-    await conversation.generate_title()
-
     return CreateConversationResponse(
         conversation=api_models.Conversation.from_chat(conversation)
     )

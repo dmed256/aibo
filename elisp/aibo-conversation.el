@@ -195,16 +195,21 @@
      :on-success
      (lambda (conversation)
        (aibo:go-to-conversation conversation)
-       (aibo:api-ws-stream-assistant-message
-        :conversation-id (oref aibo:b-conversation :id)
-        :text text
-        :on-message (lambda (message)
-                      (widget-value-set
-                       aibo:b-streaming-assistant-message-widget
-                       message)
-                      (set-buffer-modified-p nil))
-        :on-success (lambda ()
-                      (aibo:refresh-current-conversation)))))))
+       (aibo:stream-assistant-message)))))
+
+(defun aibo:stream-assistant-message (&rest args)
+  (interactive)
+  (let* ((on-success (plist-get args :on-success)))
+    (aibo:api-ws-stream-assistant-message
+     :conversation-id (oref aibo:b-conversation :id)
+     :on-message (lambda (message)
+                   (widget-value-set
+                    aibo:b-streaming-assistant-message-widget
+                    message)
+                   (set-buffer-modified-p nil))
+     :on-success (lambda ()
+                   (aibo:refresh-current-conversation)
+                   (if on-success (funcall on-success))))))
 
 ;; ---[ Render conversation ]---------------------
 (define-widget 'chat-message 'default
@@ -349,6 +354,9 @@
      :message-inputs api-message-inputs
      :on-success
      (lambda (conversation)
-       (aibo:go-to-conversation conversation)))))
+       (aibo:go-to-conversation conversation)
+       (aibo:stream-assistant-message
+        :on-success (lambda ()
+                      (aibo:generate-current-conversation-title)))))))
 
 (provide 'aibo-conversation)
