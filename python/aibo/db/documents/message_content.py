@@ -57,6 +57,7 @@ class CompletionErrorContent(BaseMessageContent):
     """
 
     class ErrorType(StrEnum):
+        AIBO_SERVER = "aibo_server"
         API = "api"
         AUTHENTICATION = "authentication"
         PERMISSION = "permission"

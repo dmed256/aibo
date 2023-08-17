@@ -213,6 +213,11 @@ class ConversationSummary(BaseModel):
         )
 
 
+class StreamedMessage(BaseModel):
+    message: Message
+    is_done: bool
+
+
 class Conversation(ConversationSummary):
     root_message: Message
     current_message: Message
@@ -390,8 +395,8 @@ class Conversation(ConversationSummary):
         )
 
     @tenacity.retry(
-        wait=tenacity.wait_random_exponential(min=1, max=20),
-        stop=tenacity.stop_after_attempt(5),
+        wait=tenacity.wait_random_exponential(min=1, max=5),
+        stop=tenacity.stop_after_attempt(3),
     )
     async def generate_assistant_message(self) -> Message:
         source = self.openai_model_source.copy()
@@ -402,7 +407,7 @@ class Conversation(ConversationSummary):
         ]
 
         try:
-            response = openai.ChatCompletion.create(
+            response = await openai.ChatCompletion.acreate(
                 model=source.model,
                 n=1,
                 temperature=source.temperature,
@@ -421,6 +426,15 @@ class Conversation(ConversationSummary):
                 role=MessageRole.ERROR,
                 content=CompletionErrorContent.from_openai(exc),
             )
+        except Exception as exc:
+            return self.insert_message(
+                source=ProgrammaticSource(source="server_error"),
+                role=MessageRole.ERROR,
+                content=CompletionErrorContent(
+                    error_type=CompletionErrorContent.ErrorType.AIBO_SERVER,
+                    text=str(exc),
+                ),
+            )
 
         content = response.choices[0]["message"]["content"]
         return self.insert_message(
@@ -428,6 +442,70 @@ class Conversation(ConversationSummary):
             role=MessageRole.ASSISTANT,
             content=TextMessageContent(text=content),
         )
+
+    async def stream_assistant_message(self):
+        source = self.openai_model_source.copy()
+        functions = [
+            function.dict(exclude_none=True)
+            for tool in self.enabled_tools
+            for function in tool.to_openai()
+        ]
+
+        try:
+            response = await openai.ChatCompletion.acreate(
+                model=source.model,
+                stream=True,
+                n=1,
+                temperature=source.temperature,
+                max_tokens=source.max_tokens,
+                messages=[
+                    openai_message.dict(exclude_none=True)
+                    for message in self.get_current_history()
+                    if (openai_message := message.to_openai(conversation=self))
+                ],
+                # API expects functions to only be defined if it's a non-empty list
+                **(dict(functions=functions) if functions else {}),
+            )
+
+            temp_id = uuid4()
+            temp_created_at = now_utc()
+            content = ""
+            async for chunk in response:
+                content += chunk["choices"][0]["delta"]["content"]
+                message = Message(
+                    id=temp_id,
+                    conversation_id=self.id,
+                    parent_id=self.current_message.id,
+                    source=source,
+                    role=MessageRole.ASSISTANT,
+                    content=TextMessageContent(text=content),
+                    created_at=temp_created_at,
+                    history=[],
+                )
+                yield StreamedMessage(message=message, is_done=False)
+
+            final_message = self.insert_message(
+                source=source,
+                role=MessageRole.ASSISTANT,
+                content=TextMessageContent(text=content),
+            )
+        except openai.OpenAIError as exc:
+            final_message = self.insert_message(
+                source=ProgrammaticSource(source="api_error"),
+                role=MessageRole.ERROR,
+                content=CompletionErrorContent.from_openai(exc),
+            )
+        except Exception as exc:
+            final_message = self.insert_message(
+                source=ProgrammaticSource(source="server_error"),
+                role=MessageRole.ERROR,
+                content=CompletionErrorContent(
+                    error_type=CompletionErrorContent.ErrorType.AIBO_SERVER,
+                    text=str(exc),
+                ),
+            )
+
+        yield StreamedMessage(message=final_message, is_done=True)
 
     async def generate_title(self):
         env = Env.get()
