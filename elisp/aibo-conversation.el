@@ -196,7 +196,8 @@
                    (widget-value-set
                     aibo:b-streaming-assistant-message-widget
                     message))
-     :on-success aibo:refresh-current-conversation)))
+     :on-success (lambda ()
+                   (aibo:refresh-current-conversation)))))
 
 (defun aibo:sync-submit-user-message ()
   (interactive)

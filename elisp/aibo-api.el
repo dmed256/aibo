@@ -219,11 +219,10 @@
          (event (add-to-list 'partial-event `("id" . ,event-id))))
     (ht-set! aibo:--websocket-callbacks
              event-id
-             (lambda (ht-event is-completed)
-               (let* ((event (ht->alist ht-event)))
-                 (if is-completed
-                     (funcall on-success)
-                     (funcall on-message (funcall response-transform event))))))
+             (lambda (event is-completed)
+               (if is-completed
+                   (funcall on-success)
+                   (funcall on-message (funcall response-transform event)))))
     (websocket-send-text (aibo:websocket) (json-encode event))))
 
 (defun aibo:api-ws-submit-user-message (&rest args)
@@ -234,8 +233,9 @@
     (aibo:--api-ws-send
      :event `(("conversation_id" . ,conversation-id)
               ("text" . ,text))
-     :response-transform (lambda (api-message)
-                           (Message-from-api api-message))
+     :response-transform (lambda (response)
+                           (let* ((api-message (ht-get response "message")))
+                             (Message-from-api api-message)))
      :on-message on-message
      :on-success on-success)))
 

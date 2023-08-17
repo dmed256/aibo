@@ -4,6 +4,22 @@
 (require 'ts)
 
 ;; ---[ API Classes ]-----------------------------
+(defun aibo:xref (collection keyword-key)
+  "Works for alist and hash-tables"
+  (let* ((string-key (substring (symbol-name keyword-key) 1))
+         (symbol-key (intern string-key)))
+    (cond
+     ((listp collection)
+      (cond
+       ((assoc keyword-key collection) (cdr (assoc keyword-key collection)))
+       ((assoc symbol-key collection) (cdr (assoc symbol-key collection)))
+       ((assoc string-key collection) (cdr (assoc string-key collection)))))
+     ((ht? collection)
+      (cond
+       ((ht-contains? collection keyword-key) (ht-get collection keyword-key))
+       ((ht-contains? collection symbol-key) (ht-get collection symbol-key))
+       ((ht-contains? collection string-key) (ht-get collection string-key)))))))
+
 (defclass ConversationSummary ()
   ((id
     :documentation "The primary ID of the conversation"
@@ -33,9 +49,9 @@
 
 (defun ConversationSummary-from-api (api-conversation)
   (ConversationSummary
-   :id (cdr (assoc 'id api-conversation))
-   :title (cdr (assoc 'title api-conversation))
-   :created-at (ts-parse (cdr (assoc 'created_at api-conversation)))))
+   :id (aibo:xref api-conversation :id)
+   :title (aibo:xref api-conversation :title)
+   :created-at (ts-parse (aibo:xref api-conversation :created_at))))
 
 (defun Conversation-from-api (api-conversation)
   (let ((summary (ConversationSummary-from-api api-conversation)))
@@ -43,11 +59,11 @@
      :id (oref summary :id)
      :title (oref summary :title)
      :created-at (oref summary :created-at)
-     :root-message-id (cdr (assoc 'root_message_id api-conversation))
-     :current-message-id (cdr (assoc 'current_message_id api-conversation))
+     :root-message-id (aibo:xref api-conversation :root_message_id)
+     :current-message-id (aibo:xref api-conversation :current_message_id)
      :all-messages (--map
                     (cons (car it) (Message-from-api it))
-                    (cdr (assoc 'all_messages api-conversation))))))
+                    (aibo:xref api-conversation :all_messages)))))
 
 (defclass Message ()
   ((id
@@ -76,12 +92,12 @@
 
 (defun Message-from-api (api-message)
   (Message
-   :id (cdr (assoc 'id api-message))
-   :status (cdr (assoc 'status api-message))
-   :parent-id (cdr (assoc 'parent_id api-message))
-   :source (cdr (assoc 'source api-message))
-   :role (cdr (assoc 'role api-message))
-   :content-text (cdr (assoc 'content_text api-message))))
+   :id (aibo:xref api-message :id)
+   :status (aibo:xref api-message :status)
+   :parent-id (aibo:xref api-message :parent_id)
+   :source (aibo:xref api-message :source)
+   :role (aibo:xref api-message :role)
+   :content-text (aibo:xref api-message :content_text)))
 
 (defclass HumanSource ()
   ((kind
