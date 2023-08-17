@@ -24,10 +24,14 @@
           ("error-light"     "#fcdcdc")))
 
 (setq aibo:--new-user-message-keymap
-      (let ((keymap (copy-keymap widget-keymap)))
-        (define-key keymap (kbd "RET") (lambda () (interactive) (insert "\n")))
-        (define-key keymap (kbd "M-RET") #'aibo:submit-user-message)
-        keymap))
+      (let ((map (copy-keymap widget-keymap)))
+        (define-key map (kbd "C-c C-x C-r") 'aibo:refresh-current-conversation)
+        (define-key map (kbd "C-c C-t") 'aibo:set-current-conversation-title)
+        (define-key map (kbd "C-c C-c") 'aibo:regenerate-last-message)
+        (define-key map (kbd "C-c C-x C-t") 'aibo:generate-current-conversation-title)
+        (define-key map (kbd "RET") (lambda () (interactive) (insert "\n")))
+        (define-key map (kbd "M-RET") #'aibo:submit-user-message)
+        map))
 
 (defun aibo::--get-role-color (role shade)
   (ht-get aibo:--message-role-colors (format "%s-%s" role shade) ))
