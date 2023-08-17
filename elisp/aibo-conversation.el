@@ -129,7 +129,7 @@
 
        ;; Clean up buffer state
        (if set-not-modified
-           (not-modified))
+           (set-buffer-modified-p nil))
 
        (widget-setup)
 
@@ -201,7 +201,8 @@
         :on-message (lambda (message)
                       (widget-value-set
                        aibo:b-streaming-assistant-message-widget
-                       message))
+                       message)
+                      (set-buffer-modified-p nil))
         :on-success (lambda ()
                       (aibo:refresh-current-conversation)))))))
 

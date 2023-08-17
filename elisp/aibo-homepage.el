@@ -45,7 +45,7 @@
 
          (widget-setup)
 
-         (not-modified)
+         (set-buffer-modified-p nil)
          (goto-char current-point))))))
 
 (defun aibo:--render-conversation-section (section)
