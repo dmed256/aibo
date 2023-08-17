@@ -239,7 +239,10 @@
          (cond
           ((string= (oref message :status) "streaming") "█")
           (t ""))
-         "\n\n"))
+         (propertize
+          "\n\n"
+          'read-only t
+          'message message)))
     "\n"))
 
 (defun aibo:--render-message-widget (message)
