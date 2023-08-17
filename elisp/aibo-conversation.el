@@ -224,7 +224,8 @@
 (defun aibo:--chat-message-widget-value-to-internal (widget message)
   (if message
       (let* ((message-header-color (aibo::--get-message-color message "dark"))
-             (message-content-color (aibo::--get-message-color message "light")))
+             (message-content-color (aibo::--get-message-color message "light"))
+             (message-suffix (if (string= (oref message :status) "streaming") "█" "")))
         (concat
          (propertize
           (aibo::--get-message-header message)
@@ -232,13 +233,10 @@
           'message message
           'font-lock-face `(:background ,message-header-color))
          (propertize
-          (format "\n%s" (oref message :content-text))
+          (format "\n%s%s" (oref message :content-text) message-suffix)
           'read-only t
           'message message
           'font-lock-face `(:foreground ,message-content-color))
-         (cond
-          ((string= (oref message :status) "streaming") "█")
-          (t ""))
          (propertize
           "\n\n"
           'read-only t
