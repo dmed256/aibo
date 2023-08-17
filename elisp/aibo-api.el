@@ -9,6 +9,7 @@
 (require 'json)
 (require 'request)
 (require 'uuidgen)
+(require 'websocket)
 
 (defun aibo:start-server (&rest args)
   (interactive)
@@ -200,9 +201,10 @@
                   (event-kind (ht-get event "kind"))
                   (is-completed (string= event-kind "event_completed"))
                   (callback (ht-get aibo:--websocket-callbacks event-id)))
-             (cond
-              (is-completed (ht-remove! aibo:--websocket-callbacks event-id))
-              (callback (funcall callback event)))))
+             (if callback
+                 (funcall callback event is-completed))
+             (if is-completed
+                 (ht-remove! aibo:--websocket-callbacks event-id))))
          :on-close
          (lambda (websocket)
            (setq aibo:--websocket nil)
@@ -212,23 +214,29 @@
   (let* ((partial-event (plist-get args :event))
          (response-transform (plist-get args :response-transform))
          (on-message (plist-get args :on-message))
+         (on-success (plist-get args :on-success))
          (event-id (uuidgen-4))
-         (event (add-to-list 'partial-event '("id" . event-id))))
+         (event (add-to-list 'partial-event `("id" . ,event-id))))
     (ht-set! aibo:--websocket-callbacks
              event-id
-             (lambda (event)
-               (funcall on-message (response-transform event))))
+             (lambda (ht-event is-completed)
+               (let* ((event (ht->alist ht-event)))
+                 (if is-completed
+                     (funcall on-success)
+                     (funcall on-message (funcall response-transform event))))))
     (websocket-send-text (aibo:websocket) (json-encode event))))
 
 (defun aibo:api-ws-submit-user-message (&rest args)
   (let* ((conversation-id (plist-get args :conversation-id))
          (text (plist-get args :text))
-         (on-message (plist-get args :on-message)))
+         (on-message (plist-get args :on-message))
+         (on-success (plist-get args :on-success)))
     (aibo:--api-ws-send
-     :event `(("conversation_id" . conversation-id)
-              ("text" . text))
+     :event `(("conversation_id" . ,conversation-id)
+              ("text" . ,text))
      :response-transform (lambda (api-message)
                            (Message-from-api api-message))
-     :on-message on-message)))
+     :on-message on-message
+     :on-success on-success)))
 
 (provide 'aibo-api)

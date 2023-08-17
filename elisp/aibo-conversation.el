@@ -14,14 +14,14 @@
     (format "*Aibo [%.7s] - %s*" short-id title)))
 
 (setq aibo:--message-role-colors
-      '(("system-dark" . "#377047")
-        ("system-light" . "#beface")
-        ("user-dark" . "#ba7a13")
-        ("user-light" . "#fae2b9")
-        ("assistant-dark" . "#384a8f")
-        ("assistant-light" . "#dce9fc")
-        ("error-dark" . "#8f3838")
-        ("error-light" . "#fcdcdc")))
+      (ht ("system-dark"     "#377047")
+          ("system-light"    "#beface")
+          ("user-dark"       "#ba7a13")
+          ("user-light"      "#fae2b9")
+          ("assistant-dark"  "#384a8f")
+          ("assistant-light" "#dce9fc")
+          ("error-dark"      "#8f3838")
+          ("error-light"     "#fcdcdc")))
 
 (setq aibo:--new-user-message-keymap
       (let ((keymap (copy-keymap widget-keymap)))
@@ -30,7 +30,7 @@
         keymap))
 
 (defun aibo::--get-role-color (role shade)
-  (cdr (assoc (format "%s-%s" role shade) aibo:--message-role-colors)))
+  (ht-get aibo:--message-role-colors (format "%s-%s" role shade) ))
 
 (defun aibo::--get-message-color (message shade)
   (aibo::--get-role-color (oref message :role) shade))
@@ -186,6 +186,19 @@
         (kill-buffer prev-buffer))))
 
 (defun aibo:submit-user-message ()
+  (interactive)
+  (let* ((text (widget-value aibo:b-new-user-message-widget)))
+    (widget-value-set aibo:b-new-user-message-widget "")
+    (aibo:api-ws-submit-user-message
+     :conversation-id (oref aibo:b-conversation :id)
+     :text text
+     :on-message (lambda (message)
+                   (widget-value-set
+                    aibo:b-streaming-assistant-message-widget
+                    message))
+     :on-success aibo:refresh-current-conversation)))
+
+(defun aibo:sync-submit-user-message ()
   (interactive)
   (let* ((text (widget-value aibo:b-new-user-message-widget)))
     (widget-value-set aibo:b-new-user-message-widget "")
