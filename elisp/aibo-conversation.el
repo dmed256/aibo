@@ -238,7 +238,7 @@
           ((string= (oref message :status) "streaming") "█")
           (t ""))
          "\n\n"))
-    ""))
+    "\n"))
 
 (defun aibo:--render-message-widget (message)
   (let* ((message-widget (widget-create 'chat-message :value message)))
