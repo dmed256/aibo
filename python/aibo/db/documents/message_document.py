@@ -57,7 +57,6 @@ class MessageDocument(BaseDocument):
                 ],
                 unique=False,
             ),
-            Index(name="source", fields=[("source", pymongo.TEXT)], unique=False),
             Index(
                 name="source_kind",
                 fields=[("source.kind", pymongo.DESCENDING)],
@@ -66,6 +65,11 @@ class MessageDocument(BaseDocument):
             Index(
                 name="content_kind",
                 fields=[("content.kind", pymongo.DESCENDING)],
+                unique=False,
+            ),
+            Index(
+                name="content_text",
+                fields=[("content_text", pymongo.TEXT)],
                 unique=False,
             ),
             Index(
