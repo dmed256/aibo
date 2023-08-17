@@ -38,10 +38,10 @@
 (defun aibo::--get-message-header (message)
   (let ((role (oref message :role)))
     (cond
-     ((string= role "system") "[System]")
-     ((string= role "user") "[User]")
-     ((string= role "assistant") (format "[Assistant: %s]" (aibo::--get-message-source message)))
-     ((string= role "error") "[Error]"))))
+     ((string= role "system") "[ System ]")
+     ((string= role "user") "[ User ]")
+     ((string= role "assistant") (format "[ Assistant: %s ]" (aibo::--get-message-source message)))
+     ((string= role "error") "[ Error ]"))))
 
 (defun aibo::--get-message-source (message)
   (let* ((source (oref message :source))
@@ -118,7 +118,7 @@
 
        ;; Render User input
        (widget-insert (propertize
-                       "[User]"
+                       "[ User ]"
                        'font-lock-face `(:background ,(aibo::--get-role-color "user" "dark"))))
        (widget-insert "\n")
        (setq-local aibo:b-new-user-message-widget
