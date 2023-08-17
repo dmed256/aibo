@@ -471,7 +471,16 @@ class Conversation(ConversationSummary):
             temp_created_at = now_utc()
             content = ""
             async for chunk in response:
-                content += chunk["choices"][0]["delta"]["content"]
+                chunk_info = chunk["choices"][0]
+                is_done = chunk_info["finish_reason"]
+                if is_done:
+                    break
+
+                delta = chunk_info["delta"].get("content")
+                if delta is None:
+                    break
+
+                content += delta
                 message = Message(
                     id=temp_id,
                     conversation_id=self.id,

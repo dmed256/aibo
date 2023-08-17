@@ -44,7 +44,7 @@ async def submit_user_message(
 
     async for streamed_message in conversation.stream_assistant_message():
         await websocket.send_text(
-            SubmitUserMessageResponse(
+            SubmitUserMessageEventResponse(
                 message=streamed_message.message,
                 is_done=streamed_message.is_done,
             ).json()
