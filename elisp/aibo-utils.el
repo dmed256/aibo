@@ -45,8 +45,12 @@
       (setq buffer (generate-new-buffer name)))
 
     (cond
-     ((eq open-style :current-window) (switch-to-buffer buffer))
-     ((eq open-style :new-window) (pop-to-buffer buffer)))
+     ((eq open-style :current-window)
+      (switch-to-buffer buffer))
+     ((eq open-style :new-window)
+      (if (> (length (window-list)) 1)
+          (switch-to-buffer buffer)
+        (pop-to-buffer buffer))))
 
     (if (and on-create did-create-buffer)
         (funcall on-create buffer))

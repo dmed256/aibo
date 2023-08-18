@@ -133,6 +133,21 @@
     :initarg :source
     :type string)))
 
+(defclass MessageSearchResult ()
+  ((conversation-id
+    :initarg :conversation-id
+    :initform "Conversation ID"
+    :type string)
+   (content-text
+    :documentation "Matched message"
+    :initarg :content-text
+    :type string)))
+
+(cl-defmethod MessageSearchResult-from-api (api-result)
+  (MessageSearchResult
+   :conversation-id (aibo:xref api-result :conversation_id)
+   :content-text (aibo:xref api-result :content_text)))
+
 ;; ---[ ConversationSection ]---------------------
 (defclass ConversationSection ()
   ((name

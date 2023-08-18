@@ -34,6 +34,7 @@
   (let* ((path (plist-get args :path))
          (type (plist-get args :type))
          (data (plist-get args :data))
+         (sync (plist-get args :sync))
          (response-transform (plist-get args :response-transform))
          (on-success (plist-get args :on-success))
          (bypass-server-check (plist-get args :bypass-server-check))
@@ -44,6 +45,7 @@
               :headers '(("Content-Type" . "application/json"))
               :parser 'json-read
               :encoding 'utf-8
+              :sync sync
               :data (if data (json-encode data) nil)
               :success (lambda (&rest args)
                          (if on-success
@@ -51,10 +53,16 @@
                                     (on-success-args (if response-transform
                                                          (funcall response-transform data)
                                                        data)))
-                               (funcall on-success on-success-args))))))))
-    (if bypass-server-check
-        (funcall do-request)
-        (aibo:start-server :on-success do-request))))
+                               (funcall on-success on-success-args)))))))
+         (response (if bypass-server-check
+                       (funcall do-request)
+                     (aibo:start-server :on-success do-request))))
+    (if sync
+        (let* ((data (request-response-data response)))
+          (if response-transform
+              (funcall response-transform data)
+            data)))))
+
 
 (defun aibo:--api-get (&rest args)
   (apply 'aibo:--api-request :type "GET" args))
@@ -160,6 +168,20 @@
                              (Conversation-from-api api-conversation)))
      :on-success on-success)))
 
+(defun aibo:api-conversation-message-search (&rest args)
+  (interactive)
+  (let* ((query (plist-get args :query))
+         (count (plist-get args :count))
+         (sync (plist-get args :sync)))
+    (aibo:--api-post
+     :path "/chat/conversations/message-search"
+     :data `((:query . ,query)
+             (:count . ,count))
+     :sync sync
+     :response-transform (lambda (response)
+                           (let* ((api-search-results (cdr (assoc 'search_results response))))
+                             (--map (MessageSearchResult-from-api it) api-search-results))))))
+
 (defun aibo:api-generate-conversation-title (&rest args)
   (let* ((id (plist-get args :id))
          (on-success (plist-get args :on-success)))
@@ -212,7 +234,7 @@
              (lambda (event is-completed)
                (if is-completed
                    (funcall on-success)
-                   (funcall on-message (funcall response-transform event)))))
+                 (funcall on-message (funcall response-transform event)))))
     (websocket-send-text (aibo:websocket) (json-encode event))))
 
 (defun aibo:api-ws-stream-assistant-message (&rest args)

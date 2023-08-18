@@ -6,6 +6,7 @@
 (defvar aibo:mode-map
   (let ((map (make-sparse-keymap)))
     (define-key map (kbd "C-c C-x C-r") 'aibo:refresh-homepage)
+    (define-key map (kbd "C-c p s") 'aibo:message-search)
     map))
 
 

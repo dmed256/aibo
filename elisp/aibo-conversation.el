@@ -203,17 +203,20 @@
 
 (defun aibo:stream-assistant-message (&rest args)
   (interactive)
-  (let* ((on-success (plist-get args :on-success)))
+  (let* ((buffer (current-buffer))
+         (on-success (plist-get args :on-success)))
     (aibo:api-ws-stream-assistant-message
      :conversation-id (oref aibo:b-conversation :id)
      :on-message (lambda (message)
-                   (widget-value-set
-                    aibo:b-streaming-assistant-message-widget
-                    message)
-                   (set-buffer-modified-p nil))
+                   (with-current-buffer buffer
+                     (widget-value-set
+                      aibo:b-streaming-assistant-message-widget
+                      message)
+                     (set-buffer-modified-p nil)))
      :on-success (lambda ()
-                   (aibo:refresh-current-conversation)
-                   (if on-success (funcall on-success))))))
+                   (with-current-buffer buffer
+                     (aibo:refresh-current-conversation)
+                     (if on-success (funcall on-success)))))))
 
 ;; ---[ Render conversation ]---------------------
 (define-widget 'chat-message 'default
@@ -336,9 +339,9 @@
   (interactive)
   (ivy-read "Template: " (aibo:--conversation-template-options)
             :require-match t
-            :history 'aibo:--create-conversation-history
+            :history #'aibo:--create-conversation-history
             :action #'aibo:--create-conversation-from-template
-            :caller 'aibo:--create-conversation-with-content))
+            :caller #'aibo:--create-conversation-with-content))
 
 (ivy-configure 'aibo:--create-conversation-with-content
   :initial-input "^")
@@ -366,5 +369,45 @@
        (aibo:stream-assistant-message
         :on-success (lambda ()
                       (aibo:generate-current-conversation-title)))))))
+
+;; ---[ Search conversations ]--------------------
+(defvar aibo:--conversation-message-search-history nil
+  "History for 'aibo:conversation-message-search'")
+
+(defvar aibo:--conversation-message-search-debounce-timer nil
+  "Debounce timer for 'aibo:conversation-message-search'")
+
+(defun aibo:message-search ()
+  (interactive)
+  (ivy-read "[aibo] Search: "
+            #'aibo:--ivy-conversation-message-search
+            :dynamic-collection t
+            :require-match t
+            :history #'aibo:--conversation-message-search-history
+            :action #'aibo:--conversation-message-search-action))
+
+(defun aibo:--ivy-conversation-message-search (query)
+  (if (timerp aibo:--conversation-message-search-debounce-timer)
+      (cancel-timer aibo:--conversation-message-search-debounce-timer))
+  (setq aibo:--conversation-message-search-debounce-timer
+        (run-with-idle-timer
+         0.5 nil
+         #'aibo:--ivy-conversation-message-search-no-debounce query)))
+
+(defun aibo:--ivy-conversation-message-search-no-debounce (query)
+  (or
+   (ivy-more-chars)
+   (--map (format "%s: %s"
+                  (oref it :conversation-id)
+                  (substring (oref it :content-text) 0 50))
+          (aibo:api-conversation-message-search
+           :query query
+           :count 100
+           :sync t))))
+
+(defun aibo:--conversation-message-search-action (search-result)
+  (when (string-match "^\\(.*?\\):.*" search-result)
+    (let ((conversation-id (match-string-no-properties 1 search-result)))
+      (aibo:go-to-conversation-by-id conversation-id))))
 
 (provide 'aibo-conversation)

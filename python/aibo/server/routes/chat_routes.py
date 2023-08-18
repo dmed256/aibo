@@ -46,18 +46,18 @@ class GetConversationResponse(BaseModel):
     conversation: api_models.Conversation
 
 
-class SearchConversationRequest(BaseModel):
+class ConversationMessageSearchRequest(BaseModel):
     query: str
     count: int
 
 
-class SearchConversationResult(BaseModel):
+class MessageSearchResult(BaseModel):
     conversation_id: UUID
     content_text: str
 
 
-class SearchConversationResponse(BaseModel):
-    search_results: list[SearchConversationResult]
+class ConversationMessageSearchResponse(BaseModel):
+    search_results: list[MessageSearchResult]
 
 
 class EditConversationRequest(BaseModel):
@@ -189,10 +189,10 @@ async def get_conversation(
     )
 
 
-@router.post("/conversations/search")
-async def search_conversations(
-    request: SearchConversationRequest,
-) -> GetConversationResponse:
+@router.post("/conversations/message-search")
+async def conversation_message_search(
+    request: ConversationMessageSearchRequest,
+) -> ConversationMessageSearchResponse:
     search_cursor = (
         chat.MessageDocument.collection.find(
             {
@@ -210,9 +210,9 @@ async def search_conversations(
         .limit(request.count)
     )
 
-    return SearchConversationResponse(
+    return ConversationMessageSearchResponse(
         search_results=[
-            SearchConversationResult(
+            MessageSearchResult(
                 conversation_id=search_info["conversation_id"],
                 content_text=search_info["content_text"],
             )
