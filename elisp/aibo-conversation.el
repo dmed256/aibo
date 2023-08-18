@@ -388,19 +388,11 @@
             :action #'aibo:--conversation-message-search-action))
 
 (defun aibo:--ivy-conversation-message-search (query)
-  (if (timerp aibo:--conversation-message-search-debounce-timer)
-      (cancel-timer aibo:--conversation-message-search-debounce-timer))
-  (setq aibo:--conversation-message-search-debounce-timer
-        (run-with-idle-timer
-         0.5 nil
-         #'aibo:--ivy-conversation-message-search-no-debounce query)))
-
-(defun aibo:--ivy-conversation-message-search-no-debounce (query)
   (or
    (ivy-more-chars)
    (--map (format "%s: %s"
                   (oref it :conversation-id)
-                  (substring (oref it :content-text) 0 50))
+                  (replace-regexp-in-string "\n" "\\\\n" (oref it :content-text)))
           (aibo:api-conversation-message-search
            :query query
            :count 100
