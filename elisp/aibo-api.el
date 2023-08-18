@@ -26,6 +26,7 @@
                         "--port" (number-to-string aibo:server-port))))
      :on-load
      (lambda (buffer)
+       (aibo:websocket)
        (funcall on-success)))))
 
 
