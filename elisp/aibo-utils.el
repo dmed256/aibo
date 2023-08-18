@@ -53,10 +53,12 @@
         (pop-to-buffer buffer))))
 
     (if (and on-create did-create-buffer)
-        (funcall on-create buffer))
+        (with-current-buffer buffer
+          (funcall on-create buffer)))
 
     (if on-load
-        (funcall on-load buffer))))
+        (with-current-buffer buffer
+          (funcall on-load buffer)))))
 
 (defun aibo:--get-region ()
   (if (region-active-p)

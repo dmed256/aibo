@@ -214,9 +214,10 @@
                       message)
                      (set-buffer-modified-p nil)))
      :on-success (lambda ()
-                   (with-current-buffer buffer
-                     (aibo:refresh-current-conversation)
-                     (if on-success (funcall on-success)))))))
+                   (save-window-excursion
+                     (with-current-buffer buffer
+                       (aibo:refresh-current-conversation)
+                       (if on-success (funcall on-success))))))))
 
 ;; ---[ Render conversation ]---------------------
 (define-widget 'chat-message 'default
