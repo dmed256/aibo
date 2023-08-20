@@ -4,6 +4,8 @@
 
 `aibo` is an Emacs package that leverages OpenAI's chat API to bring ChatGPT into Emacs. It enables the creation of conversations from anywhere using an `ivy` minibuffer and organizes persisted conversations
 
+[![asciicast](https://asciinema.org/a/fE2FoyzUgfUJMYreJtPu2mm5h.svg)](https://asciinema.org/a/fE2FoyzUgfUJMYreJtPu2mm5h)
+
 ## Features
 
 - Create conversations quickly using the Ivy minibuffer.
@@ -11,12 +13,6 @@
 - Soft-delete conversations - hidden from the homepage but still accessible.
 - Maintain a Python service on the `*Aibo server*` buffer with hot-reloading (Default: `localhost:5000`).
 - Persist conversations in MongoDB (Default: `aibo-local` DB at `localhost:27017`).
-
-## Upcoming Features
-
-```
-// TODO(dmed): Add demo video
-```
 
 ## Installation
 
