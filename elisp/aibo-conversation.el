@@ -384,40 +384,17 @@
 (defvar aibo:--conversation-message-search-history nil
   "History for 'aibo:conversation-message-search'")
 
-(defvar aibo:--conversation-message-search-debounce-timer nil
-  "Debounce timer for 'aibo:conversation-message-search'")
-
-(defvar aibo:--conversation-message-search-debounce-last-value nil
-  "Last non-debounce value 'aibo:conversation-message-search'")
-
 (defun aibo:message-search ()
   (interactive)
-  (setq aibo:--conversation-message-search-debounce-timer nil)
-  (setq aibo:--conversation-message-search-debounce-last-value nil)
-  (ivy-read "[aibo] Search: "
-            #'aibo:--ivy-conversation-message-search
-            :dynamic-collection t
-            :require-match t
-            :history #'aibo:--conversation-message-search-history
-            :action #'aibo:--conversation-message-search-action))
+  (let ((ivy-dynamic-exhibit-delay-ms 500))
+    (ivy-read "[aibo] Search: "
+              #'aibo:--ivy-conversation-message-search
+              :dynamic-collection t
+              :require-match t
+              :history #'aibo:--conversation-message-search-history
+              :action #'aibo:--conversation-message-search-action)))
 
-;; TODO(dmed): Find how to trigger an ivy-read update on the last debounce
 (defun aibo:--ivy-conversation-message-search (query)
-  (or
-   (ivy-more-chars)
-   (progn
-     (if (timerp aibo:--conversation-message-search-debounce-timer)
-         (cancel-timer aibo:--conversation-message-search-debounce-timer))
-
-     (setq aibo:--conversation-message-search-debounce-timer
-           (run-with-timer 0.5 nil
-                           (lambda ()
-                             (setq aibo:--conversation-message-search-debounce-last-value
-                                   (aibo:--ivy-conversation-message-search-no-debounce query)))))
-
-     aibo:--conversation-message-search-debounce-last-value)))
-
-(defun aibo:--ivy-conversation-message-search-no-debounce (query)
   (--map (format "%s: %s"
                  (oref it :conversation-id)
                  (replace-regexp-in-string "\n" "\\\\n" (oref it :content-text)))
