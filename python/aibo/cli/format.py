@@ -13,7 +13,7 @@ import fire
 from aibo.cli.common import PKG_DIR, call_command
 
 
-def main(port: int = 5000):
+def main(port: int = 5000) -> None:
     call_command(f"black .", cwd=PKG_DIR)
     call_command(f"isort --profile black .", cwd=PKG_DIR)
 

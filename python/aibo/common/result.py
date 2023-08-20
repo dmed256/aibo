@@ -52,7 +52,7 @@ class Error(GenericModel, Generic[TError]):
         INVALID_COMPLETION = "invalid_completion"
 
     kind: Literal["error"] = "error"
-    value: TOk
+    value: Optional[TError] = None
     error_message: str
     error_code: Code
 
@@ -76,55 +76,30 @@ class Result(GenericModel, Generic[TOk, TError]):
             value=Error(error_message=error_message, error_code=error_code, value=value)
         )
 
-    def update_error(
-        self,
-        *,
-        error_message: Optional[str] = None,
-        error_code: Optional[Error.Code] = None,
-        value: TError | None = None,
-    ) -> Self:
-        error_value = self.error_value
-
-        return self.error(
-            error_message=error_value.error_message
-            if error_message is None
-            else error_message,
-            error_code=error_value.error_code if error_code is None else error_code,
-            value=error_value.value if value is None else value,
-        )
-
-    @property
-    def is_ok(self):
-        return isinstance(self.value, Ok)
-
-    @property
-    def is_error(self):
-        return isinstance(self.value, Error)
-
     @staticmethod
     def is_undefined(value: Any):
         return isinstance(value, Undefined)
 
     @property
     def ok_value(self) -> TOk:
-        if self.is_ok:
+        if isinstance(self.value, Ok):
             return self.value.value
 
         raise Error(
-            "Fetching ok_value from Error",
+            error_message="Fetching ok_value from Error",
             error_code=Error.Code.FAILED_PRECONDITION,
         )
 
     @property
     def error_value(self) -> TError | None:
-        if self.is_error:
+        if isinstance(self.value, Error):
             return self.value.value
 
         raise Error(
-            "Fetching error_value from Ok",
+            error_message="Fetching error_value from Ok",
             error_code=Error.Code.FAILED_PRECONDITION,
         )
 
     def validate(self):
-        if self.is_error:
+        if isinstance(self.value, Error):
             raise self.value

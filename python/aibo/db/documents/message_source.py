@@ -1,4 +1,4 @@
-from typing import Annotated, Literal, Optional, Union
+from typing import Annotated, Literal, Self, Optional, Union
 
 from pydantic import BaseModel, Field
 
@@ -20,7 +20,7 @@ class HumanSource(BaseModel):
     kind: Literal["human"] = "human"
     user: str
 
-    def __str__(self):
+    def __str__(self) -> str:
         return f"human:{self.user}"
 
 
@@ -41,7 +41,7 @@ class OpenAIModelSource(BaseModel):
         model: Optional[str] = None,
         temperature: Optional[float] = None,
         max_tokens: Optional[int] = None,
-    ):
+    ) -> Self:
         env = Env.get()
         return cls(
             model=model or env.OPENAI_MODEL_NAME,
@@ -49,7 +49,7 @@ class OpenAIModelSource(BaseModel):
             max_tokens=max_tokens,
         )
 
-    def __str__(self):
+    def __str__(self) -> str:
         return f"model:{self.model}"
 
 
@@ -61,7 +61,7 @@ class ProgrammaticSource(BaseModel):
     kind: Literal["programmatic"] = "programmatic"
     source: str
 
-    def __str__(self):
+    def __str__(self) -> str:
         return f"programmatic:{self.source}"
 
 

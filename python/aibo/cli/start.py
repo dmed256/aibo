@@ -14,7 +14,7 @@ import uvicorn
 from aibo.cli.common import PKG_DIR
 
 
-def main(port: int = 5000):
+def main(port: int = 5000) -> None:
     uvicorn.run(
         "aibo.server.main:app",
         port=port,

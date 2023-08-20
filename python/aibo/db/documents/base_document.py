@@ -59,7 +59,7 @@ class BaseDocument(BaseModel, abc.ABC):
         return []
 
     @classmethod
-    def migrate(cls):
+    def migrate(cls) -> None:
         existing_index_names = list(cls.collection.index_information().keys())
         unmigrated_indices = [
             index for index in cls.indices() if index.name not in existing_index_names

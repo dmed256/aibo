@@ -1,20 +1,21 @@
 import functools
+from typing import Any
 
 from bson.binary import UuidRepresentation
 from bson.codec_options import CodecOptions
-from pymongo import MongoClient
+from pymongo import MongoClient, database
 
 from aibo.common.constants import Env
 
 
 @functools.cache
-def get_client():
+def get_client() -> MongoClient:
     env = Env.get()
     return MongoClient(env.MONGO_URI, env.MONGO_PORT)
 
 
 @functools.cache
-def get_db():
+def get_db() -> database.Database[Any]:
     env = Env.get()
     return get_client().get_database(
         env.MONGO_DATABASE,

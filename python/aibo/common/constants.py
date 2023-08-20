@@ -1,5 +1,6 @@
 import functools
 import os
+from typing import Self
 
 from pydantic import BaseModel
 
@@ -25,7 +26,7 @@ class Env(BaseModel):
 
     @classmethod
     @functools.cache
-    def get(cls):
+    def get(cls) -> Self:
         return cls(
             # Mongo
             MONGO_URI=os.environ.get("MONGO_URI", "localhost"),

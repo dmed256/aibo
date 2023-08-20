@@ -85,7 +85,7 @@ class Message(BaseModel):
     history: list["Message"] = Field([], repr=False)
 
     @classmethod
-    def from_document(cls, doc: MessageDocument, *, history: list[Self]):
+    def from_document(cls, doc: MessageDocument, *, history: list[Self]) -> Self:
         return Message(
             id=doc.id,
             status=cls.Status.COMPLETED,
@@ -99,7 +99,7 @@ class Message(BaseModel):
             history=history,
         )
 
-    def to_document(self):
+    def to_document(self) -> MessageDocument:
         return MessageDocument(
             id=self.id,
             conversation_id=self.conversation_id,
