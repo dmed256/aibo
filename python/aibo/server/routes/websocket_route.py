@@ -1,10 +1,11 @@
 import inspect
 import typing
-from typing import Any, Callable, Literal, Type, TypeVar
+from typing import Any, Callable, Literal, Type, TypeVar, Union
 from uuid import UUID
 
 from fastapi import WebSocket
 from pydantic import BaseModel
+import pydantic
 
 T = TypeVar("T")
 EventRoute = Callable[[WebSocket, T], Any]
@@ -26,9 +27,11 @@ class WebsocketRouter:
         self._event_request_class = RequestClass
         self._event_request_classes = typing.get_args(RequestClass)[0]
 
-        # Unions of 1 type return itself rather than a list of 1 item
-        if not isinstance(self._event_request_classes, list):
+        if typing.get_origin(self._event_request_classes) is not Union:
             self._event_request_classes = [self._event_request_classes]
+        else:
+            self._event_request_classes = typing.get_args(self._event_request_classes)
+
 
     def route(self, event_route: EventRoute[T]) -> EventRoute[T]:
         event_route_signature = inspect.signature(event_route)
@@ -57,7 +60,7 @@ class WebsocketRouter:
 
     async def process(self, websocket: WebSocket) -> None:
         event_json = await websocket.receive_json()
-        event = self._event_request_class.parse_obj(event_json)
+        event = pydantic.parse_obj_as(self._event_request_class, event_json)
 
         event_route = self._routes_by_event.get(event.__class__)
         if not event_route:

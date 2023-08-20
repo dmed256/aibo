@@ -18,13 +18,26 @@ class StreamAssistantMessageEventRequest(BaseEvent):
     conversation_id: UUID
 
 
-class SubmitUserMessageEventResponse(BaseEvent):
+class StreamAssistantMessageEventResponse(BaseEvent):
     kind: Literal["stream_assistant_message"] = "stream_assistant_message"
     message: api_models.Message
 
 
+class StreamAssistantMessageChunksEventRequest(BaseEvent):
+    kind: Literal["stream_assistant_message_chunks"] = "stream_assistant_message_chunks"
+    conversation_id: UUID
+
+
+class StreamAssistantMessageChunksEventResponse(BaseEvent):
+    kind: Literal["stream_assistant_message_chunks"] = "stream_assistant_message_chunks"
+    chunk: chat.StreamingMessageResult
+
+
 WebsocketEventRequest = Annotated[
-    Union[StreamAssistantMessageEventRequest,],
+    Union[
+        StreamAssistantMessageEventRequest,
+        StreamAssistantMessageChunksEventRequest,
+    ],
     Field(discriminator="kind"),
 ]
 
@@ -36,14 +49,29 @@ ws_router.set_event_class(WebsocketEventRequest)
 async def stream_assistant_message(
     websocket: WebSocket,
     event: StreamAssistantMessageEventRequest,
-) -> AsyncGenerator[SubmitUserMessageEventResponse, None]:
+) -> AsyncGenerator[StreamAssistantMessageEventResponse, None]:
     conversation = chat.Conversation.get(event.conversation_id)
     assert conversation, f"Conversation doesn't exist: {event.conversation_id}"
 
     async for message in conversation.stream_assistant_message():
-        yield SubmitUserMessageEventResponse(
+        yield StreamAssistantMessageEventResponse(
             id=event.id,
             message=api_models.Message.from_chat(message),
+        )
+
+
+@ws_router.route
+async def stream_assistant_message_chunks(
+    websocket: WebSocket,
+    event: StreamAssistantMessageChunksEventRequest,
+) -> AsyncGenerator[StreamAssistantMessageChunksEventResponse, None]:
+    conversation = chat.Conversation.get(event.conversation_id)
+    assert conversation, f"Conversation doesn't exist: {event.conversation_id}"
+
+    async for chunk in conversation.stream_assistant_message_chunks():
+        yield StreamAssistantMessageChunksEventResponse(
+            id=event.id,
+            chunk=chunk,
         )
 
 

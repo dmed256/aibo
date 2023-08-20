@@ -264,7 +264,8 @@
          (on-message (plist-get args :on-message))
          (on-success (plist-get args :on-success)))
     (aibo:--api-ws-send
-     :event `(("conversation_id" . ,conversation-id))
+     :event `(("kind" . "stream_assistant_message")
+              ("conversation_id" . ,conversation-id))
      :response-transform (lambda (response)
                            (let* ((api-message (ht-get response "message")))
                              (Message-from-api api-message)))
