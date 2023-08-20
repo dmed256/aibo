@@ -96,7 +96,8 @@
         (widget-create
          'link
          :notify (lambda (&rest _ignore)
-                   (aibo:go-to-conversation-by-id (oref conversation :id)))
+                   (aibo:go-to-conversation-by-id
+                    :conversation-id (oref conversation :id)))
          :button-prefix ""
          :button-suffix ""
          :tag (aibo:--stylize-conversation-title
