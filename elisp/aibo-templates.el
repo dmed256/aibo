@@ -79,8 +79,8 @@
          (message-inputs (oref template :message-inputs))
          (region-regex "\\(^\\|\\s-\\)\\\\r\\(\\s-\\|$\\)")
          (buffer-regex "\\(^\\|\\s-\\)\\\\b\\(\\s-\\|$\\)")
-         (region-string (if (and transient-mark-mode mark-active)
-                            (buffer-substring (region-beginning) (region-end))
+         (region-string (if (mark)
+                            (buffer-substring (min (mark) (point)) (max (mark) (point)))
                           ""))
          (content (if (s-contains? "\\r" content)
                       (replace-regexp-in-string
