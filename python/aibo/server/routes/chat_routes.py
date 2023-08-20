@@ -3,7 +3,7 @@ from typing import Optional
 from uuid import UUID
 
 from fastapi import APIRouter
-from pydantic import BaseModel
+from pydantic import BaseModel, ConfigDict
 
 from aibo.common.constants import Env
 from aibo.core import chat
@@ -31,6 +31,10 @@ class SearchConversationsResponse(BaseModel):
 
 
 class CreateConversationRequest(BaseModel):
+    model_config = ConfigDict(
+        protected_namespaces=tuple(),
+    )
+
     model_name: Optional[str] = None
     temperature: Optional[float] = None
     max_tokens: Optional[int] = None

@@ -6,6 +6,7 @@ from uuid import UUID, uuid4
 import pymongo
 from pydantic import BaseModel, Field
 
+from aibo.common.classproperty import classproperty
 from aibo.common.time import now_utc
 from aibo.db.documents.base_document import BaseDocument, Index, Order
 
@@ -18,8 +19,7 @@ class MessageEdgeDocument(BaseDocument):
     child_id: UUID
     created_at: dt.datetime
 
-    @classmethod  # type: ignore[misc]
-    @property
+    @classproperty
     def collection_name(cls) -> str:
         return "message_edges"
 

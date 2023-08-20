@@ -1,13 +1,15 @@
 import abc
+import datetime as dt
 import functools
-from typing import Literal, Optional, Self, Union
+from typing import Any, Literal, Optional, Self, Union, cast
 from uuid import UUID, uuid4
 
 import pymongo
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, ConfigDict, Field
 from pymongo.collection import Collection
 from pymongo.typings import _DocumentType
 
+from aibo.common.classproperty import classproperty
 from aibo.common.time import now_utc
 from aibo.common.types import StrEnum
 
@@ -34,19 +36,20 @@ class Index(BaseModel):
 
 
 class BaseDocument(BaseModel, abc.ABC):
+    model_config = ConfigDict(
+        arbitrary_types_allowed=True,
+        populate_by_name=True,
+        ignored_types=(classproperty,),
+    )
+
     id: UUID = Field(default_factory=uuid4, alias="_id")
 
-    class Config:
-        allow_population_by_field_name = True
-
-    @classmethod  # type: ignore[misc]
-    @property
+    @classproperty
     @abc.abstractmethod
     def collection_name(cls) -> str:
         ...
 
-    @classmethod  # type: ignore[misc]
-    @property
+    @classproperty
     def collection(cls) -> Collection[_DocumentType]:
         from aibo.db.client import get_db
 
@@ -68,7 +71,7 @@ class BaseDocument(BaseModel, abc.ABC):
             ]
             cls.collection.create_index(fields, unique=index.unique, name=index.name)
 
-    def safe_dict(self) -> dict:
+    def safe_dict(self) -> dict[str, Any]:
         return self.dict(by_alias=True)
 
     @classmethod
@@ -80,21 +83,23 @@ class BaseDocument(BaseModel, abc.ABC):
         return cls(**doc_dict)
 
     def insert(self) -> Self:
-        self.collection.insert_one(self.safe_dict())
+        self.collection.insert_one(cast(Any, self.safe_dict()))
         return self
 
     @classmethod
     def insert_many(self, docs: list[Self]) -> list[Self]:
-        self.collection.insert_many([doc.dict(by_alias=True) for doc in docs])
+        self.collection.insert_many(
+            [cast(Any, doc.dict(by_alias=True)) for doc in docs]
+        )
         return docs
 
     def save(self) -> None:
         self.collection.save(self.safe_dict())
 
     @classmethod
-    def partial_update(cls, id: UUID, **updates) -> Self:
+    def partial_update(cls, id: UUID, **updates: Any) -> Self:
         cls.collection.update_one({"_id": id}, {"$set": updates})
-        return cls.by_id(id)
+        return cast(Self, cls.by_id(id))
 
     def soft_delete(self) -> Self:
         self.deleted_at: Optional[dt.datetime] = now_utc()
@@ -102,15 +107,15 @@ class BaseDocument(BaseModel, abc.ABC):
         return self
 
     @classmethod
-    def find(cls, query, **kwargs) -> list[Self]:
+    def find(cls, query: Any, **kwargs: Any) -> list[Self]:
         return [cls(**doc_dict) for doc_dict in cls.collection.find(query, **kwargs)]
 
     @classmethod
-    def aggregate(cls, query, **kwargs) -> list[Self]:
+    def aggregate(cls, query: Any, **kwargs: Any) -> list[Self]:
         return [
             cls(**doc_dict) for doc_dict in cls.collection.aggregate(query, **kwargs)
         ]
 
     @classmethod
-    def count(cls, *args, **kwargs) -> int:
+    def count(cls, *args: Any, **kwargs: Any) -> int:
         return cls.collection.count_documents(*args, **kwargs)

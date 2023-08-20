@@ -5,6 +5,7 @@ from uuid import UUID
 import pymongo
 from pydantic import BaseModel, Field
 
+from aibo.common.classproperty import classproperty
 from aibo.common.time import now_utc
 from aibo.db.documents.base_document import BaseDocument, Index, Order
 from aibo.db.documents.message_source import *
@@ -27,8 +28,7 @@ class ConversationDocument(BaseDocument):
     created_at: dt.datetime = Field(default_factory=now_utc)
     deleted_at: Optional[dt.datetime] = None
 
-    @classmethod  # type: ignore[misc]
-    @property
+    @classproperty
     def collection_name(cls) -> str:
         return "conversations"
 

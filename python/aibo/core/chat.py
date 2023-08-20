@@ -293,7 +293,7 @@ class Conversation(ConversationSummary):
             **dict(ConversationSummary.from_document(doc)),
             root_message=root_message,
             current_message=current_message,
-            all_messages=[],
+            all_messages={},
         )
         conversation.sync_messages()
 
