@@ -1,7 +1,6 @@
 from typing import Any, Generic, Literal, Optional, Self, TypeVar
 
 from pydantic import BaseModel, Field
-from pydantic.generics import GenericModel
 
 from aibo.common.types import StrEnum
 
@@ -24,12 +23,12 @@ class Undefined(BaseModel):
 UNDEFINED = Undefined()
 
 
-class Ok(GenericModel, Generic[TOk]):
+class Ok(BaseModel, Generic[TOk]):
     kind: Literal["ok"] = "ok"
     value: TOk
 
 
-class Error(GenericModel, Generic[TError]):
+class Error(BaseModel, Generic[TError]):
     class Code(StrEnum):
         # gRPC error codes
         CANCELLED = "cancelled"
@@ -57,7 +56,7 @@ class Error(GenericModel, Generic[TError]):
     error_code: Code
 
 
-class Result(GenericModel, Generic[TOk, TError]):
+class Result(BaseModel, Generic[TOk, TError]):
     value: Ok[TOk] | Error[TError] = Field(..., discriminator="kind")
 
     @classmethod
@@ -77,7 +76,7 @@ class Result(GenericModel, Generic[TOk, TError]):
         )
 
     @staticmethod
-    def is_undefined(value: Any):
+    def is_undefined(value: Any) -> bool:
         return isinstance(value, Undefined)
 
     @property
@@ -85,7 +84,7 @@ class Result(GenericModel, Generic[TOk, TError]):
         if isinstance(self.value, Ok):
             return self.value.value
 
-        raise Error(
+        raise Error(  # type: ignore[misc]
             error_message="Fetching ok_value from Error",
             error_code=Error.Code.FAILED_PRECONDITION,
         )
@@ -95,11 +94,7 @@ class Result(GenericModel, Generic[TOk, TError]):
         if isinstance(self.value, Error):
             return self.value.value
 
-        raise Error(
+        raise Error(  # type: ignore[misc]
             error_message="Fetching error_value from Ok",
             error_code=Error.Code.FAILED_PRECONDITION,
         )
-
-    def validate(self):
-        if isinstance(self.value, Error):
-            raise self.value

@@ -1,7 +1,9 @@
+from __future__ import annotations
+
 import datetime as dt
 import functools
 import re
-from typing import Any, AsyncGenerator, Iterable, Optional, Self, Type
+from typing import Any, AsyncGenerator, Iterable, Optional, Self, Sequence, Type, cast
 from uuid import UUID, uuid4
 
 import openai
@@ -11,7 +13,7 @@ from pydantic import BaseModel, Field
 from termcolor import colored
 
 from aibo.common.constants import NULL_UUID, Env
-from aibo.common.openai import OpenAIMessage
+from aibo.common.openai import OpenAIMessage, OpenAIRole
 from aibo.common.result import Error, Result
 from aibo.common.time import now_utc
 from aibo.common.types import StrEnum
@@ -55,11 +57,18 @@ __all__ = [
 ]
 
 
-ROLE_COLORS = {
+ROLE_COLORS: dict[MessageRole, str] = {
     MessageRole.SYSTEM: "green",
     MessageRole.USER: "cyan",
     MessageRole.ASSISTANT: "yellow",
     MessageRole.ERROR: "light_gray",
+}
+
+OPENAI_ROLES: dict[MessageRole, OpenAIRole] = {
+    MessageRole.SYSTEM: "system",
+    MessageRole.USER: "user",
+    MessageRole.ASSISTANT: "assistant",
+    MessageRole.FUNCTION: "function",
 }
 
 
@@ -82,11 +91,13 @@ class Message(BaseModel):
     content: MessageContent
     created_at: dt.datetime
     deleted_at: Optional[dt.datetime] = None
-    history: list["Message"] = Field([], repr=False)
+    history: list["Message"] = Field([], exclude=True)
 
     @classmethod
-    def from_document(cls, doc: MessageDocument, *, history: list[Self]) -> Self:
-        return Message(
+    def from_document(
+        cls, doc: MessageDocument, *, history: list["Message"]
+    ) -> "Message":
+        return cls(
             id=doc.id,
             status=cls.Status.COMPLETED,
             conversation_id=doc.conversation_id,
@@ -101,7 +112,7 @@ class Message(BaseModel):
 
     def to_document(self) -> MessageDocument:
         return MessageDocument(
-            id=self.id,
+            id=self.id,  # type: ignore[call-arg]
             conversation_id=self.conversation_id,
             parent_id=self.parent_id,
             source=self.source,
@@ -114,11 +125,11 @@ class Message(BaseModel):
         )
 
     @property
-    def source_text(self):
+    def source_text(self) -> str:
         return str(self.source)
 
     @property
-    def content_text(self):
+    def content_text(self) -> str:
         return str(self.content)
 
     def to_openai(self, *, conversation: "Conversation") -> Optional[OpenAIMessage]:
@@ -126,12 +137,7 @@ class Message(BaseModel):
         if content is None:
             return None
 
-        openai_role = {
-            MessageRole.SYSTEM: "system",
-            MessageRole.USER: "user",
-            MessageRole.ASSISTANT: "assistant",
-            MessageRole.FUNCTION: "function",
-        }[self.role]
+        openai_role = OPENAI_ROLES[self.role]
 
         message = OpenAIMessage(
             role=openai_role,
@@ -143,18 +149,24 @@ class Message(BaseModel):
 
         return message
 
-    def get_children(self):
+    def get_children(self) -> list["Message"]:
         child_history = [*self.history, self]
         return [
-            Message.from_document(doc, history=child_history)
+            self.from_document(doc, history=child_history)
             for doc in MessageDocument.get_message_children(
                 conversation_id=self.conversation_id,
                 parent_id=self.id,
             )
         ]
 
-    def get_conversation(self) -> "Conversation":
-        return Conversation.get(self.conversation_id)
+    def get_conversation(self) -> Conversation:
+        conversation = Conversation.get(self.conversation_id)
+        assert conversation, f"Conversation no longer exists: {self.conversation_id}"
+
+        return conversation
+
+    def change_parent(self, parent_id: UUID, changed_at: dt.datetime) -> None:
+        raise NotImplementedError()
 
 
 class ConversationSummary(BaseModel):
@@ -189,7 +201,7 @@ class ConversationSummary(BaseModel):
         before_date: Optional[dt.datetime],
         query: Optional[str],
     ) -> list[Self]:
-        filters = {}
+        filters: dict[str, Any] = {}
 
         if after_date or before_date:
             created_at_filter = {}
@@ -212,7 +224,7 @@ class ConversationSummary(BaseModel):
             for conversation_doc in conversation_docs
         ]
 
-    def set_title(self, title: str):
+    def set_title(self, title: str) -> None:
         self.title = title
         ConversationDocument.partial_update(
             id=self.id,
@@ -263,7 +275,7 @@ class Conversation(ConversationSummary):
 
         return cls.from_document(conversation_doc)
 
-    def soft_delete(self, *, soft_delete_messages: bool = False):
+    def soft_delete(self, *, soft_delete_messages: bool = False) -> None:
         if soft_delete_messages:
             MessageDocument.collection.update_many(
                 {"conversation_id": self.id},
@@ -280,12 +292,19 @@ class Conversation(ConversationSummary):
 
     @classmethod
     def from_document(cls, doc: ConversationDocument) -> Self:
+        root_message_doc = MessageDocument.by_id(doc.root_message_id)
+        current_message_doc = MessageDocument.by_id(doc.current_message_id)
+        assert root_message_doc, f"Message no longer exists: {doc.root_message_id}"
+        assert (
+            current_message_doc
+        ), f"Message no longer exists: {doc.current_message_id}"
+
         root_message = Message.from_document(
-            MessageDocument.by_id(doc.root_message_id),
+            root_message_doc,
             history=[],
         )
         current_message = Message.from_document(
-            MessageDocument.by_id(doc.current_message_id),
+            current_message_doc,
             history=[],
         )
 
@@ -307,7 +326,7 @@ class Conversation(ConversationSummary):
 
         return cls.from_document(conversation_doc)
 
-    def sync_messages(self):
+    def sync_messages(self) -> None:
         self.all_messages = {
             doc.id: Message.from_document(doc, history=[])
             for doc in MessageDocument.get_conversation_messages(self.id)
@@ -315,14 +334,21 @@ class Conversation(ConversationSummary):
         for message in self.all_messages.values():
             self._set_message_history(message)
 
-    def get_message_edges(self, *, include_deletions: bool = False):
+    def get_message_edges(
+        self, *, include_deletions: bool = False
+    ) -> list[MessageEdgeDocument]:
         if include_deletions:
             return MessageEdgeDocument.find({"conversation_id": self.id})
 
         latest_edges = MessageEdgeDocument.aggregate(
             [
                 {"$filter": {"cond": {"conversation_id": self.id}}},
-                {"$sort": {"child_id": pymongo.DESC, "created_at": pymongo.DESC}},
+                {
+                    "$sort": {
+                        "child_id": pymongo.DESCENDING,
+                        "created_at": pymongo.DESCENDING,
+                    }
+                },
                 {
                     "$group": {
                         "id": "$_id",
@@ -341,7 +367,7 @@ class Conversation(ConversationSummary):
             and edge.parent_id in self.all_messages
         ]
 
-    def _set_message_history(self, message: Message):
+    def _set_message_history(self, message: Message) -> None:
         # No-op if message is root or already has history
         if not message.parent_id or message.history:
             return
@@ -409,7 +435,7 @@ class Conversation(ConversationSummary):
         ]
 
         try:
-            response = await openai.ChatCompletion.acreate(
+            response = await openai.ChatCompletion.acreate(  # type: ignore[no-untyped-call]
                 model=source.model,
                 n=1,
                 temperature=source.temperature,
@@ -454,7 +480,7 @@ class Conversation(ConversationSummary):
         ]
 
         try:
-            response = await openai.ChatCompletion.acreate(
+            response = await openai.ChatCompletion.acreate(  # type: ignore[no-untyped-call]
                 model=source.model,
                 stream=True,
                 n=1,
@@ -516,7 +542,7 @@ class Conversation(ConversationSummary):
                 ),
             )
 
-    async def generate_title(self):
+    async def generate_title(self) -> None:
         env = Env.get()
 
         title_conversation = Conversation.create(
@@ -557,6 +583,7 @@ Remember, only use less than ten words in total!
         self.set_title(re.sub(r"\s+", " ", str(generated_message.content)))
 
     def edit_message(
+        self,
         message: Message,
         *,
         source: MessageSource,
@@ -564,7 +591,7 @@ Remember, only use less than ten words in total!
         content: MessageContent,
     ) -> Message:
         if message.parent_id is None:
-            raise Error(
+            raise Result.error(  # type: ignore[misc]
                 "Cannot edit root message", error_code=Error.Code.INVALID_ARGUMENT
             )
 
@@ -583,9 +610,9 @@ Remember, only use less than ten words in total!
 
         return new_message
 
-    def delete_message(self, message: Message):
+    def delete_message(self, message: Message) -> None:
         if message.parent_id is None:
-            raise Error(
+            raise Result.error(  # type: ignore[misc]
                 "Cannot delete root message", error_code=Error.Code.INVALID_ARGUMENT
             )
 
@@ -597,7 +624,12 @@ Remember, only use less than ten words in total!
         message.deleted_at = soft_deleted_message_doc.deleted_at
 
         if self.current_message.id == message.id:
-            self.current_message = self.all_messages.get(message.parent_id)
+            next_current_message = self.all_messages.get(message.parent_id)
+            assert (
+                next_current_message
+            ), f"Message no longer exists: {message.parent_id}"
+
+            self.current_message = next_current_message
             ConversationDocument.partial_update(
                 id=self.id,
                 current_message_id=self.current_message.id,
@@ -614,20 +646,25 @@ Remember, only use less than ten words in total!
 
         messages = [message]
         while True:
-            message_parent = self.all_messages.get(messages[0].parent_id)
-            if not message_parent:
+            parent_id = messages[0].parent_id
+            if parent_id is None:
                 break
+
+            message_parent = self.all_messages.get(parent_id)
+            if message_parent is None:
+                break
+
             messages.insert(0, message_parent)
 
         return messages
 
-    def stringify_conversation(self, *, colored=False) -> str:
+    def stringify_conversation(self, *, enable_colors: bool = False) -> str:
         conversation_str = ""
         for message in self.get_current_history(sync=True):
             role = f"[{message.role.upper()}]"
             content = str(message.content)
 
-            if colored:
+            if enable_colors:
                 role_color = ROLE_COLORS[message.role]
                 role = colored(role, role_color)
                 content = colored(content, f"light_{role_color}")
@@ -636,8 +673,8 @@ Remember, only use less than ten words in total!
 
         return conversation_str
 
-    def pretty_print_current_history(self):
-        print(self.stringify_conversation(colored=True))
+    def pretty_print_current_history(self) -> None:
+        print(self.stringify_conversation(enable_colors=True))
 
 
 Message.update_forward_refs()

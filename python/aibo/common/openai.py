@@ -2,9 +2,11 @@ from typing import Any, Literal, Optional
 
 from pydantic import BaseModel
 
+OpenAIRole = Literal["system", "user", "assistant", "function"]
+
 
 class OpenAIMessage(BaseModel):
-    role: Literal["system", "user", "assistant", "function"]
+    role: OpenAIRole
     content: str
     name: Optional[str] = None
     function_call: Optional[dict[str, Any]] = None

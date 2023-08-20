@@ -1,12 +1,13 @@
 import functools
 import os
 from typing import Self
+from uuid import UUID
 
 from pydantic import BaseModel
 
 __all__ = ["Env", "NULL_UUID"]
 
-NULL_UUID = "00000000-0000-0000-0000-000000000000"
+NULL_UUID = UUID("00000000-0000-0000-0000-000000000000")
 
 
 class Env(BaseModel):

@@ -13,6 +13,10 @@ router = APIRouter(prefix="/chat")
 
 
 class GetModelsResponse(BaseModel):
+    model_config = ConfigDict(
+        protected_namespaces=tuple(),
+    )
+
     model_names: list[str]
 
 
@@ -148,14 +152,15 @@ async def create_conversation(
     env = Env.get()
 
     enabled_tool_names = set(request.enabled_tool_names)
-    enabled_tools = [
-        tool for tool_name in enabled_tool_names if (tool := Tool.get(tool_name))
-    ]
-    if len(enabled_tools) != len(enabled_tool_names):
-        missing_tool_names = [
-            tool_name for tool_name in enabled_tool_names if Tool.get(tool_name) is None
-        ]
-        raise Exception(f"Tool(s) not found: {missing_tool_names}")
+    enabled_tools: list[str] = []
+    # enabled_tools = [
+    #     tool for tool_name in enabled_tool_names if (tool := Tool.get(tool_name))
+    # ]
+    # if len(enabled_tools) != len(enabled_tool_names):
+    #     missing_tool_names = [
+    #         tool_name for tool_name in enabled_tool_names if Tool.get(tool_name) is None
+    #     ]
+    #     raise Exception(f"Tool(s) not found: {missing_tool_names}")
 
     openai_model_source = chat.OpenAIModelSource.build(
         model=request.model_name,
@@ -231,7 +236,7 @@ async def conversation_message_search(
 async def edit_conversation(
     conversation_id: UUID,
     request: EditConversationRequest,
-) -> GetConversationResponse:
+) -> EditConversationResponse:
     conversation = chat.Conversation.get(conversation_id)
     assert conversation, "Conversation not found"
 
@@ -313,7 +318,7 @@ async def edit_message(
     message = conversation.all_messages.get(message_id)
     assert message, "Message not found"
 
-    if not isinstance(message.content, TextMessageContent):
+    if not isinstance(message.content, chat.TextMessageContent):
         raise Exception(
             f"Expected TextMessageContent, found {message.content.__class__}"
         )
@@ -327,7 +332,7 @@ async def edit_message(
         message,
         source=message.source,
         role=message.role,
-        content=TextMessageContent(text=request.text),
+        content=chat.TextMessageContent(text=request.text),
     )
 
     return EditMessageResponse(
@@ -340,7 +345,7 @@ async def delete_message(
     conversation_id: UUID,
     message_id: UUID,
     delete_after: bool = False,
-) -> None:
+) -> DeleteMessageResponse:
     conversation = chat.Conversation.get(conversation_id)
     assert conversation, "Conversation not found"
 
@@ -365,6 +370,8 @@ async def get_conversation_edges(
     conversation_id: UUID,
 ) -> GetConversationEdgesResponse:
     conversation = chat.Conversation.get(conversation_id)
+    assert conversation, "Conversation not found"
+
     return GetConversationEdgesResponse(
         message_edges=[
             api_models.MessageEdge.from_chat(edge)

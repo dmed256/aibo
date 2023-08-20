@@ -36,4 +36,3 @@ jobs:
         run: |
           cd python
           mypy aibo
-        continue-on-error: true
