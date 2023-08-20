@@ -22,6 +22,20 @@
             :content `(("kind" . "text")
                        ("text" .
                         "@@@content@@@")))))
+        ;; ---[ Command ]---------------------------
+        ,(ConversationTemplate
+         :short-name "c"
+         :name "Command find"
+         :message-inputs
+         `(,(CreateMessageInput
+            :role "system"
+            :content `(("kind" . "text")
+                       ("text" . ,aibo:--generic-system-message)))
+           ,(CreateMessageInput
+            :role "user"
+            :content `(("kind" . "text")
+                       ("text" .
+                        "Can you give me a command which answers the following:\n\n@@@content@@@\n\nOnly the command and nothing more, no ``` either")))))
         ;; ---[ Write documentation ]---------------
         ,(ConversationTemplate
          :short-name "d"
