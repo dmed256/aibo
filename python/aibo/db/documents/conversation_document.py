@@ -1,5 +1,5 @@
 import datetime as dt
-from typing import Optional, Self
+from typing import Any, Optional, Self
 from uuid import UUID
 
 import pymongo
@@ -27,7 +27,7 @@ class ConversationDocument(BaseDocument):
     created_at: dt.datetime = Field(default_factory=now_utc)
     deleted_at: Optional[dt.datetime] = None
 
-    @classmethod
+    @classmethod  # type: ignore[misc]
     @property
     def collection_name(cls) -> str:
         return "conversations"
@@ -44,7 +44,7 @@ class ConversationDocument(BaseDocument):
         ]
 
     @classmethod
-    def safe_find(cls, *, include_deletions: bool = False, **kwargs) -> list[Self]:
+    def safe_find(cls, *, include_deletions: bool = False, **kwargs: Any) -> list[Self]:
         query = dict(kwargs)
         if not include_deletions:
             query["deleted_at"] = None

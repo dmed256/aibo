@@ -1,5 +1,5 @@
 import datetime as dt
-from typing import Annotated, Literal, Union
+from typing import Annotated, AsyncGenerator, Literal, Union
 from uuid import UUID
 
 from fastapi import APIRouter, WebSocket
@@ -36,8 +36,10 @@ ws_router.set_event_class(WebsocketEventRequest)
 async def stream_assistant_message(
     websocket: WebSocket,
     event: StreamAssistantMessageEventRequest,
-):
+) -> AsyncGenerator[SubmitUserMessageEventResponse, None]:
     conversation = chat.Conversation.get(event.conversation_id)
+    assert conversation, f"Conversation doesn't exist: {event.conversation_id}"
+
     async for message in conversation.stream_assistant_message():
         yield SubmitUserMessageEventResponse(
             id=event.id,
@@ -46,7 +48,7 @@ async def stream_assistant_message(
 
 
 @router.websocket("/ws")
-async def websocket_connection(websocket: WebSocket):
+async def websocket_connection(websocket: WebSocket) -> None:
     await websocket.accept()
     while True:
         await ws_router.process(websocket)

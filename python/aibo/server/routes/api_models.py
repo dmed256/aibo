@@ -1,5 +1,5 @@
 import datetime as dt
-from typing import Optional
+from typing import Optional, Self
 from uuid import UUID
 
 from pydantic import BaseModel, ValidationError, root_validator
@@ -23,7 +23,7 @@ class Message(BaseModel):
     deleted_at: Optional[dt.datetime] = None
 
     @classmethod
-    def from_chat(cls, message: chat.Message):
+    def from_chat(cls, message: chat.Message) -> Self:
         return cls(
             id=message.id,
             status=message.status,
@@ -47,7 +47,7 @@ class ConversationSummary(BaseModel):
     created_at: dt.datetime
 
     @classmethod
-    def from_chat(cls, conversation: chat.ConversationSummary):
+    def from_chat(cls, conversation: chat.ConversationSummary) -> Self:
         return cls(
             id=conversation.id,
             title=conversation.title,
@@ -63,7 +63,7 @@ class Conversation(ConversationSummary):
     all_messages: dict[UUID, Message]
 
     @classmethod
-    def from_chat(cls, conversation: chat.Conversation):
+    def from_chat(cls, conversation: chat.Conversation) -> Self:  # type: ignore[override]
         return cls(
             **dict(ConversationSummary.from_chat(conversation)),
             root_message_id=conversation.root_message.id,
@@ -82,5 +82,5 @@ class MessageEdge(BaseModel):
     created_at: dt.datetime
 
     @classmethod
-    def from_chat(cls, message_edge: chat.MessageEdgeDocument):
+    def from_chat(cls, message_edge: chat.MessageEdgeDocument) -> Self:
         return cls(**message_edge.dict())

@@ -1,5 +1,5 @@
 import datetime as dt
-from typing import Optional, Self, Union
+from typing import Any, Optional, Self, Union
 from uuid import UUID, uuid4
 
 import pymongo
@@ -36,7 +36,7 @@ class MessageDocument(BaseDocument):
     created_at: dt.datetime = Field(default_factory=now_utc)
     deleted_at: Optional[dt.datetime] = None
 
-    @classmethod
+    @classmethod  # type: ignore[misc]
     @property
     def collection_name(cls) -> str:
         return "messages"
@@ -111,7 +111,7 @@ class MessageDocument(BaseDocument):
 
     @classmethod
     def safe_find(
-        cls, query, *, include_deletions: bool = False, **kwargs
+        cls, query: dict, *, include_deletions: bool = False, **kwargs: Any
     ) -> list[Self]:
         query = dict(query)
         if not include_deletions:
@@ -130,7 +130,7 @@ class MessageDocument(BaseDocument):
             include_deletions=include_deletions,
         )
 
-    def get_children(self):
+    def get_children(self) -> list[Self]:
         return self.get_message_children(
             conversation_id=self.conversation_id,
             parent_id=self.id,
@@ -143,7 +143,7 @@ class MessageDocument(BaseDocument):
         conversation_id: UUID,
         parent_id: Union[UUID, None],
         include_deletions: bool = False,
-    ):
+    ) -> list[Self]:
         return cls.safe_find(
             {
                 "conversation_id": conversation_id,

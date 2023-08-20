@@ -18,7 +18,7 @@ class MessageEdgeDocument(BaseDocument):
     child_id: UUID
     created_at: dt.datetime
 
-    @classmethod
+    @classmethod  # type: ignore[misc]
     @property
     def collection_name(cls) -> str:
         return "message_edges"

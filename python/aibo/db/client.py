@@ -4,6 +4,7 @@ from typing import Any
 from bson.binary import UuidRepresentation
 from bson.codec_options import CodecOptions
 from pymongo import MongoClient, database
+from pymongo.typings import _DocumentType
 
 from aibo.common.constants import Env
 
@@ -15,7 +16,7 @@ def get_client() -> MongoClient:
 
 
 @functools.cache
-def get_db() -> database.Database[Any]:
+def get_db() -> database.Database[_DocumentType]:
     env = Env.get()
     return get_client().get_database(
         env.MONGO_DATABASE,

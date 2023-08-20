@@ -1,10 +1,12 @@
 import abc
 import functools
-from typing import Literal, Optional, Self
+from typing import Literal, Optional, Self, Union
 from uuid import UUID, uuid4
 
 import pymongo
 from pydantic import BaseModel, Field
+from pymongo.collection import Collection
+from pymongo.typings import _DocumentType
 
 from aibo.common.time import now_utc
 from aibo.common.types import StrEnum
@@ -16,17 +18,13 @@ class Order(StrEnum):
     ASC = "asc"
     DESC = "desc"
 
-    def to_pymongo(self):
-        if order == Order.ASC:
+    def to_pymongo(self) -> int:
+        if self.value == Order.ASC:
             return pymongo.ASCENDING
         return pymongo.DESCENDING
 
 
-IndexType = Literal[
-    pymongo.ASCENDING,
-    pymongo.DESCENDING,
-    pymongo.TEXT,
-]
+IndexType = Union[int, str]
 
 
 class Index(BaseModel):
@@ -41,15 +39,15 @@ class BaseDocument(BaseModel, abc.ABC):
     class Config:
         allow_population_by_field_name = True
 
-    @classmethod
+    @classmethod  # type: ignore[misc]
     @property
     @abc.abstractmethod
     def collection_name(cls) -> str:
         ...
 
-    @classmethod
+    @classmethod  # type: ignore[misc]
     @property
-    def collection(cls):
+    def collection(cls) -> Collection[_DocumentType]:
         from aibo.db.client import get_db
 
         return get_db()[cls.collection_name]
@@ -70,7 +68,7 @@ class BaseDocument(BaseModel, abc.ABC):
             ]
             cls.collection.create_index(fields, unique=index.unique, name=index.name)
 
-    def safe_dict(self):
+    def safe_dict(self) -> dict:
         return self.dict(by_alias=True)
 
     @classmethod
@@ -90,29 +88,29 @@ class BaseDocument(BaseModel, abc.ABC):
         self.collection.insert_many([doc.dict(by_alias=True) for doc in docs])
         return docs
 
-    def save(self):
+    def save(self) -> None:
         self.collection.save(self.safe_dict())
 
     @classmethod
-    def partial_update(cls, id: UUID, **updates):
+    def partial_update(cls, id: UUID, **updates) -> Self:
         cls.collection.update_one({"_id": id}, {"$set": updates})
         return cls.by_id(id)
 
     def soft_delete(self) -> Self:
-        self.deleted_at = now_utc()
+        self.deleted_at: Optional[dt.datetime] = now_utc()
         self.partial_update(id=self.id, deleted_at=self.deleted_at)
         return self
 
     @classmethod
-    def find(cls, query, **kwargs):
+    def find(cls, query, **kwargs) -> list[Self]:
         return [cls(**doc_dict) for doc_dict in cls.collection.find(query, **kwargs)]
 
     @classmethod
-    def aggregate(cls, query, **kwargs):
+    def aggregate(cls, query, **kwargs) -> list[Self]:
         return [
             cls(**doc_dict) for doc_dict in cls.collection.aggregate(query, **kwargs)
         ]
 
     @classmethod
-    def count(cls, *args, **kwargs):
+    def count(cls, *args, **kwargs) -> int:
         return cls.collection.count_documents(*args, **kwargs)

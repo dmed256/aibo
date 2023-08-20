@@ -1,7 +1,7 @@
 import datetime as dt
 import functools
 import re
-from typing import Any, Iterable, Optional, Self, Type
+from typing import Any, AsyncGenerator, Iterable, Optional, Self, Type
 from uuid import UUID, uuid4
 
 import openai
@@ -445,7 +445,7 @@ class Conversation(ConversationSummary):
             content=TextMessageContent(text=content),
         )
 
-    async def stream_assistant_message(self):
+    async def stream_assistant_message(self) -> AsyncGenerator[Message, None]:
         source = self.openai_model_source.copy()
         functions = [
             function.dict(exclude_none=True)
@@ -554,7 +554,7 @@ Remember, only use less than ten words in total!
         generated_message = await title_conversation.generate_assistant_message()
         title_conversation.soft_delete()
 
-        self.set_title(str(generated_message.content))
+        self.set_title(re.sub(r"\s+", " ", str(generated_message.content)))
 
     def edit_message(
         message: Message,

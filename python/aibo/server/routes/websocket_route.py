@@ -1,10 +1,13 @@
 import inspect
 import typing
-from typing import Literal
+from typing import Any, Callable, Literal, Type, TypeVar
 from uuid import UUID
 
 from fastapi import WebSocket
 from pydantic import BaseModel
+
+T = TypeVar("T")
+EventRoute = Callable[[WebSocket, T], Any]
 
 
 class BaseEvent(BaseModel):
@@ -16,10 +19,10 @@ class EventCompleted(BaseEvent):
 
 
 class WebsocketRouter:
-    def __init__(self):
-        self._routes_by_event = {}
+    def __init__(self) -> None:
+        self._routes_by_event: dict[Type[Any], EventRoute[Any]] = {}
 
-    def set_event_class(self, RequestClass):
+    def set_event_class(self, RequestClass: Type[Any]) -> None:
         self._event_request_class = RequestClass
         self._event_request_classes = typing.get_args(RequestClass)[0]
 
@@ -27,7 +30,7 @@ class WebsocketRouter:
         if not isinstance(self._event_request_classes, list):
             self._event_request_classes = [self._event_request_classes]
 
-    def route(self, event_route):
+    def route(self, event_route: EventRoute[T]) -> EventRoute[T]:
         event_route_signature = inspect.signature(event_route)
         param_types = [
             param.annotation for param in event_route_signature.parameters.values()
@@ -52,7 +55,7 @@ class WebsocketRouter:
 
         return event_route
 
-    async def process(self, websocket: WebSocket):
+    async def process(self, websocket: WebSocket) -> None:
         event_json = await websocket.receive_json()
         event = self._event_request_class.parse_obj(event_json)
 
