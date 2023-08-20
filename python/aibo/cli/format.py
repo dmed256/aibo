@@ -8,14 +8,19 @@ Options:
     python -m aibo.cli.format
 
 """
+
 import fire
 
 from aibo.cli.common import PKG_DIR, call_command
 
 
-def main(port: int = 5000) -> None:
-    call_command(f"black .", cwd=PKG_DIR)
-    call_command(f"isort --profile black .", cwd=PKG_DIR)
+def main(port: int = 5000, check: bool = False) -> None:
+    if check:
+        call_command(f"black --check .", cwd=PKG_DIR)
+        call_command(f"isort --check --profile black .", cwd=PKG_DIR)
+    else:
+        call_command(f"black .", cwd=PKG_DIR)
+        call_command(f"isort --profile black .", cwd=PKG_DIR)
 
 
 if __name__ == "__main__":

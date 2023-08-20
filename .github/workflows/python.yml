@@ -28,6 +28,10 @@ jobs:
           pip install .
           pip install mypy
 
+      - name: formatting
+        run: |
+          python -m aibo.cli.format --check
+
       - name: mypy
         run: |
           cd python
