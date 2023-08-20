@@ -77,6 +77,7 @@
   (let* ((template (plist-get args :template))
          (content (plist-get args :content))
          (message-inputs (oref template :message-inputs))
+         (header (make-string 20 ?-))
          (region-regex "\\(^\\|\\s-\\)\\\\r\\(\\s-\\|$\\)")
          (buffer-regex "\\(^\\|\\s-\\)\\\\b\\(\\s-\\|$\\)")
          (region-string (if (mark)
@@ -86,7 +87,7 @@
                       (replace-regexp-in-string
                        region-regex
                        (if (> (length region-string) 0)
-                           (format "\n\n----------\n%s\n----------\n\n" region-string)
+                           (format "\n\n%s\n%s\n%s\n\n" header region-string header)
                          " ")
                        content
                        t t)
@@ -94,7 +95,7 @@
          (content (if (s-contains? "\\b" content)
                       (replace-regexp-in-string
                        buffer-regex
-                       (format "\n\n----------\n%s\n----------\n\n" (buffer-string))
+                       (format "\n\n%s\n%s\n%s\n\n" header (buffer-string) header)
                        content
                        t t)
                     content))
