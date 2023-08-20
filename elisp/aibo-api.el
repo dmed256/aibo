@@ -13,21 +13,39 @@
 
 (defun aibo:start-server (&rest args)
   (interactive)
+  (if (not (aibo:api-is-healthy))
+      (let* ((on-success (plist-get args :on-success)))
+        (aibo:--get-or-create-buffer
+         :name "*Aibo server*"
+         :on-create
+         (lambda (buffer)
+           (with-current-buffer buffer
+             (add-hook 'after-change-functions 'aibo:--ansi-buffer nil t)
+             (start-process "aibo-server" buffer
+                            aibo:server-python
+                            "-m" "aibo.cli.start"
+                            "--port" (number-to-string aibo:server-port))))
+         :on-load
+         (lambda (buffer)
+           (aibo:--on-healthy-server
+            :on-success #'aibo:websocket))))))
+
+(setq aibo:--on-healthy-server-max-checks 60)
+(setq aibo:--on-healthy-server-checks nil)
+
+(defun aibo:--on-healthy-server (&rest args)
+  (if (not aibo:--on-healthy-server-checks)
+      (setq aibo:--on-healthy-server-checks 0)
+    (setq aibo:--on-healthy-server-checks (+ aibo:--on-healthy-server-checks 1)))
+
   (let* ((on-success (plist-get args :on-success)))
-    (aibo:--get-or-create-buffer
-     :name "*Aibo server*"
-     :on-create
-     (lambda (buffer)
-       (with-current-buffer buffer
-         (add-hook 'after-change-functions 'aibo:--ansi-buffer nil t)
-         (start-process "aibo-server" buffer
-                        aibo:server-python
-                        "-m" "aibo.cli.start"
-                        "--port" (number-to-string aibo:server-port))))
-     :on-load
-     (lambda (buffer)
-       (aibo:websocket)
-       (funcall on-success)))))
+    (if (aibo:api-is-healthy)
+        (progn
+          (setq aibo:--on-healthy-server-checks nil)
+          (funcall on-success))
+      (if (< aibo:--on-healthy-server-checks aibo:--on-healthy-server-max-checks)
+          (run-with-timer 0.5 nil #'aibo:--on-healthy-server
+                          :on-success on-success)))))
 
 
 ;; ---[ Request Wrappers ]------------------------
@@ -36,28 +54,24 @@
          (type (plist-get args :type))
          (data (plist-get args :data))
          (sync (plist-get args :sync))
+         (timeout (plist-get args :timeout))
          (response-transform (plist-get args :response-transform))
          (on-success (plist-get args :on-success))
-         (bypass-server-check (plist-get args :bypass-server-check))
-         (do-request
-          (lambda ()
-            (request (format "http://localhost:%s%s" aibo:server-port path)
-              :type type
-              :headers '(("Content-Type" . "application/json"))
-              :parser 'json-read
-              :encoding 'utf-8
-              :sync sync
-              :data (if data (json-encode data) nil)
-              :success (lambda (&rest args)
-                         (if on-success
-                             (let* ((data (plist-get args :data))
-                                    (on-success-args (if response-transform
-                                                         (funcall response-transform data)
-                                                       data)))
-                               (funcall on-success on-success-args)))))))
-         (response (if bypass-server-check
-                       (funcall do-request)
-                     (aibo:start-server :on-success do-request))))
+         (response (request (format "http://localhost:%s%s" aibo:server-port path)
+                     :type type
+                     :headers '(("Content-Type" . "application/json"))
+                     :parser 'json-read
+                     :encoding 'utf-8
+                     :sync sync
+                     :timeout (or timeout 1)
+                     :data (if data (json-encode data) nil)
+                     :success (lambda (&rest args)
+                                (if on-success
+                                    (let* ((data (plist-get args :data))
+                                           (on-success-args (if response-transform
+                                                                (funcall response-transform data)
+                                                              data)))
+                                      (funcall on-success on-success-args)))))))
     (if sync
         (let* ((data (request-response-data response)))
           (if response-transform
@@ -79,6 +93,13 @@
 
 
 ;; ---[ API Methods ]-----------------------------
+(defun aibo:api-is-healthy ()
+  (string= "OK" (aibo:--api-get
+                 :path "/status"
+                 :bypass-server-check t
+                 :sync t
+                 :timeout 0.1)))
+
 (defun aibo:api-get-conversations (&rest args)
   (let* ((on-success (plist-get args :on-success)))
     (aibo:--api-post
