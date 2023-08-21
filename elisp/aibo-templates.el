@@ -6,10 +6,6 @@
 (setq aibo:--generic-system-message
       "You are an AI with all the knowledge available in the world up to your knowledge cutoff. You give concise and succinct answers to anything asked, only providing deep analysis, relevant examples, and supporting details when asked or absolutely necessary. Prioritize conciseness and succinctness.")
 
-(setq aibo:--copilot-system-message
-      (concat
-       "You are a helpful copilot code-generation AI that auto-completes missing code where @@CODE INJECTION SITE@@ is located."))
-
 (defun aibo:--expand-conversation-template-shorthands (text)
   "Replace \b -> Buffer and \r -> Region"
   (let* ((header (make-string 20 ?-))
@@ -113,6 +109,60 @@
                             ,(concat "Can you spellcheck and review the grammar for this with minimal changes?:\n"
                                      "\n"
                                      (aibo:--expand-conversation-template-shorthands content))))))))
+        ;; ---[ File info ]----------------
+        ,(aibo:ConversationTemplate
+          :short-name "f"
+          :name "File info"
+          :action-type :new-conversation
+          :get-message-inputs
+          (lambda (content)
+            `(,(aibo:CreateMessageInput
+                :role "system"
+                :content `(("kind" . "text")
+                           ("text" . "You are a helpful AI that generates structured file information for the given file.")))
+              ,(aibo:CreateMessageInput
+                :role "user"
+                :content `(("kind" . "text")
+                           ("text" .
+                            ,(concat
+                              (buffer-string)
+                              "\n"
+                              "--------------------\n"
+                              "\n"
+                              "Please give me FileInfo for the file contents above\n"
+                              "\n"
+                              "type FileInfo {\n"
+                              "    // File name\n"
+                              "    filename: \"" (buffer-file-name) "\";\n"
+                              "    // Programming language\n"
+                              "    language: string | null;\n"
+                              "    // Summary of the file\n"
+                              "    summary: string;\n"
+                              "    // Imports used\n"
+                              "    imports: Import[];\n"
+                              "    // Functions defined in the file\n"
+                              "    functions: Function[];\n"
+                              "}\n"
+                              "\n"
+                              "type Import {\n"
+                              "    // Fully qualified name, such as \"http.server\"\n"
+                              "    name: string;\n"
+                              "    // Imported things\n"
+                              "    imports: string[];\n"
+                              "}\n"
+                              "\n"
+                              "type Function {\n"
+                              "    // Fully qualified name, such as \"my_module.class_name.function_name\"\n"
+                              "    name: string;\n"
+                              "    // Summary of what the function is for\n"
+                              "    summary: string;\n"
+                              "    arguments: {\n"
+                              "        name: string;\n"
+                              "        type: string;\n"
+                              "        summary: string;\n"
+                              "    }[]\n"
+                              "}\n"
+                              )))))))
         ;; ---[ Copilot ]------------------
         ,(aibo:ConversationTemplate
           :short-name "cp"
@@ -125,7 +175,7 @@
               `(,(aibo:CreateMessageInput
                   :role "system"
                   :content `(("kind" . "text")
-                             ("text" . ,aibo:--copilot-system-message)))
+                             ("text" . "You are a helpful copilot code-generation AI that auto-completes missing code where @@CODE INJECTION SITE@@ is located.")))
                 ,(aibo:CreateMessageInput
                   :role "user"
                   :content `(("kind" . "text")

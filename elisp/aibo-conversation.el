@@ -382,9 +382,10 @@
         ((eq action-type :new-conversation)
          (progn
            (aibo:go-to-conversation :conversation conversation)
-           (aibo:stream-assistant-message
-            :on-success (lambda ()
-                          (aibo:generate-current-conversation-title)))))
+           (with-current-buffer (current-buffer)
+             (aibo:stream-assistant-message
+              :on-success (lambda ()
+                            (aibo:generate-current-conversation-title))))))
 
         ((eq action-type :buffer-insert)
          (with-current-buffer buffer
