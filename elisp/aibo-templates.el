@@ -8,11 +8,9 @@
 
 (setq aibo:--copilot-system-message
       (concat
-       "You are a helpful copilot code-generation AI that auto-completes code where [USER-CURSOR] is located.\n"
+       "You are a helpful copilot code-generation AI that auto-completes missing code where <AI-COMPLETE> is located.\n"
        "- Inspect the given file contents.\n"
-       "- Output ONLY the code that will be literally placed where [USER-CURSOR] is located, so don't output nearby code since it'll be duplicated.\n"
-       "- Leverage all the code in the file, especially nearby code and comments, to output the code that will be inserted.\n"
-       "- Use correct newlines and indentation so that replacing where [USER-CURSOR] is located will be syntactically correct."))
+       "- Output ONLY the raw code that will be literally placed where <AI-COMPLETE> is located, so DO NOT output nearby code since it'll be duplicated."))
 
 (defun aibo:--expand-conversation-template-shorthands (text)
   "Replace \b -> Buffer and \r -> Region"
@@ -137,11 +135,10 @@
                               ,(concat
                                 "# File\n"
                                 "----------------\n"
-                                pre-point-buffer-content "[USER-CURSOR]" post-point-buffer-content "\n"
+                                pre-point-buffer-content "<AI-COMPLETE>" post-point-buffer-content "\n"
                                 "----------------\n"
                                 "\n"
-                                "As a reminder, " aibo:--copilot-system-message "\n"
-                                "I'll copy-paste exactly what you output where [USER-CURSOR] is located, so only output the code as a continuation of the code without explanations."))))))))
+                                content))))))))
         ))
 
 (defun aibo:get-conversation-template (&rest args)
