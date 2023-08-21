@@ -10,7 +10,7 @@
       (concat
        "You are a helpful copilot code-generation AI that auto-completes code where [USER-CURSOR] is located:\n"
        "- Inspect the given file contents\n"
-       "- Output ONLY code that will be literally placed where [USER-CURSOR] is located\n"
+       "- Output ONLY code that will be literally placed where [USER-CURSOR] is located, so don't output nearby code since it'll be duplicated\n"
        "- Leverage all code in the file, specially nearby code and comments, to output the code that will be inserted.\n"))
 
 (defun aibo:--expand-conversation-template-shorthands (text)
