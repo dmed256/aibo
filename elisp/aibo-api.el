@@ -272,4 +272,21 @@
      :on-message on-message
      :on-success on-success)))
 
+(defun aibo:api-ws-stream-assistant-message-chunks (&rest args)
+  (let* ((conversation-id (plist-get args :conversation-id))
+         (on-message (plist-get args :on-message))
+         (on-success (plist-get args :on-success)))
+    (aibo:--api-ws-send
+     :event `(("kind" . "stream_assistant_message_chunks")
+              ("conversation_id" . ,conversation-id))
+     :response-transform
+     (lambda (response)
+       (let* ((chunk (ht-get response "chunk"))
+              (status (ht-get chunk "status")))
+       (cond
+        ((string= status "streaming") (ht-get chunk "text"))
+        ((string= status "error") (ht-get chunk "content")))))
+     :on-message on-message
+     :on-success on-success)))
+
 (provide 'aibo-api)

@@ -3,9 +3,9 @@ import typing
 from typing import Any, Callable, Literal, Type, TypeVar, Union
 from uuid import UUID
 
+import pydantic
 from fastapi import WebSocket
 from pydantic import BaseModel
-import pydantic
 
 T = TypeVar("T")
 EventRoute = Callable[[WebSocket, T], Any]
@@ -31,7 +31,6 @@ class WebsocketRouter:
             self._event_request_classes = [self._event_request_classes]
         else:
             self._event_request_classes = typing.get_args(self._event_request_classes)
-
 
     def route(self, event_route: EventRoute[T]) -> EventRoute[T]:
         event_route_signature = inspect.signature(event_route)

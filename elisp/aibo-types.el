@@ -225,9 +225,12 @@
     :documentation "Short name for starting a conversation quickly"
     :initarg :short-name
     :type string)
-   (message-inputs
-    :documentation "Message inputs used to create the new conversation"
-    :initarg :message-inputs)))
+   (action-type
+    :documentation "Action taken on selection: :new-conversation or :buffer-insert"
+    :initarg :action-type)
+   (get-message-inputs
+    :documentation "Function to generate message inputs based on the input"
+    :initarg :get-message-inputs)))
 
 (defclass CreateMessageInput ()
   ((role

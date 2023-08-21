@@ -360,6 +360,9 @@
   (let* ((template-short-name (car (split-string template-option "\\s-+")))
          (template (aibo:get-conversation-template
                     :short-name template-short-name))
+         (action-type (oref template :action-type))
+         (buffer (current-buffer))
+         (current-point (point))
          (content-input (read-string (format "%s: " (oref template :name))))
          (content (if (string= content-input "")
                       (buffer-substring (region-beginning) (region-end))
@@ -375,10 +378,25 @@
      :message-inputs api-message-inputs
      :on-success
      (lambda (conversation)
-       (aibo:go-to-conversation :conversation conversation)
-       (aibo:stream-assistant-message
-        :on-success (lambda ()
-                      (aibo:generate-current-conversation-title)))))))
+       (cond
+        ((eq action-type :new-conversation)
+         (progn
+           (aibo:go-to-conversation :conversation conversation)
+           (aibo:stream-assistant-message
+            :on-success (lambda ()
+                          (aibo:generate-current-conversation-title)))))
+
+        ((eq action-type :buffer-insert)
+         (with-current-buffer buffer
+           (save-excursion
+             (aibo:api-ws-stream-assistant-message-chunks
+              :conversation-id (oref conversation :id)
+              :on-message (lambda (text)
+                            (goto-char current-point)
+                            (insert text)
+                            (setq current-point (+ current-point (length text))))
+              :on-success (lambda ()
+                            (aibo:api-delete-conversation :id (oref conversation :id))))))))))))
 
 ;; ---[ Search conversations ]--------------------
 (defvar aibo:--conversation-message-search-history nil
