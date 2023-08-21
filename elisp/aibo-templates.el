@@ -8,9 +8,7 @@
 
 (setq aibo:--copilot-system-message
       (concat
-       "You are a helpful copilot code-generation AI that auto-completes missing code where <AI-COMPLETE> is located.\n"
-       "- Inspect the given file contents.\n"
-       "- Output ONLY the raw code that will be literally placed where <AI-COMPLETE> is located, so DO NOT output nearby code since it'll be duplicated."))
+       "You are a helpful copilot code-generation AI that auto-completes missing code where @@CODE INJECTION SITE@@ is located."))
 
 (defun aibo:--expand-conversation-template-shorthands (text)
   "Replace \b -> Buffer and \r -> Region"
@@ -122,8 +120,8 @@
           :action-type :buffer-insert
           :get-message-inputs
           (lambda (content)
-            (let* ((pre-point-buffer-content (buffer-substring (point-min) (point)))
-                   (post-point-buffer-content (buffer-substring (point) (point-max))))
+            (let* ((prefix (buffer-substring (point-min) (point)))
+                   (suffix (buffer-substring (point) (point-max))))
               `(,(aibo:CreateMessageInput
                   :role "system"
                   :content `(("kind" . "text")
@@ -133,12 +131,19 @@
                   :content `(("kind" . "text")
                              ("text" .
                               ,(concat
-                                "# File\n"
+                                "Here are the current full file contents:\n"
                                 "----------------\n"
-                                pre-point-buffer-content "<AI-COMPLETE>" post-point-buffer-content "\n"
+                                prefix "@@CODE INJECTION SITE@@" suffix "\n"
                                 "----------------\n"
                                 "\n"
-                                content))))))))
+                                "To help spot where I'll like your help, here's the code snippet from the file above where you'll inject the code:\n"
+                                "----------------\n"
+                                "..." (substring prefix (max 0 (- (length prefix) 100)))
+                                "@@CODE INJECTION SITE@@"
+                                (substring suffix 0 (min 100 (length suffix))) "...\n"
+                                "----------------\n"
+                                "\n"
+                                "Output ONLY what should be injected, which should be related to: " content "\n"))))))))
         ))
 
 (defun aibo:get-conversation-template (&rest args)
