@@ -23,7 +23,7 @@ class WebsocketRouter:
     def __init__(self) -> None:
         self._routes_by_event: dict[Type[Any], EventRoute[Any]] = {}
 
-    def set_event_class(self, RequestClass: Type[Any]) -> None:
+    def set_event_class(self, RequestClass: Any) -> None:
         self._event_request_class = RequestClass
         self._event_request_classes = typing.get_args(RequestClass)[0]
 
