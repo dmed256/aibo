@@ -102,10 +102,7 @@ class MessageDocument(BaseDocument):
             return self
 
         self.parent_id = parent_id
-        self.partial_update(
-            id=self.id,
-            parent_id=parent_id
-        )
+        self.partial_update(id=self.id, parent_id=parent_id)
 
         MessageEdgeDocument(
             conversation_id=self.conversation_id,
