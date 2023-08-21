@@ -207,7 +207,11 @@ class Message(BaseModel):
         return conversation
 
     def change_parent(self, parent_id: UUID, changed_at: dt.datetime) -> None:
-        raise NotImplementedError()
+        self.parent_id = parent_id
+        self.to_document().change_parent(
+            parent_id,
+            changed_at=changed_at,
+        )
 
 
 class ConversationSummary(BaseModel):

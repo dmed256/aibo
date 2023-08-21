@@ -98,14 +98,21 @@ class MessageDocument(BaseDocument):
     def change_parent(self, parent_id: UUID, *, changed_at: dt.datetime) -> Self:
         from aibo.db.documents.message_edge_document import MessageEdgeDocument
 
+        if self.parent_id == parent_id:
+            return self
+
         self.parent_id = parent_id
-        if self.parent_id:
-            MessageEdgeDocument(
-                conversation_id=self.conversation_id,
-                parent_id=self.parent_id,
-                child_id=self.id,
-                created_at=changed_at,
-            ).insert()
+        self.partial_update(
+            id=self.id,
+            parent_id=parent_id
+        )
+
+        MessageEdgeDocument(
+            conversation_id=self.conversation_id,
+            parent_id=self.parent_id,
+            child_id=self.id,
+            created_at=changed_at,
+        ).insert()
 
         return self
 

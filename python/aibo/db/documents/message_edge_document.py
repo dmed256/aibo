@@ -15,7 +15,7 @@ __all__ = ["MessageEdgeDocument"]
 
 class MessageEdgeDocument(BaseDocument):
     conversation_id: UUID
-    parent_id: UUID
+    parent_id: Optional[UUID]
     child_id: UUID
     created_at: dt.datetime
 
