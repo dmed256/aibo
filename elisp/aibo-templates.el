@@ -8,10 +8,11 @@
 
 (setq aibo:--copilot-system-message
       (concat
-       "You are a helpful copilot code-generation AI that auto-completes code where [USER-CURSOR] is located:\n"
-       "- Inspect the given file contents\n"
-       "- Output ONLY code that will be literally placed where [USER-CURSOR] is located, so don't output nearby code since it'll be duplicated\n"
-       "- Leverage all code in the file, specially nearby code and comments, to output the code that will be inserted.\n"))
+       "You are a helpful copilot code-generation AI that auto-completes code where [USER-CURSOR] is located.\n"
+       "- Inspect the given file contents.\n"
+       "- Output ONLY the code that will be literally placed where [USER-CURSOR] is located, so don't output nearby code since it'll be duplicated.\n"
+       "- Leverage all the code in the file, especially nearby code and comments, to output the code that will be inserted.\n"
+       "- Use correct newlines and indentation so that replacing where [USER-CURSOR] is located will be syntactically correct."))
 
 (defun aibo:--expand-conversation-template-shorthands (text)
   "Replace \b -> Buffer and \r -> Region"
