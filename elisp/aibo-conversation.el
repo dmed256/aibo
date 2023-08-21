@@ -25,12 +25,12 @@
 
 (setq aibo:--new-user-message-keymap
       (let ((map (copy-keymap widget-keymap)))
-        (define-key map (kbd "C-c C-x C-r") 'aibo:refresh-current-conversation)
-        (define-key map (kbd "C-c C-t") 'aibo:set-current-conversation-title)
-        (define-key map (kbd "C-c C-c") 'aibo:regenerate-last-message)
-        (define-key map (kbd "C-c C-x C-t") 'aibo:generate-current-conversation-title)
-        (define-key map (kbd "RET") (lambda () (interactive) (insert "\n")))
-        (define-key map (kbd "M-RET") #'aibo:submit-user-message)
+        (define-key map (kbd "C-c C-x C-r") #'aibo:refresh-current-conversation)
+        (define-key map (kbd "C-c C-t")     #'aibo:set-current-conversation-title)
+        (define-key map (kbd "C-c C-c")     #'aibo:regenerate-last-message)
+        (define-key map (kbd "C-c C-x C-t") #'aibo:generate-current-conversation-title)
+        (define-key map (kbd "RET")         (lambda () (interactive) (insert "\n")))
+        (define-key map (kbd "M-RET")       #'aibo:submit-user-message)
         map))
 
 (defun aibo::--get-role-color (role shade)
@@ -42,16 +42,16 @@
 (defun aibo::--get-message-header (message)
   (let ((role (oref message :role)))
     (cond
-     ((string= role "system") "[ System ]")
-     ((string= role "user") "[ User ]")
+     ((string= role "system")    "[ System ]")
+     ((string= role "user")      "[ User ]")
      ((string= role "assistant") (format "[ Assistant: %s ]" (aibo::--get-message-source message)))
-     ((string= role "error") "[ Error ]"))))
+     ((string= role "error")     "[ Error ]"))))
 
 (defun aibo::--get-message-source (message)
   (let* ((source (oref message :source))
          (source-kind (aibo:xref source :kind)))
     (cond
-     ((string= source-kind "human") "User")
+     ((string= source-kind "human")        "User")
      ((string= source-kind "openai_model") (aibo:xref source :model))
      ((string= source-kind "programmatic") (aibo:xref source :source)))))
 
@@ -371,7 +371,7 @@
                           :template template
                           :content content))
          (api-message-inputs (--map
-                              (CreateMessageInput-to-api it)
+                              (aibo:CreateMessageInput-to-api it)
                               message-inputs)))
 
     (aibo:api-create-conversation

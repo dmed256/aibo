@@ -44,32 +44,32 @@
 (setq aibo:conversation-templates
       `(
         ;; ---[ Question ]--------------------------
-        ,(ConversationTemplate
+        ,(aibo:ConversationTemplate
           :short-name "q"
           :name "Question"
           :action-type :new-conversation
           :get-message-inputs
           (lambda (content)
-            `(,(CreateMessageInput
+            `(,(aibo:CreateMessageInput
                 :role "system"
                 :content `(("kind" . "text")
                            ("text" . ,aibo:--generic-system-message)))
-              ,(CreateMessageInput
+              ,(aibo:CreateMessageInput
                 :role "user"
                 :content `(("kind" . "text")
                            ("text" . ,(aibo:--expand-conversation-template-shorthands content)))))))
         ;; ---[ Command ]---------------------------
-        ,(ConversationTemplate
+        ,(aibo:ConversationTemplate
           :short-name "c"
           :name "Command find"
           :action-type :new-conversation
           :get-message-inputs
           (lambda (content)
-            `(,(CreateMessageInput
+            `(,(aibo:CreateMessageInput
                 :role "system"
                 :content `(("kind" . "text")
                            ("text" . ,aibo:--generic-system-message)))
-              ,(CreateMessageInput
+              ,(aibo:CreateMessageInput
                 :role "user"
                 :content `(("kind" . "text")
                            ("text" .
@@ -80,17 +80,17 @@
                               "\n"
                               "Only the command and nothing more, no ``` either")))))))
         ;; ---[ Write documentation ]---------------
-        ,(ConversationTemplate
+        ,(aibo:ConversationTemplate
           :short-name "d"
           :name "Write docstrings"
           :action-type :new-conversation
           :get-message-inputs
           (lambda (content)
-            `(,(CreateMessageInput
+            `(,(aibo:CreateMessageInput
                 :role "system"
                 :content `(("kind" . "text")
                            ("text" . ,aibo:--generic-system-message)))
-              ,(CreateMessageInput
+              ,(aibo:CreateMessageInput
                 :role "user"
                 :content `(("kind" . "text")
                            ("text" .
@@ -100,17 +100,17 @@
                               "\n"
                               (aibo:--expand-conversation-template-shorthands content))))))))
         ;; ---[ Spellcheck ]---------------
-        ,(ConversationTemplate
+        ,(aibo:ConversationTemplate
           :short-name "s"
           :name "Spellcheck"
           :action-type :new-conversation
           :get-message-inputs
           (lambda (content)
-            `(,(CreateMessageInput
+            `(,(aibo:CreateMessageInput
                 :role "system"
                 :content `(("kind" . "text")
                            ("text" . ,aibo:--generic-system-message)))
-              ,(CreateMessageInput
+              ,(aibo:CreateMessageInput
                 :role "user"
                 :content `(("kind" . "text")
                            ("text" .
@@ -118,7 +118,7 @@
                                      "\n"
                                      (aibo:--expand-conversation-template-shorthands content))))))))
         ;; ---[ Copilot ]------------------
-        ,(ConversationTemplate
+        ,(aibo:ConversationTemplate
           :short-name "cp"
           :name "Copilot"
           :action-type :buffer-insert
@@ -126,11 +126,11 @@
           (lambda (content)
             (let* ((pre-point-buffer-content (buffer-substring (point-min) (point)))
                    (post-point-buffer-content (buffer-substring (point) (point-max))))
-              `(,(CreateMessageInput
+              `(,(aibo:CreateMessageInput
                   :role "system"
                   :content `(("kind" . "text")
                              ("text" . ,aibo:--copilot-system-message)))
-                ,(CreateMessageInput
+                ,(aibo:CreateMessageInput
                   :role "user"
                   :content `(("kind" . "text")
                              ("text" .

@@ -12,15 +12,15 @@
      ((listp collection)
       (cond
        ((assoc keyword-key collection) (cdr (assoc keyword-key collection)))
-       ((assoc symbol-key collection) (cdr (assoc symbol-key collection)))
-       ((assoc string-key collection) (cdr (assoc string-key collection)))))
+       ((assoc symbol-key collection)  (cdr (assoc symbol-key collection)))
+       ((assoc string-key collection)  (cdr (assoc string-key collection)))))
      ((ht? collection)
       (cond
        ((ht-contains? collection keyword-key) (ht-get collection keyword-key))
-       ((ht-contains? collection symbol-key) (ht-get collection symbol-key))
-       ((ht-contains? collection string-key) (ht-get collection string-key)))))))
+       ((ht-contains? collection symbol-key)  (ht-get collection symbol-key))
+       ((ht-contains? collection string-key)  (ht-get collection string-key)))))))
 
-(defclass ConversationSummary ()
+(defclass aibo:ConversationSummary ()
   ((id
     :documentation "The primary ID of the conversation"
     :initarg :id
@@ -34,7 +34,7 @@
     :initarg :created-at
     :type ts)))
 
-(defclass Conversation (ConversationSummary)
+(defclass aibo:Conversation (aibo:ConversationSummary)
   ((root-message-id
     :documentation "The root message ID"
     :initarg :root-message-id
@@ -47,25 +47,25 @@
     :documentation "The messages in the conversation"
     :initarg :all-messages)))
 
-(defun ConversationSummary-from-api (api-conversation)
-  (ConversationSummary
+(defun aibo:ConversationSummary-from-api (api-conversation)
+  (aibo:ConversationSummary
    :id (aibo:xref api-conversation :id)
    :title (aibo:xref api-conversation :title)
    :created-at (ts-parse (aibo:xref api-conversation :created_at))))
 
-(defun Conversation-from-api (api-conversation)
-  (let ((summary (ConversationSummary-from-api api-conversation)))
-    (Conversation
+(defun aibo:Conversation-from-api (api-conversation)
+  (let ((summary (aibo:ConversationSummary-from-api api-conversation)))
+    (aibo:Conversation
      :id (oref summary :id)
      :title (oref summary :title)
      :created-at (oref summary :created-at)
      :root-message-id (aibo:xref api-conversation :root_message_id)
      :current-message-id (aibo:xref api-conversation :current_message_id)
      :all-messages (--map
-                    (cons (car it) (Message-from-api it))
+                    (cons (car it) (aibo:Message-from-api it))
                     (aibo:xref api-conversation :all_messages)))))
 
-(defclass Message ()
+(defclass aibo:Message ()
   ((id
     :documentation "The primary ID of the message"
     :initarg :id
@@ -90,8 +90,8 @@
     :initarg :content-text
     :type string)))
 
-(defun Message-from-api (api-message)
-  (Message
+(defun aibo:Message-from-api (api-message)
+  (aibo:Message
    :id (aibo:xref api-message :id)
    :status (aibo:xref api-message :status)
    :parent-id (aibo:xref api-message :parent_id)
@@ -99,7 +99,7 @@
    :role (aibo:xref api-message :role)
    :content-text (aibo:xref api-message :content_text)))
 
-(defclass HumanSource ()
+(defclass aibo:HumanSource ()
   ((kind
     :initarg :kind
     :initform "human")
@@ -108,7 +108,7 @@
     :initarg :user
     :type string)))
 
-(defclass OpenAIModelSource ()
+(defclass aibo:OpenAIModelSource ()
   ((kind
     :initarg :kind
     :initform "openai_model")
@@ -124,7 +124,7 @@
     :documentation "Tokens used to generate the message"
     :initarg :max-tokens)))
 
-(defclass ProgrammaticSource ()
+(defclass aibo:ProgrammaticSource ()
   ((kind
     :initarg :kind
     :initform "programmatic")
@@ -133,7 +133,7 @@
     :initarg :source
     :type string)))
 
-(defclass MessageSearchResult ()
+(defclass aibo:MessageSearchResult ()
   ((conversation-id
     :initarg :conversation-id
     :initform "Conversation ID"
@@ -143,13 +143,13 @@
     :initarg :content-text
     :type string)))
 
-(cl-defmethod MessageSearchResult-from-api (api-result)
-  (MessageSearchResult
+(cl-defmethod aibo:MessageSearchResult-from-api (api-result)
+  (aibo:MessageSearchResult
    :conversation-id (aibo:xref api-result :conversation_id)
    :content-text (aibo:xref api-result :content_text)))
 
 ;; ---[ ConversationSection ]---------------------
-(defclass ConversationSection ()
+(defclass aibo:ConversationSection ()
   ((name
     :documentation "Section name"
     :initarg :name
@@ -164,24 +164,24 @@
     :initform (list)
     :type list)))
 
-(cl-defmethod ConversationSection-from ((conversation ConversationSummary))
+(cl-defmethod aibo:ConversationSection-from ((conversation aibo:ConversationSummary))
   (let* ((now (ts-now))
-         (today-start (ts-apply :hour 0 :minute 0 :second 0 now))
-         (yesterday-start (ts-adjust 'day -1 today-start))
-         (last-7-days-start (ts-adjust 'day -6 today-start))
+         (today-start        (ts-apply :hour 0 :minute 0 :second 0 now))
+         (yesterday-start    (ts-adjust 'day -1 today-start))
+         (last-7-days-start  (ts-adjust 'day -6 today-start))
          (last-30-days-start (ts-adjust 'day -30 today-start))
-         (last-year-start (ts-adjust 'month -11 today-start))
+         (last-year-start    (ts-adjust 'month -11 today-start))
          (created-at (oref conversation :created-at))
          (section-info (cond
-                        ((ts>= created-at today-start) '("Today" 1000004))
-                        ((ts>= created-at yesterday-start) '("Yesterday" 1000003))
-                        ((ts>= created-at last-7-days-start) '("Last 7 days" 1000002))
+                        ((ts>= created-at today-start)        '("Today" 1000004))
+                        ((ts>= created-at yesterday-start)    '("Yesterday" 1000003))
+                        ((ts>= created-at last-7-days-start)  '("Last 7 days" 1000002))
                         ((ts>= created-at last-30-days-start) '("Last 30 days" 1000001))
                         ((ts>= created-at last-year-start)
                          `(,(ts-month-name created-at)
                            ,(string-to-number (ts-format "%Y%m" created-at))))
                         (t '("History" 0)))))
-    (ConversationSection
+    (aibo:ConversationSection
      :name (nth 0 section-info)
      :priority (nth 1 section-info))
     ))
@@ -191,7 +191,7 @@
     ;; Add conversations to their respective sections
     (--each conversations
       (let* ((conversation it)
-             (section (ConversationSection-from conversation))
+             (section (aibo:ConversationSection-from conversation))
              (section-index (--find-index (eq (oref it :name) (oref section :name)) sections)))
         ;; Make sure the section exists
         (if (eq section-index nil)
@@ -216,7 +216,7 @@
      sections)))
 
 ;; ---[ ConversationTemplate ]--------------------
-(defclass ConversationTemplate ()
+(defclass aibo:ConversationTemplate ()
   ((name
     :documentation "The human-readable name"
     :initarg :name
@@ -232,7 +232,7 @@
     :documentation "Function to generate message inputs based on the input"
     :initarg :get-message-inputs)))
 
-(defclass CreateMessageInput ()
+(defclass aibo:CreateMessageInput ()
   ((role
     :documentation "Message role"
     :initarg :role
@@ -241,8 +241,8 @@
     :documentation "Message content type"
     :initarg :content)))
 
-(cl-defmethod CreateMessageInput-to-api ((message-input CreateMessageInput))
-  `(("role" . ,(oref message-input :role))
+(cl-defmethod aibo:CreateMessageInput-to-api ((message-input aibo:CreateMessageInput))
+  `(("role"    . ,(oref message-input :role))
     ("content" . ,(oref message-input :content))))
 
 (provide 'aibo-types)

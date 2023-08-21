@@ -106,7 +106,7 @@
      :path "/chat/conversations/search"
      :response-transform (lambda (response)
                            (let* ((api-conversations (cdr (assoc 'conversations response))))
-                             (--map (ConversationSummary-from-api it) api-conversations)))
+                             (--map (aibo:ConversationSummary-from-api it) api-conversations)))
      :on-success on-success)))
 
 (defun aibo:api-get-conversation (&rest args)
@@ -116,7 +116,7 @@
      :path (format "/chat/conversations/%s" id)
      :response-transform (lambda (response)
                            (let* ((api-conversation (cdr (assoc 'conversation response))))
-                             (Conversation-from-api api-conversation)))
+                             (aibo:Conversation-from-api api-conversation)))
      :on-success on-success)))
 
 (defun aibo:api-create-conversation (&rest args)
@@ -124,11 +124,11 @@
          (on-success (plist-get args :on-success)))
     (aibo:--api-post
      :path "/chat/conversations"
-     :data `(("messages" . ,message-inputs)
+     :data `(("messages"   . ,message-inputs)
              ("model_name" . ,aibo:model-name))
      :response-transform (lambda (response)
                            (let* ((api-conversation (cdr (assoc 'conversation response))))
-                             (Conversation-from-api api-conversation)))
+                             (aibo:Conversation-from-api api-conversation)))
      :on-success on-success)))
 
 (defun aibo:api-delete-conversation (&rest args)
@@ -147,7 +147,7 @@
      :data `(("text" . ,text))
      :response-transform (lambda (response)
                            (let* ((api-conversation (cdr (assoc 'conversation response))))
-                             (Conversation-from-api api-conversation)))
+                             (aibo:Conversation-from-api api-conversation)))
      :on-success on-success)))
 
 (defun aibo:api-edit-message (&rest args)
@@ -160,7 +160,7 @@
      :data `(("text" . ,text))
      :response-transform (lambda (response)
                            (let* ((api-conversation (cdr (assoc 'conversation response))))
-                             (Conversation-from-api api-conversation)))
+                             (aibo:Conversation-from-api api-conversation)))
      :on-success on-success)))
 
 (defun aibo:api-delete-message (&rest args)
@@ -175,7 +175,7 @@
                    (if delete-after "true" "false"))
      :response-transform (lambda (response)
                            (let* ((api-conversation (cdr (assoc 'conversation response))))
-                             (Conversation-from-api api-conversation)))
+                             (aibo:Conversation-from-api api-conversation)))
      :on-success on-success)))
 
 (defun aibo:api-set-conversation-title (&rest args)
@@ -187,7 +187,7 @@
      :data `((:title . ,title))
      :response-transform (lambda (response)
                            (let* ((api-conversation (cdr (assoc 'conversation response))))
-                             (Conversation-from-api api-conversation)))
+                             (aibo:Conversation-from-api api-conversation)))
      :on-success on-success)))
 
 (defun aibo:api-conversation-message-search (&rest args)
@@ -202,7 +202,7 @@
      :sync sync
      :response-transform (lambda (response)
                            (let* ((api-search-results (cdr (assoc 'search_results response))))
-                             (--map (MessageSearchResult-from-api it) api-search-results))))))
+                             (--map (aibo:MessageSearchResult-from-api it) api-search-results))))))
 
 (defun aibo:api-generate-conversation-title (&rest args)
   (let* ((id (plist-get args :id))
@@ -211,7 +211,7 @@
      :path (format "/chat/conversations/%s/generate-title" id)
      :response-transform (lambda (response)
                            (let* ((api-conversation (cdr (assoc 'conversation response))))
-                             (Conversation-from-api api-conversation)))
+                             (aibo:Conversation-from-api api-conversation)))
      :on-success on-success)))
 
 
@@ -264,11 +264,11 @@
          (on-message (plist-get args :on-message))
          (on-success (plist-get args :on-success)))
     (aibo:--api-ws-send
-     :event `(("kind" . "stream_assistant_message")
+     :event `(("kind"            . "stream_assistant_message")
               ("conversation_id" . ,conversation-id))
      :response-transform (lambda (response)
                            (let* ((api-message (ht-get response "message")))
-                             (Message-from-api api-message)))
+                             (aibo:Message-from-api api-message)))
      :on-message on-message
      :on-success on-success)))
 
@@ -277,7 +277,7 @@
          (on-message (plist-get args :on-message))
          (on-success (plist-get args :on-success)))
     (aibo:--api-ws-send
-     :event `(("kind" . "stream_assistant_message_chunks")
+     :event `(("kind"            . "stream_assistant_message_chunks")
               ("conversation_id" . ,conversation-id))
      :response-transform
      (lambda (response)
