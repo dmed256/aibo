@@ -30,7 +30,7 @@
            (aibo:--on-healthy-server
             :on-success #'aibo:websocket))))))
 
-(setq aibo:--on-healthy-server-max-checks 60)
+(setq aibo:--on-healthy-server-max-checks 5)
 (setq aibo:--on-healthy-server-checks nil)
 
 (defun aibo:--on-healthy-server (&rest args)
@@ -44,7 +44,7 @@
           (setq aibo:--on-healthy-server-checks nil)
           (funcall on-success))
       (if (< aibo:--on-healthy-server-checks aibo:--on-healthy-server-max-checks)
-          (run-with-timer 0.5 nil #'aibo:--on-healthy-server
+          (run-with-timer 1 nil #'aibo:--on-healthy-server
                           :on-success on-success)))))
 
 

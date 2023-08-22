@@ -107,6 +107,14 @@ class BaseDocument(BaseModel, abc.ABC):
         return self
 
     @classmethod
+    def find_one(cls, query: Any, **kwargs: Any) -> Optional[Self]:
+        maybe_doc_dict = cls.collection.find_one(query, **kwargs)
+        if maybe_doc_dict:
+            return cls(**maybe_doc_dict)
+
+        return None
+
+    @classmethod
     def find(cls, query: Any, **kwargs: Any) -> list[Self]:
         return [cls(**doc_dict) for doc_dict in cls.collection.find(query, **kwargs)]
 
