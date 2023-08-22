@@ -1,4 +1,5 @@
 import datetime as dt
+from aibo.common.constants import Env
 import os
 import subprocess
 from typing import Annotated, Literal, Optional, Self, Union
@@ -245,6 +246,8 @@ class GitRepoDocument(BaseDocument):
         if self.is_update_locked and not bypass_update_lock:
             return None
 
+        env = Env.get()
+        embedding_model = env.OPENAI_EMBEDDING_MODEL_NAME
         self.set_update_lock()
 
         git_commit = self.get_git_commit()
@@ -263,7 +266,11 @@ class GitRepoDocument(BaseDocument):
             filename = info["filename"]
             GitFileDocument.partial_update(
                 id=git_file_id,
-                embedding=get_file_embedding(f"{self.cache_dir}/{filename}"),
+                embedding=get_file_embedding(
+                    f"{self.cache_dir}/{filename}",
+                    model=embedding_model,
+                ),
+                embedding_model=embedding_model,
             )
 
     def query_file_contents(

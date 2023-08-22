@@ -49,6 +49,7 @@ class GitFileDocument(BaseDocument):
     filename: str
     git_commit: str
     embedding: Optional[list[float]] = Field(None, repr=False)
+    embedding_model: Optional[str] = None
     file_schema: Optional[FileSchema] = Field(None, repr=False)
     created_at: dt.datetime = Field(default_factory=now_utc)
     deleted_at: Optional[dt.datetime] = None
