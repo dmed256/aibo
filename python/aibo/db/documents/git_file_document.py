@@ -12,6 +12,10 @@ from aibo.db.documents.base_document import BaseDocument, Index, Order
 
 __all__ = [
     "GitFileDocument",
+    "FileFunction",
+    "FileImport",
+    "FileSchema",
+    "FileVariable",
 ]
 
 

@@ -1,5 +1,4 @@
 import datetime as dt
-from aibo.common.constants import Env
 import os
 import subprocess
 from typing import Annotated, Literal, Optional, Self, Union
@@ -11,6 +10,7 @@ import tqdm
 from pydantic import BaseModel, Field
 
 from aibo.common.classproperty import classproperty
+from aibo.common.constants import Env
 from aibo.common.openai import get_file_embedding, get_string_embedding
 from aibo.common.time import now_utc
 from aibo.db.documents.base_document import BaseDocument, Index
