@@ -36,7 +36,9 @@ class Env(BaseModel):
             MONGO_DATABASE=os.environ.get("MONGO_DATABASE", "aibo-local"),
             # OpenAI
             OPENAI_MODEL_NAME=os.environ.get("OPENAI_MODEL_NAME", "gpt-3.5-turbo"),
-            OPENAI_EMBEDDING_MODEL_NAME=os.environ.get("OPENAI_EMBEDDING_MODEL_NAME", "text-embedding-ada-002"),
+            OPENAI_EMBEDDING_MODEL_NAME=os.environ.get(
+                "OPENAI_EMBEDDING_MODEL_NAME", "text-embedding-ada-002"
+            ),
             OPENAI_TEMPERATURE=float(os.environ.get("OPENAI_TEMPERATURE", "0.9")),
             # Misc
             CURRENT_USER=os.environ.get("USER", "unknown"),

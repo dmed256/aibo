@@ -1,10 +1,11 @@
 import os
-from aibo.common.constants import Env
-from typing import Any, Literal, Optional
 import typing
-import openai
+from typing import Any, Literal, Optional
 
+import openai
 from pydantic import BaseModel
+
+from aibo.common.constants import Env
 
 OpenAIRole = Literal["system", "user", "assistant", "function"]
 
@@ -27,7 +28,7 @@ def get_string_embedding(content: str) -> list[float]:
 
     # From docs: Replace newlines, which can negatively affect performance
     content = content.replace("\n", " ")
-    response = openai.Embedding.create( # type: ignore[no-untyped-call]
+    response = openai.Embedding.create(  # type: ignore[no-untyped-call]
         input=content,
         model=env.OPENAI_EMBEDDING_MODEL_NAME,
     )
@@ -35,7 +36,7 @@ def get_string_embedding(content: str) -> list[float]:
 
 
 def get_file_embedding(filename: str) -> list[float]:
-    with open(os.path.expanduser(filename), 'r') as fd:
+    with open(os.path.expanduser(filename), "r") as fd:
         # From docs: Replace newlines, which can negatively affect performance
         content = fd.read()
 

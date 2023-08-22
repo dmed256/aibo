@@ -1,17 +1,17 @@
 import datetime as dt
 import os
-import tqdm
 import subprocess
-import numpy as np
 from typing import Annotated, Literal, Optional, Self, Union
 from uuid import UUID
 
+import numpy as np
 import pymongo
+import tqdm
 from pydantic import BaseModel, Field
 
 from aibo.common.classproperty import classproperty
-from aibo.common.time import now_utc
 from aibo.common.openai import get_file_embedding, get_string_embedding
+from aibo.common.time import now_utc
 from aibo.db.documents.base_document import BaseDocument, Index
 from aibo.db.documents.git_file_document import GitFileDocument
 
@@ -235,7 +235,9 @@ class GitRepoDocument(BaseDocument):
 
         self.clear_update_lock()
 
-    def set_embeddings(self, *, bypass_update_lock: bool = False, show_progress: bool = False) -> None:
+    def set_embeddings(
+        self, *, bypass_update_lock: bool = False, show_progress: bool = False
+    ) -> None:
         """
         Updates the (current) related GitFileDocument embedding values
         """
@@ -269,16 +271,14 @@ class GitRepoDocument(BaseDocument):
         *,
         limit: int,
     ) -> list[GitFileDocument]:
-        query_embedding = np.array(
-            get_string_embedding(query)
-        )
+        query_embedding = np.array(get_string_embedding(query))
 
         file_infos = GitFileDocument.collection.find(
             {
                 "git_repo_id": self.id,
                 "git_commit": self.get_git_commit(),
             },
-            {"_id": 1, "embedding": 1 },
+            {"_id": 1, "embedding": 1},
         )
 
         sorted_id_distance = sorted(
@@ -291,12 +291,13 @@ class GitRepoDocument(BaseDocument):
         )
 
         git_file_indices = {
-            id: index
-            for index, (id, _) in enumerate(sorted_id_distance[:limit])
+            id: index for index, (id, _) in enumerate(sorted_id_distance[:limit])
         }
-        git_file_docs = GitFileDocument.find({
-            "_id": {"$in": list(git_file_indices.keys())},
-        })
+        git_file_docs = GitFileDocument.find(
+            {
+                "_id": {"$in": list(git_file_indices.keys())},
+            }
+        )
 
         return sorted(
             git_file_docs,
