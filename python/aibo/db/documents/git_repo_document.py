@@ -194,6 +194,7 @@ class GitRepoDocument(BaseDocument):
             },
             {"_id": 1, "filename": 1},
         )
+        # TODO(dmed): Only recompute embeddings if the file contents changed
 
         stale_file_info_by_filename = {
             info["filename"]: info for info in stale_files_info
@@ -271,6 +272,9 @@ class GitRepoDocument(BaseDocument):
         *,
         limit: int,
     ) -> list[GitFileDocument]:
+        """
+        Gets the top `limit` GitFileDocument results based on embedding similarity
+        """
         query_embedding = np.array(get_string_embedding(query))
 
         file_infos = GitFileDocument.collection.find(
