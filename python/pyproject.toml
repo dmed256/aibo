@@ -18,6 +18,7 @@ dependencies = [
   "pymongo==4.*",
   "tenacity==8.*",
   "termcolor==2.*",
+  "tqdm==4.65.*",
   "uvicorn[standard]==0.22.*",
 ]
 
@@ -25,6 +26,9 @@ dependencies = [
 profile = "black"
 
 [tool.mypy]
+plugins = [
+  "pydantic.mypy"
+]
 warn_redundant_casts = true
 warn_unused_ignores = true
 disallow_untyped_calls = true

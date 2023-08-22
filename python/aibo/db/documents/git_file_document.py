@@ -2,7 +2,6 @@ import datetime as dt
 from typing import Annotated, Literal, Optional, Union
 from uuid import UUID, uuid4
 
-import numpy as np
 import pymongo
 from pydantic import BaseModel, Field
 
@@ -49,10 +48,8 @@ class GitFileDocument(BaseDocument):
     git_repo_id: UUID
     filename: str
     git_commit: str
-    embedding: Optional[np.ndarray] = None
-    normalized_embedding: Optional[np.ndarray] = None
-    file_schema: Optional[FileSchema] = None
-    is_synced: bool = False
+    embedding: Optional[list[float]] = Field(None, repr=False)
+    file_schema: Optional[FileSchema] = Field(None, repr=False)
     created_at: dt.datetime = Field(default_factory=now_utc)
     deleted_at: Optional[dt.datetime] = None
 

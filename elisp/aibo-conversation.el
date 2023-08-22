@@ -419,7 +419,7 @@
                  (replace-regexp-in-string "\n" "\\\\n" (oref it :content-text)))
          (aibo:api-conversation-message-search
           :query query
-          :count 100
+          :limit 100
           :sync t)))
 
 (defun aibo:--conversation-message-search-action (search-result)

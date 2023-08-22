@@ -153,7 +153,7 @@ class Message(BaseModel):
 
     def to_document(self) -> MessageDocument:
         return MessageDocument(
-            id=self.id,  # type: ignore[call-arg]
+            id=self.id,
             conversation_id=self.conversation_id,
             parent_id=self.parent_id,
             source=self.source,

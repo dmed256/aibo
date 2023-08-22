@@ -193,12 +193,12 @@
 (defun aibo:api-conversation-message-search (&rest args)
   (interactive)
   (let* ((query (plist-get args :query))
-         (count (plist-get args :count))
+         (limit (plist-get args :limit))
          (sync (plist-get args :sync)))
     (aibo:--api-post
      :path "/chat/conversations/message-search"
      :data `((:query . ,query)
-             (:count . ,count))
+             (:limit . ,limit))
      :sync sync
      :response-transform (lambda (response)
                            (let* ((api-search-results (cdr (assoc 'search_results response))))

@@ -1,6 +1,8 @@
 import datetime as dt
 import os
+import tqdm
 import subprocess
+import numpy as np
 from typing import Annotated, Literal, Optional, Self, Union
 from uuid import UUID
 
@@ -9,6 +11,7 @@ from pydantic import BaseModel, Field
 
 from aibo.common.classproperty import classproperty
 from aibo.common.time import now_utc
+from aibo.common.openai import get_file_embedding, get_string_embedding
 from aibo.db.documents.base_document import BaseDocument, Index
 from aibo.db.documents.git_file_document import GitFileDocument
 
@@ -134,7 +137,8 @@ class GitRepoDocument(BaseDocument):
             return False
 
         now_without_offset = now_utc().astimezone().replace(tzinfo=None)
-        is_locked = (now_without_offset - self.update_locked_at) < UPDATE_LOCK_TIME
+        updated_locked_at = self.update_locked_at.astimezone().replace(tzinfo=None)
+        is_locked = (now_without_offset - updated_locked_at) < UPDATE_LOCK_TIME
         if not is_locked:
             self.clear_update_lock()
 
@@ -154,13 +158,12 @@ class GitRepoDocument(BaseDocument):
             update_locked_at=self.update_locked_at,
         )
 
-    def update_files(self, *, bypass_update_lock: bool = False) -> list[UUID]:
+    def update_file_documents(self, *, bypass_update_lock: bool = False) -> None:
         """
-        Updates the related GitFileDocument entries based on the current commit and returns
-        the list GitFileDocument IDs that need to be synced
+        Updates the related GitFileDocument entries based on the current commit
         """
         if self.is_update_locked and not bypass_update_lock:
-            return []
+            return None
 
         self.cache_git_repo()
         self.set_update_lock()
@@ -174,7 +177,7 @@ class GitRepoDocument(BaseDocument):
                 "git_repo_id": self.id,
                 "git_commit": git_commit,
             },
-            {"_id": 1, "filename": 1, "is_synced": 1},
+            {"filename": 1},
         )
 
         up_to_date_filenames = {info["filename"] for info in up_to_date_files_info}
@@ -182,9 +185,7 @@ class GitRepoDocument(BaseDocument):
 
         if not missing_filenames:
             self.clear_update_lock()
-            return [
-                info["_id"] for info in up_to_date_files_info if not info["is_synced"]
-            ]
+            return None
 
         stale_files_info = GitFileDocument.collection.find(
             {
@@ -221,9 +222,7 @@ class GitRepoDocument(BaseDocument):
                     id=file_id,
                     git_commit=git_commit,
                     embedding=None,
-                    normalized_embedding=None,
                     file_schema=None,
-                    is_synced=False,
                 )
                 git_file_ids_to_sync.append(file_id)
             else:
@@ -235,4 +234,71 @@ class GitRepoDocument(BaseDocument):
                 git_file_ids_to_sync.append(git_file_doc.id)
 
         self.clear_update_lock()
-        return git_file_ids_to_sync
+
+    def set_embeddings(self, *, bypass_update_lock: bool = False, show_progress: bool = False) -> None:
+        """
+        Updates the (current) related GitFileDocument embedding values
+        """
+        if self.is_update_locked and not bypass_update_lock:
+            return None
+
+        self.set_update_lock()
+
+        git_commit = self.get_git_commit()
+
+        # Find up-to-date files that exist
+        file_infos = GitFileDocument.collection.find(
+            {
+                "git_repo_id": self.id,
+                "git_commit": git_commit,
+                "embedding": None,
+            },
+            {"_id": 1, "filename": 1},
+        )
+        for info in tqdm.tqdm(file_infos, disable=not show_progress):
+            git_file_id = info["_id"]
+            filename = info["filename"]
+            GitFileDocument.partial_update(
+                id=git_file_id,
+                embedding=get_file_embedding(f"{self.cache_dir}/{filename}"),
+            )
+
+    def query_file_contents(
+        self,
+        query: str,
+        *,
+        limit: int,
+    ) -> list[GitFileDocument]:
+        query_embedding = np.array(
+            get_string_embedding(query)
+        )
+
+        file_infos = GitFileDocument.collection.find(
+            {
+                "git_repo_id": self.id,
+                "git_commit": self.get_git_commit(),
+            },
+            {"_id": 1, "embedding": 1 },
+        )
+
+        sorted_id_distance = sorted(
+            [
+                (info["_id"], np.dot(query_embedding, info["embedding"]))
+                for info in file_infos
+            ],
+            key=lambda row: row[1],
+            reverse=True,
+        )
+
+        git_file_indices = {
+            id: index
+            for index, (id, _) in enumerate(sorted_id_distance[:limit])
+        }
+        git_file_docs = GitFileDocument.find({
+            "_id": {"$in": list(git_file_indices.keys())},
+        })
+
+        return sorted(
+            git_file_docs,
+            key=lambda doc: git_file_indices[doc.id],
+        )

@@ -56,7 +56,7 @@ class GetConversationResponse(BaseModel):
 
 class ConversationMessageSearchRequest(BaseModel):
     query: str
-    count: int
+    limit: int
 
 
 class MessageSearchResult(BaseModel):
@@ -218,7 +218,7 @@ async def conversation_message_search(
                 ("created_at", -1),
             ]
         )
-        .limit(request.count)
+        .limit(request.limit)
     )
 
     return ConversationMessageSearchResponse(
