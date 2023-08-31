@@ -209,6 +209,7 @@
          (on-success (plist-get args :on-success)))
     (aibo:--api-post
      :path (format "/chat/conversations/%s/generate-title" id)
+     :data `(("model_name" . ,aibo:model-name))
      :response-transform (lambda (response)
                            (let* ((api-conversation (cdr (assoc 'conversation response))))
                              (aibo:Conversation-from-api api-conversation)))

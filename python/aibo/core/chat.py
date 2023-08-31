@@ -559,12 +559,12 @@ class Conversation(ConversationSummary):
                 ),
             )
 
-    async def generate_title(self) -> None:
+    async def generate_title(self, *, model_name: Optional[str]) -> None:
         env = Env.get()
 
         title_conversation = Conversation.create(
             title=f"Title for {self.id}",
-            openai_model_source=OpenAIModelSource.build(),
+            openai_model_source=OpenAIModelSource.build(model=model_name),
             enabled_tools=[],
             system_message_inputs=CreateMessageInputs(
                 role=MessageRole.SYSTEM,
@@ -583,14 +583,10 @@ class Conversation(ConversationSummary):
 {self.stringify_conversation()}
 --------------------
 
-Capture the intent of the above within three to six words and 2 tags without newlines
-
-Example of good summaries include:
+Create a small 3-6 word tweet that captures the intent of the above within three to six words and 2 lowercase twitter-like tags. Do not use newlines or quotes. Here are some examples of good correct tweets:
 - Docstrings for generate_title #docstring #python
 - Capital of Thailand #geography #thailand
 - Pokemon guessing game #fun #pokemon
-
-Remember, only use less than ten words in total!
 """.strip(),
             ),
         )

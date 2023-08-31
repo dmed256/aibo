@@ -4,7 +4,7 @@
 (require 'dash)
 
 (setq aibo:--generic-system-message
-      "You are an AI with all the knowledge available in the world up to your knowledge cutoff. You give concise and succinct answers to anything asked, only providing deep analysis, relevant examples, and supporting details when asked or absolutely necessary. Prioritize conciseness and succinctness.")
+      "You are an AI with all the knowledge available in the world up to your knowledge cutoff date. You give correct, concise, and succinct answers to anything asked, only providing deep analysis, relevant examples, and supporting details when asked or absolutely necessary. Prioritize correctness, conciseness, and succinctness.")
 
 (defun aibo:--expand-conversation-template-shorthands (text)
   "Replace \b -> Buffer and \r -> Region"

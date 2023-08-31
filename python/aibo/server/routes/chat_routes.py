@@ -76,6 +76,14 @@ class EditConversationResponse(BaseModel):
     conversation: api_models.Conversation
 
 
+class GenerateConversationTitleRequest(BaseModel):
+    model_config = ConfigDict(
+        protected_namespaces=tuple(),
+    )
+
+    model_name: Optional[str] = None
+
+
 class GenerateConversationTitleResponse(BaseModel):
     conversation: api_models.Conversation
 
@@ -251,11 +259,12 @@ async def edit_conversation(
 @router.post("/conversations/{conversation_id}/generate-title")
 async def generate_conversation_title(
     conversation_id: UUID,
+    request: GenerateConversationTitleRequest,
 ) -> GenerateConversationTitleResponse:
     conversation = chat.Conversation.get(conversation_id)
     assert conversation, "Conversation not found"
 
-    await conversation.generate_title()
+    await conversation.generate_title(model_name=request.model_name)
 
     return GenerateConversationTitleResponse(
         conversation=api_models.Conversation.from_chat(conversation)
