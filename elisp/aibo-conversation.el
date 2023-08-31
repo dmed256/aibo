@@ -405,7 +405,7 @@
 
 (defun aibo:message-search ()
   (interactive)
-  (let ((ivy-dynamic-exhibit-delay-ms 500))
+  (let ((ivy-dynamic-exhibit-delay-ms 200))
     (ivy-read "[aibo] Search: "
               #'aibo:--ivy-conversation-message-search
               :dynamic-collection t

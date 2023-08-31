@@ -56,7 +56,7 @@ class GetConversationResponse(BaseModel):
 
 class ConversationMessageSearchRequest(BaseModel):
     query: str
-    limit: int
+    limit: int = 50
 
 
 class MessageSearchResult(BaseModel):
