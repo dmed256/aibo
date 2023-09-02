@@ -342,7 +342,7 @@ class ConversationDocumentFactory(BaseMongoFactory[ConversationDocument]):
     async def post_create(cls, obj: ConversationDocument) -> ConversationDocument:
         conversation_doc = obj
         system_message_doc = await MessageDocumentFactory.create(
-            conversation=conversation_doc,
+            conversation_doc=conversation_doc,
             role=MessageRole.SYSTEM,
         )
 

@@ -3,5 +3,5 @@ from aibo.testing import factory
 
 
 class TestMessage:
-    def test_change_parent(self) -> None:
-        pass
+    async def test_change_parent(self) -> None:
+        conversation = await factory.ConversationFactory.build()

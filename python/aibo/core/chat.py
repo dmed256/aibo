@@ -26,9 +26,17 @@ from pydantic import BaseModel, Field
 from termcolor import colored
 
 from aibo.common.constants import NULL_UUID, Env
-from aibo.common.openai import OpenAIMessage, OpenAIRole
 from aibo.common.result import Error, Result
 from aibo.common.time import now_utc
+from aibo.core.openai import (
+    ErrorMessageChunk,
+    OpenAIMessage,
+    OpenAIRole,
+    StreamingMessageChunk,
+    StreamingMessageResult,
+    SuccessMessageChunk,
+    stream_completion,
+)
 from aibo.db.documents import (
     CompletionErrorContent,
     ConversationDocument,
@@ -93,31 +101,6 @@ class CreateMessageInputs(BaseModel):
     content: MessageContent
 
 
-class StreamingMessageChunk(BaseModel):
-    status: Literal["streaming"] = "streaming"
-    text: str
-
-
-class SuccessMessageChunk(BaseModel):
-    status: Literal["success"] = "success"
-
-
-class ErrorMessageChunk(BaseModel):
-    status: Literal["error"] = "error"
-    source: ProgrammaticSource
-    content: CompletionErrorContent
-
-
-StreamingMessageResult = Annotated[
-    Union[
-        StreamingMessageChunk,
-        SuccessMessageChunk,
-        ErrorMessageChunk,
-    ],
-    Field(discriminator="status"),
-]
-
-
 class Message(BaseModel):
     class Status(StrEnum):
         STREAMING = "streaming"
@@ -176,8 +159,8 @@ class Message(BaseModel):
     def content_text(self) -> str:
         return str(self.content)
 
-    def to_openai(self, *, conversation: "Conversation") -> Optional[OpenAIMessage]:
-        content = self.content.to_openai(conversation=conversation)
+    def to_openai(self) -> Optional[OpenAIMessage]:
+        content = self.content.to_openai()
         if content is None:
             return None
 
@@ -476,8 +459,10 @@ class Conversation(ConversationSummary):
             pass
         return message
 
-    async def stream_assistant_message(self) -> AsyncGenerator[Message, None]:
-        source = self.openai_model_source.copy()
+    async def stream_assistant_message(
+        self, *, source: Optional[OpenAIModelSource] = None
+    ) -> AsyncGenerator[Message, None]:
+        source = source or self.openai_model_source.copy()
 
         content = ""
         temp_id = uuid4()
@@ -511,57 +496,18 @@ class Conversation(ConversationSummary):
                 )
 
     async def stream_assistant_message_chunks(
-        self, *, source: Optional[OpenAIModelSource] = None
+        self,
+        *,
+        source: Optional[OpenAIModelSource] = None,
     ) -> AsyncGenerator[StreamingMessageResult, None]:
         source = source or self.openai_model_source.copy()
-        functions = [
-            function.dict(exclude_none=True)
-            for tool in self.enabled_tools
-            for function in tool.to_openai()
-        ]
 
-        try:
-            completion_stream = await openai.ChatCompletion.acreate(  # type: ignore[no-untyped-call]
-                model=source.model,
-                stream=True,
-                n=1,
-                temperature=source.temperature,
-                max_tokens=source.max_tokens,
-                messages=[
-                    openai_message.dict(exclude_none=True)
-                    for message in self.get_current_history()
-                    if (openai_message := message.to_openai(conversation=self))
-                ],
-                # API expects functions to only be defined if it's a non-empty list
-                **(dict(functions=functions) if functions else {}),
-            )
-
-            async for chunk in completion_stream:
-                chunk_info = chunk["choices"][0]
-                is_done = chunk_info["finish_reason"]
-                if is_done:
-                    break
-
-                delta = chunk_info["delta"].get("content")
-                if delta is None:
-                    break
-
-                yield StreamingMessageChunk(text=delta)
-
-            yield SuccessMessageChunk()
-        except openai.OpenAIError as exc:
-            yield ErrorMessageChunk(
-                source=ProgrammaticSource(source="api_error"),
-                content=CompletionErrorContent.from_openai(exc),
-            )
-        except Exception as exc:
-            yield ErrorMessageChunk(
-                source=ProgrammaticSource(source="server_error"),
-                content=CompletionErrorContent(
-                    error_type=CompletionErrorContent.ErrorType.AIBO_SERVER,
-                    text=str(exc),
-                ),
-            )
+        async for chunk in stream_completion(
+            source=source,
+            messages=self.get_current_history(),
+            tools=self.enabled_tools,
+        ):
+            yield chunk
 
     async def generate_title(self, *, model_name: Optional[str]) -> None:
         env = Env.get()

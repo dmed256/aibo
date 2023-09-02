@@ -1,6 +1,7 @@
 import abc
 import datetime as dt
 import functools
+import os
 from enum import StrEnum
 from typing import Any, Literal, Optional, Self, Union, cast
 from uuid import UUID, uuid4
@@ -11,6 +12,7 @@ from pymongo.collection import Collection
 from pymongo.typings import _DocumentType
 
 from aibo.common.classproperty import classproperty
+from aibo.common.constants import Env
 from aibo.common.time import now_utc
 
 __all__ = ["BaseDocument", "Index", "Order"]
@@ -53,7 +55,17 @@ class BaseDocument(BaseModel, abc.ABC):
     def collection(cls) -> Collection[_DocumentType]:
         from aibo.db.client import get_db
 
-        return get_db()[cls.collection_name]
+        collection_name = cls.collection_name
+        if Env.get().ENV == "test":
+            import hashlib
+
+            test_name = os.environ.get("PYTEST_CURRENT_TEST")
+            assert test_name, "Missing PYTEST_CURRENT_TEST environment variable"
+
+            test_hash = hashlib.md5(test_name.encode("utf-8")).hexdigest()
+            collection_name = f"{collection_name}-{test_hash}"
+
+        return get_db()[collection_name]
 
     @classmethod
     def indices(cls) -> list[Index]:
@@ -72,7 +84,7 @@ class BaseDocument(BaseModel, abc.ABC):
             cls.collection.create_index(fields, unique=index.unique, name=index.name)
 
     def safe_dict(self) -> dict[str, Any]:
-        return self.dict(by_alias=True)
+        return self.model_dump(by_alias=True)
 
     @classmethod
     def by_id(cls, id: UUID) -> Optional[Self]:
@@ -89,7 +101,7 @@ class BaseDocument(BaseModel, abc.ABC):
     @classmethod
     def insert_many(self, docs: list[Self]) -> list[Self]:
         self.collection.insert_many(
-            [cast(Any, doc.dict(by_alias=True)) for doc in docs]
+            [cast(Any, doc.model_dump(by_alias=True)) for doc in docs]
         )
         return docs
 

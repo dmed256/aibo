@@ -83,4 +83,4 @@ class MessageEdge(BaseModel):
 
     @classmethod
     def from_chat(cls, message_edge: chat.MessageEdgeDocument) -> Self:
-        return cls(**message_edge.dict())
+        return cls(**message_edge.model_dump())

@@ -32,7 +32,7 @@ class BaseMessageContent(BaseModel, abc.ABC):
     kind: str
 
     @abc.abstractmethod
-    def to_openai(self, *, conversation: Conversation) -> Optional[str]:
+    def to_openai(self) -> Optional[str]:
         ...
 
     @abc.abstractmethod
@@ -48,7 +48,7 @@ class TextMessageContent(BaseMessageContent):
     kind: Literal["text"] = "text"
     text: str
 
-    def to_openai(self, *, conversation: Conversation) -> str:
+    def to_openai(self) -> str:
         return self.text
 
     def __str__(self) -> str:
@@ -92,7 +92,7 @@ class CompletionErrorContent(BaseMessageContent):
             text=str(error),
         )
 
-    def to_openai(self, *, conversation: Conversation) -> None:
+    def to_openai(self) -> None:
         return None
 
     def __str__(self) -> str:
@@ -123,7 +123,7 @@ class ToolRequestContent(BaseMessageContent):
     to: str = Field(title="to", description="The <tool>.<action> recipient")
     request: dict[str, Any]
 
-    def to_openai(self, *, conversation: Conversation) -> str:
+    def to_openai(self) -> str:
         return self.json(indent=2, exclude={"kind"}, exclude_none=True)
 
     def __str__(self) -> str:
@@ -180,7 +180,7 @@ class ToolResponseContent(BaseMessageContent):
     error_message: Optional[str]
     response: dict[str, Any]
 
-    def to_openai(self, *, conversation: Conversation) -> str:
+    def to_openai(self) -> str:
         return self.json(indent=2, exclude={"kind"}, exclude_none=True)
 
     def __str__(self) -> str:

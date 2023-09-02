@@ -11,7 +11,6 @@ from pydantic import BaseModel, Field
 
 from aibo.common.classproperty import classproperty
 from aibo.common.constants import Env
-from aibo.common.openai import get_file_embedding, get_string_embedding
 from aibo.common.time import now_utc
 from aibo.db.documents.base_document import BaseDocument, Index
 from aibo.db.documents.git_file_document import GitFileDocument
@@ -243,6 +242,8 @@ class GitRepoDocument(BaseDocument):
         """
         Updates the (current) related GitFileDocument embedding values
         """
+        from aibo.core.openai import get_file_embedding
+
         if self.is_update_locked and not bypass_update_lock:
             return None
 
@@ -273,7 +274,7 @@ class GitRepoDocument(BaseDocument):
                 embedding_model=embedding_model,
             )
 
-    def query_file_contents(
+    async def query_file_contents(
         self,
         query: str,
         *,
@@ -282,7 +283,9 @@ class GitRepoDocument(BaseDocument):
         """
         Gets the top `limit` GitFileDocument results based on embedding similarity
         """
-        query_embedding = np.array(get_string_embedding(query))
+        from aibo.core.openai import get_string_embedding
+
+        query_embedding = np.array(await get_string_embedding(query))
 
         file_infos = GitFileDocument.collection.find(
             {
