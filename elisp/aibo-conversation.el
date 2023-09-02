@@ -109,7 +109,7 @@
          ;; Render header
          (setq header-line-format
                (format "[%s] %s"
-                       aibo:model-name
+                       aibo:model
                        (oref conversation :title)))
 
          ;; Render title

@@ -1,0 +1,13 @@
+default_install_hook_types: [pre-push]
+repos:
+- repo: https://github.com/psf/black
+  rev: 23.3.0
+  hooks:
+  - id: black
+    types_or: [python]
+
+- repo: https://github.com/pre-commit/mirrors-mypy
+  rev: v1.5.1
+  hooks:
+  - id: mypy
+    types_or: [python]

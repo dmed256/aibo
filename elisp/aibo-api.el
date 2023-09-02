@@ -124,8 +124,8 @@
          (on-success (plist-get args :on-success)))
     (aibo:--api-post
      :path "/chat/conversations"
-     :data `(("messages"   . ,message-inputs)
-             ("model_name" . ,aibo:model-name))
+     :data `(("messages" . ,message-inputs)
+             ("model"    . ,aibo:model))
      :response-transform (lambda (response)
                            (let* ((api-conversation (cdr (assoc 'conversation response))))
                              (aibo:Conversation-from-api api-conversation)))
@@ -209,7 +209,7 @@
          (on-success (plist-get args :on-success)))
     (aibo:--api-post
      :path (format "/chat/conversations/%s/generate-title" id)
-     :data `(("model_name" . ,aibo:model-name))
+     :data `(("model" . ,aibo:model))
      :response-transform (lambda (response)
                            (let* ((api-conversation (cdr (assoc 'conversation response))))
                              (aibo:Conversation-from-api api-conversation)))
@@ -266,7 +266,8 @@
          (on-success (plist-get args :on-success)))
     (aibo:--api-ws-send
      :event `(("kind"            . "stream_assistant_message")
-              ("conversation_id" . ,conversation-id))
+              ("conversation_id" . ,conversation-id)
+              ("model"           . ,aibo:model))
      :response-transform (lambda (response)
                            (let* ((api-message (ht-get response "message")))
                              (aibo:Message-from-api api-message)))
@@ -279,7 +280,8 @@
          (on-success (plist-get args :on-success)))
     (aibo:--api-ws-send
      :event `(("kind"            . "stream_assistant_message_chunks")
-              ("conversation_id" . ,conversation-id))
+              ("conversation_id" . ,conversation-id)
+              ("model"           . ,aibo:model))
      :response-transform
      (lambda (response)
        (let* ((chunk (ht-get response "chunk"))

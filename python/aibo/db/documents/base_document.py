@@ -1,15 +1,16 @@
 import abc
+import asyncio
 import datetime as dt
 import functools
 import os
+import typing
 from enum import StrEnum
 from typing import Any, Literal, Optional, Self, Union, cast
 from uuid import UUID, uuid4
 
 import pymongo
+from motor.motor_asyncio import AsyncIOMotorCollection
 from pydantic import BaseModel, ConfigDict, Field
-from pymongo.collection import Collection
-from pymongo.typings import _DocumentType
 
 from aibo.common.classproperty import classproperty
 from aibo.common.constants import Env
@@ -52,7 +53,7 @@ class BaseDocument(BaseModel, abc.ABC):
         ...
 
     @classproperty
-    def collection(cls) -> Collection[_DocumentType]:
+    def collection(cls) -> AsyncIOMotorCollection:
         from aibo.db.client import get_db
 
         collection_name = cls.collection_name
@@ -72,70 +73,83 @@ class BaseDocument(BaseModel, abc.ABC):
         return []
 
     @classmethod
-    def migrate(cls) -> None:
-        existing_index_names = list(cls.collection.index_information().keys())
+    async def migrate(cls) -> None:
+        index_info = await cls.collection.index_information()
+        existing_index_names = list(index_info.keys())
         unmigrated_indices = [
             index for index in cls.indices() if index.name not in existing_index_names
         ]
-        for index in unmigrated_indices:
-            fields = [
-                (field_name, index_type) for field_name, index_type in index.fields
+        await asyncio.gather(
+            *[
+                cls.collection.create_index(
+                    [
+                        (field_name, index_type)
+                        for field_name, index_type in index.fields
+                    ],
+                    unique=index.unique,
+                    name=index.name,
+                )
+                for index in unmigrated_indices
             ]
-            cls.collection.create_index(fields, unique=index.unique, name=index.name)
+        )
 
     def safe_dict(self) -> dict[str, Any]:
         return self.model_dump(by_alias=True)
 
     @classmethod
-    def by_id(cls, id: UUID) -> Optional[Self]:
-        doc_dict = cls.collection.find_one({"_id": id})
+    async def by_id(cls, id: UUID) -> Optional[Self]:
+        doc_dict = await cls.collection.find_one({"_id": id})
         if not doc_dict:
             return None
 
         return cls(**doc_dict)
 
-    def insert(self) -> Self:
-        self.collection.insert_one(cast(Any, self.safe_dict()))
+    async def insert(self) -> Self:
+        await self.collection.insert_one(cast(Any, self.safe_dict()))
         return self
 
     @classmethod
-    def insert_many(self, docs: list[Self]) -> list[Self]:
-        self.collection.insert_many(
+    async def insert_many(self, docs: list[Self]) -> list[Self]:
+        await self.collection.insert_many(
             [cast(Any, doc.model_dump(by_alias=True)) for doc in docs]
         )
         return docs
 
-    def save(self) -> None:
-        self.collection.save(self.safe_dict())
-
     @classmethod
-    def partial_update(cls, id: UUID, **updates: Any) -> Self:
-        cls.collection.update_one({"_id": id}, {"$set": updates})
-        return cast(Self, cls.by_id(id))
+    async def partial_update(cls, id: UUID, **updates: Any) -> Self:
+        await cls.collection.update_one({"_id": id}, {"$set": updates})
+        return cast(Self, await cls.by_id(id))
 
-    def soft_delete(self) -> Self:
+    async def soft_delete(self) -> Self:
         self.deleted_at: Optional[dt.datetime] = now_utc()
-        self.partial_update(id=self.id, deleted_at=self.deleted_at)
+        await self.partial_update(id=self.id, deleted_at=self.deleted_at)
         return self
 
     @classmethod
-    def find_one(cls, query: Any, **kwargs: Any) -> Optional[Self]:
-        maybe_doc_dict = cls.collection.find_one(query, **kwargs)
+    async def find_one(cls, query: Any, **kwargs: Any) -> Optional[Self]:
+        maybe_doc_dict = await cls.collection.find_one(query, **kwargs)
         if maybe_doc_dict:
             return cls(**maybe_doc_dict)
 
         return None
 
     @classmethod
-    def find(cls, query: Any, **kwargs: Any) -> list[Self]:
-        return [cls(**doc_dict) for doc_dict in cls.collection.find(query, **kwargs)]
+    async def find(cls, query: Any, *args: Any, **kwargs: Any) -> list[Self]:
+        query_cursor = cls.collection.find(query, *args, **kwargs)
+        return [cls(**doc_dict) async for doc_dict in query_cursor]
 
     @classmethod
-    def aggregate(cls, query: Any, **kwargs: Any) -> list[Self]:
+    async def raw_find(cls, query: Any, *args: Any, **kwargs: Any) -> list[Any]:
+        query_cursor = cls.collection.find(query, *args, **kwargs)
+        return [row async for row in query_cursor]
+
+    @classmethod
+    async def aggregate(cls, query: Any, **kwargs: Any) -> list[Self]:
         return [
-            cls(**doc_dict) for doc_dict in cls.collection.aggregate(query, **kwargs)
+            cls(**doc_dict)
+            async for doc_dict in cls.collection.aggregate(query, **kwargs)
         ]
 
     @classmethod
-    def count(cls, *args: Any, **kwargs: Any) -> int:
-        return cls.collection.count_documents(*args, **kwargs)
+    async def count(cls, *args: Any, **kwargs: Any) -> int:
+        return typing.cast(int, await cls.collection.count_documents(*args, **kwargs))

@@ -17,7 +17,7 @@ class GetModelsResponse(BaseModel):
         protected_namespaces=tuple(),
     )
 
-    model_names: list[str]
+    models: list[str]
 
 
 class GetToolsResponse(BaseModel):
@@ -39,7 +39,7 @@ class CreateConversationRequest(BaseModel):
         protected_namespaces=tuple(),
     )
 
-    model_name: Optional[str] = None
+    model: Optional[str] = None
     temperature: Optional[float] = None
     max_tokens: Optional[int] = None
     enabled_tool_names: list[str] = []
@@ -81,7 +81,7 @@ class GenerateConversationTitleRequest(BaseModel):
         protected_namespaces=tuple(),
     )
 
-    model_name: Optional[str] = None
+    model: Optional[str] = None
 
 
 class GenerateConversationTitleResponse(BaseModel):
@@ -118,7 +118,7 @@ class GetConversationEdgesResponse(BaseModel):
 
 @router.get("/models")
 async def get_models() -> GetModelsResponse:
-    return GetModelsResponse(model_names=["gpt-3.5-turbo"])
+    return GetModelsResponse(models=["gpt-3.5-turbo"])
 
 
 @router.get("/tools")
@@ -140,7 +140,7 @@ async def search_conversations(
             return dt.datetime.fromordinal(maybe_date.toordinal())
         return None
 
-    conversations = chat.ConversationSummary.search(
+    conversations = await chat.ConversationSummary.search(
         before_date=maybe_to_datetime(request.before_date),
         after_date=maybe_to_datetime(request.after_date),
         query=request.query,
@@ -171,21 +171,21 @@ async def create_conversation(
     #     raise Exception(f"Tool(s) not found: {missing_tool_names}")
 
     openai_model_source = chat.OpenAIModelSource.build(
-        model=request.model_name,
+        model=request.model,
         temperature=request.temperature,
         max_tokens=request.max_tokens,
     )
 
     system_message_inputs, *other_message_inputs = request.messages
 
-    conversation = chat.Conversation.create(
+    conversation = await chat.Conversation.create(
         openai_model_source=openai_model_source,
         enabled_tools=enabled_tools,
         system_message_inputs=system_message_inputs,
     )
 
     for message_input in other_message_inputs:
-        conversation.insert_message(
+        await conversation.insert_message(
             source=chat.HumanSource(user=env.CURRENT_USER),
             role=message_input.role,
             content=message_input.content,
@@ -200,7 +200,7 @@ async def create_conversation(
 async def get_conversation(
     conversation_id: UUID,
 ) -> GetConversationResponse:
-    conversation = chat.Conversation.get(conversation_id)
+    conversation = await chat.Conversation.get(conversation_id)
     assert conversation, "Conversation not found"
 
     return GetConversationResponse(
@@ -212,7 +212,7 @@ async def get_conversation(
 async def conversation_message_search(
     request: ConversationMessageSearchRequest,
 ) -> ConversationMessageSearchResponse:
-    search_cursor = (
+    search_cursor = await (
         chat.MessageDocument.collection.find(
             {
                 "$text": {
@@ -235,7 +235,7 @@ async def conversation_message_search(
                 conversation_id=search_info["conversation_id"],
                 content_text=search_info["content_text"],
             )
-            for search_info in search_cursor
+            async for search_info in search_cursor
         ]
     )
 
@@ -245,11 +245,11 @@ async def edit_conversation(
     conversation_id: UUID,
     request: EditConversationRequest,
 ) -> EditConversationResponse:
-    conversation = chat.Conversation.get(conversation_id)
+    conversation = await chat.Conversation.get(conversation_id)
     assert conversation, "Conversation not found"
 
     if request.title is not None:
-        conversation.set_title(request.title)
+        await conversation.set_title(request.title)
 
     return EditConversationResponse(
         conversation=api_models.Conversation.from_chat(conversation)
@@ -261,10 +261,10 @@ async def generate_conversation_title(
     conversation_id: UUID,
     request: GenerateConversationTitleRequest,
 ) -> GenerateConversationTitleResponse:
-    conversation = chat.Conversation.get(conversation_id)
+    conversation = await chat.Conversation.get(conversation_id)
     assert conversation, "Conversation not found"
 
-    await conversation.generate_title(model_name=request.model_name)
+    await conversation.generate_title(model=request.model)
 
     return GenerateConversationTitleResponse(
         conversation=api_models.Conversation.from_chat(conversation)
@@ -275,11 +275,11 @@ async def generate_conversation_title(
 async def delete_conversation(
     conversation_id: UUID,
 ) -> None:
-    conversation = chat.Conversation.get(conversation_id)
+    conversation = await chat.Conversation.get(conversation_id)
     if not conversation:
         return
 
-    conversation.soft_delete()
+    await conversation.soft_delete()
 
 
 @router.post("/conversations/{conversation_id}/submit-user-message")
@@ -287,10 +287,10 @@ async def submit_user_message(
     conversation_id: UUID,
     request: SubmitUserMessageRequest,
 ) -> SubmitUserMessageResponse:
-    conversation = chat.Conversation.get(conversation_id)
+    conversation = await chat.Conversation.get(conversation_id)
     assert conversation, "Conversation not found"
 
-    conversation.insert_user_message(request.text)
+    await conversation.insert_user_message(request.text)
 
     return SubmitUserMessageResponse(
         conversation=api_models.Conversation.from_chat(conversation)
@@ -301,12 +301,12 @@ async def submit_user_message(
 async def regenerate_assistant_message(
     conversation_id: UUID,
 ) -> RegenerateAssistantMessageResponse:
-    conversation = chat.Conversation.get(conversation_id)
+    conversation = await chat.Conversation.get(conversation_id)
     assert conversation, "Conversation not found"
 
     current_message = conversation.current_message
     if current_message.role == chat.MessageRole.ASSISTANT:
-        conversation.delete_message(current_message)
+        await conversation.delete_message(current_message)
 
     await conversation.generate_assistant_message()
 
@@ -321,7 +321,7 @@ async def edit_message(
     message_id: UUID,
     request: EditMessageRequest,
 ) -> EditMessageResponse:
-    conversation = chat.Conversation.get(conversation_id)
+    conversation = await chat.Conversation.get(conversation_id)
     assert conversation, "Conversation not found"
 
     message = conversation.all_messages.get(message_id)
@@ -337,7 +337,7 @@ async def edit_message(
             f"Expected last message to be an user role, found: {message.role}"
         )
 
-    conversation.edit_message(
+    await conversation.edit_message(
         message,
         source=message.source,
         role=message.role,
@@ -355,7 +355,7 @@ async def delete_message(
     message_id: UUID,
     delete_after: bool = False,
 ) -> DeleteMessageResponse:
-    conversation = chat.Conversation.get(conversation_id)
+    conversation = await chat.Conversation.get(conversation_id)
     assert conversation, "Conversation not found"
 
     message = conversation.all_messages.get(message_id)
@@ -367,7 +367,7 @@ async def delete_message(
         messages_to_delete = conversation.get_current_history()[message_index:]
 
     for message in messages_to_delete:
-        conversation.delete_message(message)
+        await conversation.delete_message(message)
 
     return DeleteMessageResponse(
         conversation=api_models.Conversation.from_chat(conversation),
@@ -378,12 +378,12 @@ async def delete_message(
 async def get_conversation_edges(
     conversation_id: UUID,
 ) -> GetConversationEdgesResponse:
-    conversation = chat.Conversation.get(conversation_id)
+    conversation = await chat.Conversation.get(conversation_id)
     assert conversation, "Conversation not found"
 
     return GetConversationEdgesResponse(
         message_edges=[
             api_models.MessageEdge.from_chat(edge)
-            for edge in conversation.get_message_edges(include_deletions=True)
+            for edge in await conversation.get_message_edges(include_deletions=True)
         ]
     )

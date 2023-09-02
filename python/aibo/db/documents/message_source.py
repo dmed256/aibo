@@ -44,7 +44,7 @@ class OpenAIModelSource(BaseModel):
     ) -> Self:
         env = Env.get()
         return cls(
-            model=model or env.OPENAI_MODEL_NAME,
+            model=model or env.OPENAI_MODEL,
             temperature=env.OPENAI_TEMPERATURE if temperature is None else temperature,
             max_tokens=max_tokens,
         )

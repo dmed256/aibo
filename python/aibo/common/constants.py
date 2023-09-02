@@ -20,8 +20,8 @@ class Env(BaseModel):
     MONGO_DATABASE: str
 
     # OpenAI
-    OPENAI_MODEL_NAME: str
-    OPENAI_EMBEDDING_MODEL_NAME: str
+    OPENAI_MODEL: str
+    OPENAI_EMBEDDING_MODEL: str
     OPENAI_TEMPERATURE: float
 
     # Misc
@@ -51,9 +51,9 @@ class Env(BaseModel):
             MONGO_PORT=int(os.environ.get("MONGO_PORT", "27017")),
             MONGO_DATABASE=os.environ.get("MONGO_DATABASE", "aibo-local"),
             # OpenAI
-            OPENAI_MODEL_NAME=os.environ.get("OPENAI_MODEL_NAME", "gpt-3.5-turbo"),
-            OPENAI_EMBEDDING_MODEL_NAME=os.environ.get(
-                "OPENAI_EMBEDDING_MODEL_NAME", "text-embedding-ada-002"
+            OPENAI_MODEL=os.environ.get("OPENAI_MODEL", "gpt-3.5-turbo"),
+            OPENAI_EMBEDDING_MODEL=os.environ.get(
+                "OPENAI_EMBEDDING_MODEL", "text-embedding-ada-002"
             ),
             OPENAI_TEMPERATURE=float(os.environ.get("OPENAI_TEMPERATURE", "0.9")),
             # Misc
@@ -77,8 +77,8 @@ class Env(BaseModel):
             MONGO_PORT=int(os.environ.get("MONGO_PORT", "27017")),
             MONGO_DATABASE=os.environ.get("MONGO_DATABASE", "aibo-test"),
             # OpenAI
-            OPENAI_MODEL_NAME="fake-model",
-            OPENAI_EMBEDDING_MODEL_NAME="fake-embedding-model",
+            OPENAI_MODEL="fake-model",
+            OPENAI_EMBEDDING_MODEL="fake-embedding-model",
             OPENAI_TEMPERATURE=float(os.environ.get("OPENAI_TEMPERATURE", "0.9")),
             # Misc
             CURRENT_USER="test",

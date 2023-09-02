@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import asyncio
 import datetime as dt
 import functools
 import re
@@ -134,8 +135,8 @@ class Message(BaseModel):
             history=history,
         )
 
-    def get_document(self) -> MessageDocument:
-        return cast(MessageDocument, MessageDocument.by_id(self.id))
+    async def get_document(self) -> MessageDocument:
+        return cast(MessageDocument, await MessageDocument.by_id(self.id))
 
     def to_document(self) -> MessageDocument:
         return MessageDocument(
@@ -176,25 +177,25 @@ class Message(BaseModel):
 
         return message
 
-    def get_children(self) -> list["Message"]:
+    async def get_children(self) -> list["Message"]:
         child_history = [*self.history, self]
         return [
             self.from_document(doc, history=child_history)
-            for doc in MessageDocument.get_message_children(
+            for doc in await MessageDocument.get_message_children(
                 conversation_id=self.conversation_id,
                 parent_id=self.id,
             )
         ]
 
-    def get_conversation(self) -> Conversation:
-        conversation = Conversation.get(self.conversation_id)
+    async def get_conversation(self) -> Conversation:
+        conversation = await Conversation.get(self.conversation_id)
         assert conversation, f"Conversation no longer exists: {self.conversation_id}"
 
         return conversation
 
-    def change_parent(self, parent_id: UUID, changed_at: dt.datetime) -> None:
+    async def change_parent(self, parent_id: UUID, changed_at: dt.datetime) -> None:
         self.parent_id = parent_id
-        self.to_document().change_parent(
+        await self.to_document().change_parent(
             parent_id,
             changed_at=changed_at,
         )
@@ -224,11 +225,11 @@ class ConversationSummary(BaseModel):
             created_at=doc.created_at,
         )
 
-    def get_document(self) -> ConversationDocument:
-        return cast(ConversationDocument, ConversationDocument.by_id(self.id))
+    async def get_document(self) -> ConversationDocument:
+        return cast(ConversationDocument, await ConversationDocument.by_id(self.id))
 
     @classmethod
-    def search(
+    async def search(
         cls,
         *,
         after_date: Optional[dt.datetime],
@@ -252,15 +253,15 @@ class ConversationSummary(BaseModel):
                 },
             }
 
-        conversation_docs = ConversationDocument.safe_find(**filters)
+        conversation_docs = await ConversationDocument.safe_find(**filters)
         return [
             cls.from_document(conversation_doc)
             for conversation_doc in conversation_docs
         ]
 
-    def set_title(self, title: str) -> None:
+    async def set_title(self, title: str) -> None:
         self.title = title
-        ConversationDocument.partial_update(
+        await ConversationDocument.partial_update(
             id=self.id,
             title=title,
         )
@@ -272,7 +273,7 @@ class Conversation(ConversationSummary):
     all_messages: dict[UUID, Message]
 
     @classmethod
-    def create(
+    async def create(
         cls,
         *,
         openai_model_source: OpenAIModelSource,
@@ -280,7 +281,7 @@ class Conversation(ConversationSummary):
         system_message_inputs: CreateMessageInputs,
         title: Optional[str] = None,
     ) -> Self:
-        conversation_doc = ConversationDocument(
+        conversation_doc = await ConversationDocument(
             title=title or "New chat",
             openai_model_source=openai_model_source,
             enabled_tool_names=[tool.name for tool in enabled_tools],
@@ -291,7 +292,7 @@ class Conversation(ConversationSummary):
 
         system_source = HumanSource(user="dmed")
         system_content = system_message_inputs.content
-        system_message_doc = MessageDocument(
+        system_message_doc = await MessageDocument(
             conversation_id=conversation_doc.id,
             parent_id=None,
             source=system_source,
@@ -301,17 +302,17 @@ class Conversation(ConversationSummary):
             content_text=str(system_content),
         ).insert()
 
-        conversation_doc = ConversationDocument.partial_update(
+        conversation_doc = await ConversationDocument.partial_update(
             id=conversation_doc.id,
             root_message_id=system_message_doc.id,
             current_message_id=system_message_doc.id,
         )
 
-        return cls.from_document(conversation_doc)
+        return await cls.from_document(conversation_doc)
 
-    def soft_delete(self, *, soft_delete_messages: bool = False) -> None:
+    async def soft_delete(self, *, soft_delete_messages: bool = False) -> None:
         if soft_delete_messages:
-            MessageDocument.collection.update_many(
+            await MessageDocument.collection.update_many(
                 {"conversation_id": self.id},
                 {
                     "$set": {
@@ -320,12 +321,13 @@ class Conversation(ConversationSummary):
                 },
             )
 
-        self.get_document().soft_delete()
+        conversation_doc = await self.get_document()
+        await conversation_doc.soft_delete()
 
     @classmethod
-    def from_document(cls, doc: ConversationDocument) -> Self:
-        root_message_doc = MessageDocument.by_id(doc.root_message_id)
-        current_message_doc = MessageDocument.by_id(doc.current_message_id)
+    async def from_document(cls, doc: ConversationDocument) -> Self:  # type: ignore[override]
+        root_message_doc = await MessageDocument.by_id(doc.root_message_id)
+        current_message_doc = await MessageDocument.by_id(doc.current_message_id)
         assert root_message_doc, f"Message no longer exists: {doc.root_message_id}"
         assert (
             current_message_doc
@@ -346,33 +348,33 @@ class Conversation(ConversationSummary):
             current_message=current_message,
             all_messages={},
         )
-        conversation.sync_messages()
+        await conversation.sync_messages()
 
         return conversation
 
     @classmethod
-    def get(cls, id: UUID) -> Optional[Self]:
-        conversation_doc = ConversationDocument.by_id(id)
+    async def get(cls, id: UUID) -> Optional[Self]:
+        conversation_doc = await ConversationDocument.by_id(id)
         if not conversation_doc:
             return None
 
-        return cls.from_document(conversation_doc)
+        return await cls.from_document(conversation_doc)
 
-    def sync_messages(self) -> None:
+    async def sync_messages(self) -> None:
         self.all_messages = {
             doc.id: Message.from_document(doc, history=[])
-            for doc in MessageDocument.get_conversation_messages(self.id)
+            for doc in await MessageDocument.get_conversation_messages(self.id)
         }
         for message in self.all_messages.values():
             self._set_message_history(message)
 
-    def get_message_edges(
+    async def get_message_edges(
         self, *, include_deletions: bool = False
     ) -> list[MessageEdgeDocument]:
         if include_deletions:
-            return MessageEdgeDocument.find({"conversation_id": self.id})
+            return await MessageEdgeDocument.find({"conversation_id": self.id})
 
-        latest_edges = MessageEdgeDocument.aggregate(
+        latest_edges = await MessageEdgeDocument.aggregate(
             [
                 {"$filter": {"cond": {"conversation_id": self.id}}},
                 {
@@ -408,7 +410,7 @@ class Conversation(ConversationSummary):
         self._set_message_history(parent_message)
         message.history = [*parent_message.history, parent_message]
 
-    def insert_message(
+    async def insert_message(
         self,
         *,
         source: MessageSource,
@@ -419,7 +421,7 @@ class Conversation(ConversationSummary):
     ) -> Message:
         parent_id = parent_id or self.current_message.id
         updates_current_message = parent_id == self.current_message.id
-        message_doc = MessageDocument(
+        message_doc = await MessageDocument(
             conversation_id=self.id,
             parent_id=parent_id,
             source=source,
@@ -437,7 +439,7 @@ class Conversation(ConversationSummary):
 
         if updates_current_message:
             self.current_message = inserted_message
-            ConversationDocument.partial_update(
+            await ConversationDocument.partial_update(
                 id=self.id,
                 current_message_id=self.current_message.id,
             )
@@ -446,9 +448,9 @@ class Conversation(ConversationSummary):
 
         return inserted_message
 
-    def insert_user_message(self, text: str) -> Message:
+    async def insert_user_message(self, text: str) -> Message:
         env = Env.get()
-        return self.insert_message(
+        return await self.insert_message(
             source=HumanSource(user=env.CURRENT_USER),
             role=MessageRole.USER,
             content=TextMessageContent(text=text),
@@ -483,13 +485,13 @@ class Conversation(ConversationSummary):
                     history=[],
                 )
             elif isinstance(chunk, SuccessMessageChunk):
-                yield self.insert_message(
+                yield await self.insert_message(
                     source=source,
                     role=MessageRole.ASSISTANT,
                     content=TextMessageContent(text=content),
                 )
             elif isinstance(chunk, ErrorMessageChunk):
-                yield self.insert_message(
+                yield await self.insert_message(
                     source=chunk.source,
                     role=MessageRole.ERROR,
                     content=chunk.content,
@@ -509,12 +511,12 @@ class Conversation(ConversationSummary):
         ):
             yield chunk
 
-    async def generate_title(self, *, model_name: Optional[str]) -> None:
+    async def generate_title(self, *, model: Optional[str]) -> None:
         env = Env.get()
 
-        title_conversation = Conversation.create(
+        title_conversation = await Conversation.create(
             title=f"Title for {self.id}",
-            openai_model_source=OpenAIModelSource.build(model=model_name),
+            openai_model_source=OpenAIModelSource.build(model=model),
             enabled_tools=[],
             system_message_inputs=CreateMessageInputs(
                 role=MessageRole.SYSTEM,
@@ -524,7 +526,7 @@ class Conversation(ConversationSummary):
             ),
         )
 
-        title_conversation.insert_message(
+        await title_conversation.insert_message(
             source=HumanSource(user=env.CURRENT_USER),
             role=MessageRole.USER,
             content=TextMessageContent(
@@ -541,11 +543,11 @@ Create a small 3-6 word tweet that captures the intent of the above within three
             ),
         )
         generated_message = await title_conversation.generate_assistant_message()
-        title_conversation.soft_delete()
+        await title_conversation.soft_delete()
 
-        self.set_title(re.sub(r"\s+", " ", str(generated_message.content)))
+        await self.set_title(re.sub(r"\s+", " ", str(generated_message.content)))
 
-    def edit_message(
+    async def edit_message(
         self,
         message: Message,
         *,
@@ -558,32 +560,36 @@ Create a small 3-6 word tweet that captures the intent of the above within three
                 "Cannot edit root message", error_code=Error.Code.INVALID_ARGUMENT
             )
 
-        new_message = self.insert_message(
+        new_message = await self.insert_message(
             parent_id=message.parent_id,
             source=source,
             role=role,
             content=content,
         )
-        for child_message in message.get_children():
-            child_message.change_parent(
+        for child_message in await message.get_children():
+            await child_message.change_parent(
                 new_message.id, changed_at=new_message.created_at
             )
 
-        self.delete_message(message)
+        await self.delete_message(message)
 
         return new_message
 
-    def delete_message(self, message: Message) -> None:
+    async def delete_message(self, message: Message) -> None:
         if message.parent_id is None:
             raise Result.error(  # type: ignore[misc]
                 "Cannot delete root message", error_code=Error.Code.INVALID_ARGUMENT
             )
 
         changed_at = now_utc()
-        for child_message in message.get_children():
-            child_message.change_parent(message.parent_id, changed_at=changed_at)
+        await asyncio.gather(
+            *[
+                child_message.change_parent(message.parent_id, changed_at=changed_at)
+                for child_message in await message.get_children()
+            ]
+        )
 
-        soft_deleted_message_doc = message.to_document().soft_delete()
+        soft_deleted_message_doc = await message.to_document().soft_delete()
         message.deleted_at = soft_deleted_message_doc.deleted_at
 
         if self.current_message.id == message.id:
@@ -593,20 +599,18 @@ Create a small 3-6 word tweet that captures the intent of the above within three
             ), f"Message no longer exists: {message.parent_id}"
 
             self.current_message = next_current_message
-            ConversationDocument.partial_update(
+            await ConversationDocument.partial_update(
                 id=self.id,
                 current_message_id=self.current_message.id,
             )
 
-    def get_current_history(self, *, sync: bool = False) -> list[Message]:
-        return self.get_message_history(self.current_message, sync=sync)
+    def get_current_history(self) -> list[Message]:
+        return self.get_message_history(self.current_message)
 
     def get_message_history(
-        self, message: Message, *, sync: bool = False
+        self,
+        message: Message,
     ) -> list[Message]:
-        if sync:
-            self.sync_messages()
-
         messages = [message]
         while True:
             parent_id = messages[0].parent_id
@@ -621,9 +625,10 @@ Create a small 3-6 word tweet that captures the intent of the above within three
 
         return messages
 
-    def stringify_conversation(self, *, enable_colors: bool = False) -> str:
+    async def stringify_conversation(self, *, enable_colors: bool = False) -> str:
         conversation_str = ""
-        for message in self.get_current_history(sync=True):
+        await self.sync_messages()
+        for message in self.get_current_history():
             role = f"[{message.role.upper()}]"
             content = str(message.content)
 
@@ -636,8 +641,8 @@ Create a small 3-6 word tweet that captures the intent of the above within three
 
         return conversation_str
 
-    def pretty_print_current_history(self) -> None:
-        print(self.stringify_conversation(enable_colors=True))
+    async def pretty_print_current_history(self) -> None:
+        print(await self.stringify_conversation(enable_colors=True))
 
 
 Message.model_rebuild()

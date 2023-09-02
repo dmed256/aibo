@@ -68,7 +68,7 @@ class GitRepoDocument(BaseDocument):
         ]
 
     @classmethod
-    def get(cls, filepath: str) -> Self:
+    async def get(cls, filepath: str) -> Self:
         git_dir = _get_nearest_git_dir(filepath)
         assert git_dir, f"File is not in a git directory: {filepath}"
 
@@ -80,7 +80,7 @@ class GitRepoDocument(BaseDocument):
         origin = output.decode("utf-8").strip()
         name = os.path.basename(origin)
 
-        existing_doc = cls.find_one(
+        existing_doc = await cls.find_one(
             {
                 "name": name,
                 "origin": origin,
@@ -89,7 +89,7 @@ class GitRepoDocument(BaseDocument):
 
         return (
             existing_doc
-            or cls(
+            or await cls(
                 name=name,
                 origin=origin,
             ).insert()
@@ -131,8 +131,7 @@ class GitRepoDocument(BaseDocument):
             if (clean_entry := entry.strip())
         }
 
-    @property
-    def is_update_locked(self) -> bool:
+    async def is_update_locked(self) -> bool:
         if self.update_locked_at is None:
             return False
 
@@ -140,39 +139,39 @@ class GitRepoDocument(BaseDocument):
         updated_locked_at = self.update_locked_at.astimezone().replace(tzinfo=None)
         is_locked = (now_without_offset - updated_locked_at) < UPDATE_LOCK_TIME
         if not is_locked:
-            self.clear_update_lock()
+            await self.clear_update_lock()
 
         return is_locked
 
-    def clear_update_lock(self) -> None:
+    async def clear_update_lock(self) -> None:
         self.update_locked_at = None
-        self.partial_update(
+        await self.partial_update(
             id=self.id,
             update_locked_at=None,
         )
 
-    def set_update_lock(self) -> None:
+    async def set_update_lock(self) -> None:
         self.update_locked_at = now_utc()
-        self.partial_update(
+        await self.partial_update(
             id=self.id,
             update_locked_at=self.update_locked_at,
         )
 
-    def update_file_documents(self, *, bypass_update_lock: bool = False) -> None:
+    async def update_file_documents(self, *, bypass_update_lock: bool = False) -> None:
         """
         Updates the related GitFileDocument entries based on the current commit
         """
-        if self.is_update_locked and not bypass_update_lock:
+        if await self.is_update_locked() and not bypass_update_lock:
             return None
 
         self.cache_git_repo()
-        self.set_update_lock()
+        await self.set_update_lock()
 
         git_commit = self.get_git_commit()
         git_filenames = self.get_git_filenames()
 
         # Find up-to-date files that exist
-        up_to_date_files_info = GitFileDocument.collection.find(
+        up_to_date_files_info = await GitFileDocument.raw_find(
             {
                 "git_repo_id": self.id,
                 "git_commit": git_commit,
@@ -184,10 +183,10 @@ class GitRepoDocument(BaseDocument):
         missing_filenames = git_filenames - up_to_date_filenames
 
         if not missing_filenames:
-            self.clear_update_lock()
+            await self.clear_update_lock()
             return None
 
-        stale_files_info = GitFileDocument.collection.find(
+        stale_files_info = await GitFileDocument.raw_find(
             {
                 "git_repo_id": self.id,
                 "git_commit": {"$ne": git_commit},
@@ -208,7 +207,7 @@ class GitRepoDocument(BaseDocument):
         ]
         if removed_file_ids:
             deleted_at = now_utc()
-            GitFileDocument.collection.update_many(
+            await GitFileDocument.collection.update_many(
                 {"_id": {"$in": removed_file_ids}},
                 {"$set": {"deleted_at": deleted_at}},
             )
@@ -219,7 +218,7 @@ class GitRepoDocument(BaseDocument):
             file_info = stale_file_info_by_filename.get(filename)
             if file_info:
                 file_id = file_info["_id"]
-                GitFileDocument.partial_update(
+                await GitFileDocument.partial_update(
                     id=file_id,
                     git_commit=git_commit,
                     embedding=None,
@@ -227,16 +226,16 @@ class GitRepoDocument(BaseDocument):
                 )
                 git_file_ids_to_sync.append(file_id)
             else:
-                git_file_doc = GitFileDocument(
+                git_file_doc = await GitFileDocument(
                     git_repo_id=self.id,
                     filename=filename,
                     git_commit=git_commit,
                 ).insert()
                 git_file_ids_to_sync.append(git_file_doc.id)
 
-        self.clear_update_lock()
+        await self.clear_update_lock()
 
-    def set_embeddings(
+    async def set_embeddings(
         self, *, bypass_update_lock: bool = False, show_progress: bool = False
     ) -> None:
         """
@@ -244,17 +243,17 @@ class GitRepoDocument(BaseDocument):
         """
         from aibo.core.openai import get_file_embedding
 
-        if self.is_update_locked and not bypass_update_lock:
+        if await self.is_update_locked() and not bypass_update_lock:
             return None
 
         env = Env.get()
-        embedding_model = env.OPENAI_EMBEDDING_MODEL_NAME
-        self.set_update_lock()
+        embedding_model = env.OPENAI_EMBEDDING_MODEL
+        await self.set_update_lock()
 
         git_commit = self.get_git_commit()
 
         # Find up-to-date files that exist
-        file_infos = GitFileDocument.collection.find(
+        file_infos = await GitFileDocument.raw_find(
             {
                 "git_repo_id": self.id,
                 "git_commit": git_commit,
@@ -265,9 +264,9 @@ class GitRepoDocument(BaseDocument):
         for info in tqdm.tqdm(file_infos, disable=not show_progress):
             git_file_id = info["_id"]
             filename = info["filename"]
-            GitFileDocument.partial_update(
+            await GitFileDocument.partial_update(
                 id=git_file_id,
-                embedding=get_file_embedding(
+                embedding=await get_file_embedding(
                     f"{self.cache_dir}/{filename}",
                     model=embedding_model,
                 ),
@@ -287,7 +286,7 @@ class GitRepoDocument(BaseDocument):
 
         query_embedding = np.array(await get_string_embedding(query))
 
-        file_infos = GitFileDocument.collection.find(
+        file_infos = await GitFileDocument.raw_find(
             {
                 "git_repo_id": self.id,
                 "git_commit": self.get_git_commit(),
@@ -307,7 +306,7 @@ class GitRepoDocument(BaseDocument):
         git_file_indices = {
             id: index for index, (id, _) in enumerate(sorted_id_distance[:limit])
         }
-        git_file_docs = GitFileDocument.find(
+        git_file_docs = await GitFileDocument.find(
             {
                 "_id": {"$in": list(git_file_indices.keys())},
             }

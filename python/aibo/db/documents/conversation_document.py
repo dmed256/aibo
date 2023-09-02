@@ -44,9 +44,11 @@ class ConversationDocument(BaseDocument):
         ]
 
     @classmethod
-    def safe_find(cls, *, include_deletions: bool = False, **kwargs: Any) -> list[Self]:
+    async def safe_find(
+        cls, *, include_deletions: bool = False, **kwargs: Any
+    ) -> list[Self]:
         query = dict(kwargs)
         if not include_deletions:
             query["deleted_at"] = None
 
-        return cls.find(query)
+        return await cls.find(query)

@@ -184,7 +184,7 @@ class OpenAIModelSourceFactory(BaseFactory[OpenAIModelSource]):
         max_tokens: Optional[int] = None,
     ) -> OpenAIModelSource:
         return OpenAIModelSource(
-            model=model or "your_model_name",
+            model=model or "fake-model",
             temperature=temperature or 0.5,
             max_tokens=max_tokens,
         )
@@ -346,7 +346,7 @@ class ConversationDocumentFactory(BaseMongoFactory[ConversationDocument]):
             role=MessageRole.SYSTEM,
         )
 
-        return ConversationDocument.partial_update(
+        return await ConversationDocument.partial_update(
             id=conversation_doc.id,
             root_message_id=system_message_doc.id,
             current_message_id=system_message_doc.id,

@@ -10,7 +10,7 @@
   :type 'integer
   :group 'aibo)
 
-(defcustom aibo:model-name "gpt-3.5-turbo-16k"
+(defcustom aibo:model "gpt-3.5-turbo-16k"
   "The OpenAI model name used for completions"
   :type 'string
   :group 'aibo)

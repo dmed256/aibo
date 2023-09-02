@@ -16,6 +16,7 @@ ws_router = WebsocketRouter()
 class StreamAssistantMessageEventRequest(BaseEvent):
     kind: Literal["stream_assistant_message"] = "stream_assistant_message"
     conversation_id: UUID
+    model: str
 
 
 class StreamAssistantMessageEventResponse(BaseEvent):
@@ -26,6 +27,7 @@ class StreamAssistantMessageEventResponse(BaseEvent):
 class StreamAssistantMessageChunksEventRequest(BaseEvent):
     kind: Literal["stream_assistant_message_chunks"] = "stream_assistant_message_chunks"
     conversation_id: UUID
+    model: str
 
 
 class StreamAssistantMessageChunksEventResponse(BaseEvent):
@@ -50,10 +52,11 @@ async def stream_assistant_message(
     websocket: WebSocket,
     event: StreamAssistantMessageEventRequest,
 ) -> AsyncGenerator[StreamAssistantMessageEventResponse, None]:
-    conversation = chat.Conversation.get(event.conversation_id)
+    conversation = await chat.Conversation.get(event.conversation_id)
     assert conversation, f"Conversation doesn't exist: {event.conversation_id}"
 
-    async for message in conversation.stream_assistant_message():
+    source = chat.OpenAIModelSource.build(model=event.model)
+    async for message in conversation.stream_assistant_message(source=source):
         yield StreamAssistantMessageEventResponse(
             id=event.id,
             message=api_models.Message.from_chat(message),
@@ -65,10 +68,11 @@ async def stream_assistant_message_chunks(
     websocket: WebSocket,
     event: StreamAssistantMessageChunksEventRequest,
 ) -> AsyncGenerator[StreamAssistantMessageChunksEventResponse, None]:
-    conversation = chat.Conversation.get(event.conversation_id)
+    conversation = await chat.Conversation.get(event.conversation_id)
     assert conversation, f"Conversation doesn't exist: {event.conversation_id}"
 
-    async for chunk in conversation.stream_assistant_message_chunks():
+    source = chat.OpenAIModelSource.build(model=event.model)
+    async for chunk in conversation.stream_assistant_message_chunks(source=source):
         yield StreamAssistantMessageChunksEventResponse(
             id=event.id,
             chunk=chunk,

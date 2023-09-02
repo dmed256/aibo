@@ -37,7 +37,8 @@ class BaseMongoFactory(BaseFactory[T]):
 
     @classmethod
     async def create(cls, **kwargs: Any) -> T:
-        doc = typing.cast(BaseDocument, await cls.build(**kwargs)).insert()  # type: ignore[attr-defined]
+        doc = await cls.build(**kwargs)  # type: ignore[attr-defined]
+        doc = await doc.insert()
         return await cls.post_create(typing.cast(T, doc))
 
     @classmethod

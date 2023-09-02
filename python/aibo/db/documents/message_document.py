@@ -79,14 +79,14 @@ class MessageDocument(BaseDocument):
             ),
         ]
 
-    def insert(self) -> Self:
+    async def insert(self) -> Self:
         from aibo.db.documents.message_edge_document import MessageEdgeDocument
 
         self.created_at = now_utc()
-        super().insert()
+        await super().insert()
 
         if self.parent_id:
-            MessageEdgeDocument(
+            await MessageEdgeDocument(
                 conversation_id=self.conversation_id,
                 parent_id=self.parent_id,
                 child_id=self.id,
@@ -95,16 +95,16 @@ class MessageDocument(BaseDocument):
 
         return self
 
-    def change_parent(self, parent_id: UUID, *, changed_at: dt.datetime) -> Self:
+    async def change_parent(self, parent_id: UUID, *, changed_at: dt.datetime) -> Self:
         from aibo.db.documents.message_edge_document import MessageEdgeDocument
 
         if self.parent_id == parent_id:
             return self
 
         self.parent_id = parent_id
-        self.partial_update(id=self.id, parent_id=parent_id)
+        await self.partial_update(id=self.id, parent_id=parent_id)
 
-        MessageEdgeDocument(
+        await MessageEdgeDocument(
             conversation_id=self.conversation_id,
             parent_id=self.parent_id,
             child_id=self.id,
@@ -114,41 +114,41 @@ class MessageDocument(BaseDocument):
         return self
 
     @classmethod
-    def safe_find(
+    async def safe_find(
         cls, query: dict, *, include_deletions: bool = False, **kwargs: Any
     ) -> list[Self]:
         query = dict(query)
         if not include_deletions:
             query["deleted_at"] = None
 
-        return cls.find(query, **kwargs)
+        return await cls.find(query, **kwargs)
 
     @classmethod
-    def get_conversation_messages(
+    async def get_conversation_messages(
         cls, conversation_id: UUID, *, include_deletions: bool = False
     ) -> list[Self]:
-        return cls.safe_find(
+        return await cls.safe_find(
             {
                 "conversation_id": conversation_id,
             },
             include_deletions=include_deletions,
         )
 
-    def get_children(self) -> list[Self]:
-        return self.get_message_children(
+    async def get_children(self) -> list[Self]:
+        return await self.get_message_children(
             conversation_id=self.conversation_id,
             parent_id=self.id,
         )
 
     @classmethod
-    def get_message_children(
+    async def get_message_children(
         cls,
         *,
         conversation_id: UUID,
         parent_id: Union[UUID, None],
         include_deletions: bool = False,
     ) -> list[Self]:
-        return cls.safe_find(
+        return await cls.safe_find(
             {
                 "conversation_id": conversation_id,
                 "parent_id": parent_id,

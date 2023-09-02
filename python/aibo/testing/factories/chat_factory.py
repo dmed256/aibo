@@ -106,6 +106,6 @@ class ConversationFactory(BaseFactory[chat.Conversation]):
             deleted_at=deleted_at,
         )
 
-        conversation = chat.Conversation.from_document(conversation_document)
-        conversation.sync_messages()
+        conversation = await chat.Conversation.from_document(conversation_document)
+        await conversation.sync_messages()
         return conversation

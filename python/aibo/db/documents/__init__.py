@@ -1,3 +1,4 @@
+import asyncio
 from typing import Type
 
 from .base_document import BaseDocument
@@ -18,6 +19,7 @@ DOCUMENT_CLASSES: list[Type[BaseDocument]] = [
 ]
 
 
-def migrate_documents() -> None:
-    for document_class in DOCUMENT_CLASSES:
-        document_class.migrate()
+async def migrate_documents() -> None:
+    await asyncio.gather(
+        *[document_class.migrate() for document_class in DOCUMENT_CLASSES]
+    )
