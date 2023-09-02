@@ -1,6 +1,6 @@
-from pydantic import BaseModel
+from enum import StrEnum
 
-from aibo.common.types import StrEnum
+from pydantic import BaseModel
 
 
 class Order(StrEnum):

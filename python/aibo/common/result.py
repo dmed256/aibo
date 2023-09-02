@@ -1,8 +1,7 @@
+from enum import StrEnum
 from typing import Any, Generic, Literal, Optional, Self, TypeVar
 
 from pydantic import BaseModel, Field
-
-from aibo.common.types import StrEnum
 
 __all__ = [
     "Result",

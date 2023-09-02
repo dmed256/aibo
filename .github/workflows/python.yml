@@ -36,3 +36,8 @@ jobs:
         run: |
           cd python
           mypy aibo
+
+      - name: pytest
+        run: |
+          cd python
+          pytest

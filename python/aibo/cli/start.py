@@ -1,11 +1,11 @@
 """
-Helper command to format the python service
+Helper command to start the python service
 
-    python -m aibo.cli.format
+    python -m aibo.cli.start
 
 Options:
 
-    python -m aibo.cli.format
+    python -m aibo.cli.start
 
 """
 import fire

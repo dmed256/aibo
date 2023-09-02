@@ -2,13 +2,12 @@ from __future__ import annotations
 
 import abc
 import json
+from enum import StrEnum
 from typing import TYPE_CHECKING, Annotated, Any, Literal, Optional, Self, Union
 
 import openai
 import openai.error as oai_error
 from pydantic import BaseModel, Field
-
-from aibo.common.types import StrEnum
 
 if TYPE_CHECKING:
     from aibo.core.chat import Conversation

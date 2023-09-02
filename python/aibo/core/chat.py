@@ -3,6 +3,7 @@ from __future__ import annotations
 import datetime as dt
 import functools
 import re
+from enum import StrEnum
 from typing import (
     Annotated,
     Any,
@@ -28,7 +29,6 @@ from aibo.common.constants import NULL_UUID, Env
 from aibo.common.openai import OpenAIMessage, OpenAIRole
 from aibo.common.result import Error, Result
 from aibo.common.time import now_utc
-from aibo.common.types import StrEnum
 from aibo.db.documents import (
     CompletionErrorContent,
     ConversationDocument,
@@ -151,6 +151,9 @@ class Message(BaseModel):
             history=history,
         )
 
+    def get_document(self) -> MessageDocument:
+        return cast(MessageDocument, MessageDocument.by_id(self.id))
+
     def to_document(self) -> MessageDocument:
         return MessageDocument(
             id=self.id,
@@ -237,6 +240,9 @@ class ConversationSummary(BaseModel):
             conversation_depth=doc.conversation_depth,
             created_at=doc.created_at,
         )
+
+    def get_document(self) -> ConversationDocument:
+        return cast(ConversationDocument, ConversationDocument.by_id(self.id))
 
     @classmethod
     def search(
@@ -331,9 +337,7 @@ class Conversation(ConversationSummary):
                 },
             )
 
-        conversation_doc = ConversationDocument.by_id(self.id)
-        if conversation_doc:
-            conversation_doc.soft_delete()
+        self.get_document().soft_delete()
 
     @classmethod
     def from_document(cls, doc: ConversationDocument) -> Self:
@@ -690,6 +694,6 @@ Create a small 3-6 word tweet that captures the intent of the above within three
         print(self.stringify_conversation(enable_colors=True))
 
 
-Message.update_forward_refs()
-ConversationSummary.update_forward_refs()
-Conversation.update_forward_refs()
+Message.model_rebuild()
+ConversationSummary.model_rebuild()
+Conversation.model_rebuild()

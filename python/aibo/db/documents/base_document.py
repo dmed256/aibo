@@ -1,6 +1,7 @@
 import abc
 import datetime as dt
 import functools
+from enum import StrEnum
 from typing import Any, Literal, Optional, Self, Union, cast
 from uuid import UUID, uuid4
 
@@ -11,7 +12,6 @@ from pymongo.typings import _DocumentType
 
 from aibo.common.classproperty import classproperty
 from aibo.common.time import now_utc
-from aibo.common.types import StrEnum
 
 __all__ = ["BaseDocument", "Index", "Order"]
 

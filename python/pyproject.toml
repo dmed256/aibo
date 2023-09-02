@@ -9,6 +9,7 @@ requires-python = ">=3.11"
 dependencies = [
   "aiocache==0.12.*",
   "black==23.*",
+  "faker==19.3.*",
   "fastapi==0.*",
   "fire==0.5.*",
   "isort==5.*",
@@ -16,6 +17,7 @@ dependencies = [
   "openai==0.*",
   "pydantic==2.2.*",
   "pymongo==4.*",
+  "pytest==7.4.*",
   "tenacity==8.*",
   "termcolor==2.*",
   "tqdm==4.65.*",

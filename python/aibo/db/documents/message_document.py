@@ -1,4 +1,5 @@
 import datetime as dt
+from enum import StrEnum
 from typing import Any, Optional, Self, Union
 from uuid import UUID, uuid4
 
@@ -7,7 +8,6 @@ from pydantic import BaseModel, Field
 
 from aibo.common.classproperty import classproperty
 from aibo.common.time import now_utc
-from aibo.common.types import StrEnum
 from aibo.db.documents.base_document import BaseDocument, Index, Order
 from aibo.db.documents.message_content import *
 from aibo.db.documents.message_source import *
