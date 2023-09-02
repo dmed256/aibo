@@ -6,41 +6,30 @@
 (require 'aibo-api)
 (require 'aibo-types)
 
-(defun aibo:--get-conversation-buffer-name (&rest args)
-  (interactive)
-  (let* ((id (plist-get args :id))
-         (title (plist-get args :title))
-         (short-id (replace-regexp-in-string "-" "" id)))
-    (format "*Aibo [%.7s] - %s*" short-id title)))
+(defun aibo:--get-conversation-buffer-name (id)
+  (format "*Aibo [%s]*" id))
 
-(setq aibo:--message-role-colors
-      (ht ("system-dark"     "#377047")
-          ("system-light"    "#beface")
-          ("user-dark"       "#ba7a13")
-          ("user-light"      "#fae2b9")
-          ("assistant-dark"  "#384a8f")
-          ("assistant-light" "#dce9fc")
-          ("error-dark"      "#8f3838")
-          ("error-light"     "#fcdcdc")))
+(defun aibo:--get-conversation-buffer (id)
+  (get-buffer (aibo:--get-conversation-buffer-name id)))
 
 (setq aibo:--new-user-message-keymap
       (let ((map (copy-keymap widget-keymap)))
         (define-key map (kbd "C-c C-x C-r") #'aibo:refresh-current-conversation)
         (define-key map (kbd "C-c C-t")     #'aibo:set-current-conversation-title)
-        (define-key map (kbd "C-c C-c")     #'aibo:regenerate-last-message)
+        (define-key map (kbd "C-c C-c")     #'aibo:regenerate-current-conversation-last-assistant-message)
         (define-key map (kbd "C-c C-x C-t") #'aibo:generate-current-conversation-title)
         (define-key map (kbd "RET")         (lambda () (interactive) (insert "\n")))
         (define-key map (kbd "M-RET")       #'aibo:submit-user-message)
         map))
 
 (defun aibo::--get-role-color (role shade)
-  (ht-get aibo:--message-role-colors (format "%s-%s" role shade) ))
+  (ht-get aibo:message-role-colors (format "%s-%s" role shade) ))
 
 (defun aibo::--get-message-color (message shade)
-  (aibo::--get-role-color (oref message :role) shade))
+  (aibo::--get-role-color (ht-get message "role") shade))
 
 (defun aibo::--get-message-header (message)
-  (let ((role (oref message :role)))
+  (let ((role (ht-get message "role")))
     (cond
      ((string= role "system")    "[ System ]")
      ((string= role "user")      "[ User ]")
@@ -48,110 +37,128 @@
      ((string= role "error")     "[ Error ]"))))
 
 (defun aibo::--get-message-source (message)
-  (let* ((source (oref message :source))
-         (source-kind (aibo:xref source :kind)))
+  (let* ((source (ht-get message "source"))
+         (source-kind (ht-get source "kind")))
     (cond
      ((string= source-kind "human")        "User")
-     ((string= source-kind "openai_model") (aibo:xref source :model))
-     ((string= source-kind "programmatic") (aibo:xref source :source)))))
+     ((string= source-kind "openai_model") (ht-get source "model"))
+     ((string= source-kind "programmatic") (ht-get source "source")))))
 
 (defun aibo:refresh-current-conversation ()
   (interactive)
   (aibo:go-to-conversation-by-id
-   :conversation-id (oref aibo:b-conversation :id)))
-
-(defun aibo:go-to-conversation-by-id (&rest args)
-  (interactive)
-  (let* ((conversation-id (plist-get args :conversation-id))
-         (buffer-open-style (plist-get args :buffer-open-style)))
-    (aibo:api-get-conversation
-     :id conversation-id
-     :on-success (lambda (conversation)
-                   (aibo:go-to-conversation
-                    :conversation conversation
-                    :buffer-open-style buffer-open-style)))))
+   :conversation-id (ht-get aibo:b-conversation "id")
+   :sync t))
 
 (defun aibo:go-to-conversation (&rest args)
+  "Load the conversation in its buffer"
   (interactive)
   (let* ((conversation (plist-get args :conversation))
          (buffer-open-style (or (plist-get args :buffer-open-style) :current-window)))
     (aibo:--get-or-create-buffer
-     :name (aibo:--get-conversation-buffer-name
-            :id (oref conversation :id)
-            :title (oref conversation :title))
+     :name (aibo:--get-conversation-buffer-name (ht-get conversation "id"))
      :open-style buffer-open-style
      :on-load
      (lambda (buffer)
-       (let* ((set-not-modified (not (buffer-modified-p)))
-              (original-point (if (> (buffer-size) 0) (point) nil))
-              (original-window-start (window-start))
-              (point-was-inside-user-widget?
-               (and original-point
-                    aibo:b-new-user-message-widget
-                    (>= original-point (widget-field-start aibo:b-new-user-message-widget))
-                    (<= original-point (widget-field-end aibo:b-new-user-message-widget)))))
+       (with-current-buffer buffer
+         (aibo:--dangerously-render-conversation conversation))))))
 
-         ;; Kill all the widget local variables but
-         ;; remember to keep our own local varibles
-         (kill-all-local-variables)
-         (remove-overlays)
-         (let ((inhibit-read-only t))
-           (erase-buffer))
+(defun aibo:go-to-conversation-by-id (&rest args)
+  "Go to the conversation buffer, but if it doesn't exist reload"
+  (interactive)
+  (let* ((conversation-id (plist-get args :conversation-id))
+         (buffer-open-style (or (plist-get args :buffer-open-style) :current-window))
+         (sync (plist-get args :sync)))
+    (aibo:--get-or-create-buffer
+     :name (aibo:--get-conversation-buffer-name conversation-id)
+     :open-style buffer-open-style
+     :on-load
+     (lambda (buffer)
+       (if sync
+           (aibo:api-get-conversation
+            :id conversation-id
+            :on-success (lambda (conversation)
+                          (with-current-buffer buffer
+                            (aibo:--dangerously-render-conversation conversation))))))
+     :on-create
+     (lambda (buffer)
+       (aibo:api-get-conversation
+        :id conversation-id
+        :on-success (lambda (conversation)
+                      (with-current-buffer buffer
+                        (aibo:--dangerously-render-conversation conversation))))))))
 
-         (aibo:conversation-mode)
+(defun aibo:--dangerously-render-conversation (conversation)
+  (let* ((set-not-modified (not (buffer-modified-p)))
+         (original-point (if (> (buffer-size) 0) (point) nil))
+         (original-window-start (window-start))
+         (point-was-inside-user-widget?
+          (and original-point
+               aibo:b-new-user-message-widget
+               (>= original-point (widget-field-start aibo:b-new-user-message-widget))
+               (<= original-point (widget-field-end aibo:b-new-user-message-widget)))))
 
-         ;; All the buffer-specific variables should be defined here (even if set to nil by default)
-         (setq-local aibo:b-conversation conversation)
-         (setq-local aibo:b-message-widgets (ht-create))
-         (setq-local aibo:b-streaming-assistant-message-widget nil)
-         (setq-local aibo:b-new-user-message-widget nil)
+    ;; Kill all the widget local variables but
+    ;; remember to keep our own local varibles
+    (kill-all-local-variables)
+    (remove-overlays)
+    (let ((inhibit-read-only t))
+      (erase-buffer))
 
-         ;; Render header
-         (setq header-line-format
-               (format "[%s] %s"
-                       aibo:model
-                       (oref conversation :title)))
+    (aibo:conversation-mode)
 
-         ;; Render title
-         (widget-insert (propertize
-                         (format (concat "ID: %s\n"
-                                         "--------------------------------------------------\n\n")
-                                 (oref conversation :id)
-                                 (oref conversation :title))
-                         'font-lock-face '(:foreground "#9c9c9c")))
+    ;; All the buffer-specific variables should be defined here (even if set to nil by default)
+    (setq-local aibo:b-conversation conversation)
+    (setq-local aibo:b-message-widgets (ht-create))
+    (setq-local aibo:b-streaming-assistant-message-widget nil)
+    (setq-local aibo:b-new-user-message-widget nil)
 
-         ;; Render conversation
-         (aibo:--render-conversation conversation)
+    ;; Render header
+    (setq header-line-format
+          (format "[%s] %s"
+                  aibo:model
+                  (ht-get conversation "title")))
 
-         ;; Render streamed assistant completion
-         (setq-local aibo:b-streaming-assistant-message-widget
-                     (widget-create 'chat-message :value nil))
+    ;; Render title
+    (widget-insert (propertize
+                    (format (concat "ID: %s\n"
+                                    "--------------------------------------------------\n\n")
+                            (ht-get conversation "id")
+                            (ht-get conversation "title"))
+                    'font-lock-face `(:foreground ,aibo:conversation-header-foreground-color)))
 
-         ;; Render User input
-         (widget-insert (propertize
-                         "[ User ]"
-                         'font-lock-face `(:background ,(aibo::--get-role-color "user" "dark"))))
-         (widget-insert "\n")
-         (setq-local aibo:b-new-user-message-widget
-                     (widget-create 'text
-                                    :format "%v"
-                                    :button-suffix ""
-                                    :keymap aibo:--new-user-message-keymap))
+    ;; Render conversation
+    (aibo:--render-conversation conversation)
 
-         ;; Clean up buffer state
-         (if set-not-modified
-             (set-buffer-modified-p nil))
+    ;; Render streamed assistant completion
+    (setq-local aibo:b-streaming-assistant-message-widget
+                (widget-create 'chat-message :value nil))
 
-         (widget-setup)
+    ;; Render User input
+    (widget-insert (propertize
+                    "[ User ]"
+                    'font-lock-face `(:background ,(aibo::--get-role-color "user" "dark"))))
+    (widget-insert "\n")
+    (setq-local aibo:b-new-user-message-widget
+                (widget-create 'text
+                               :format "%v"
+                               :button-suffix ""
+                               :keymap aibo:--new-user-message-keymap))
 
-         (if (or point-was-inside-user-widget? (not original-point))
-             (progn
-               (goto-char (widget-field-start aibo:b-new-user-message-widget))
-               (let ((recenter-positions '(bottom)))
-                 (recenter-top-bottom)))
-           (progn
-             (goto-char original-point)
-             (set-window-start nil original-window-start))))))))
+    ;; Clean up buffer state
+    (if set-not-modified
+        (set-buffer-modified-p nil))
+
+    (widget-setup)
+
+    (if (or point-was-inside-user-widget? (not original-point))
+        (progn
+          (goto-char (widget-field-start aibo:b-new-user-message-widget))
+          (let ((recenter-positions '(bottom)))
+            (recenter-top-bottom)))
+      (progn
+        (goto-char original-point)
+        (set-window-start nil original-window-start)))))
 
 (defun aibo:set-current-conversation-title ()
   (interactive)
@@ -160,73 +167,88 @@
 (defun aibo:generate-current-conversation-title ()
   (interactive)
   (aibo:api-generate-conversation-title
-   :id (oref aibo:b-conversation :id)
+   :id (ht-get aibo:b-conversation "id")
    :on-success
    (lambda (updated-conversation)
-     (aibo:--on-conversation-title-change
-      :prev-conversation aibo:b-conversation
-      :conversation updated-conversation))))
+     (save-window-excursion (aibo:homepage)))))
 
 (defun aibo:set-conversation-title (conversation)
   (interactive)
-  (let* ((id (oref conversation :id))
+  (let* ((id (ht-get conversation "id"))
          (title (read-string "Title: ")))
     (aibo:api-set-conversation-title
      :id id
      :title title
      :on-success
      (lambda (updated-conversation)
-       (aibo:--on-conversation-title-change
-        :prev-conversation conversation
-        :conversation updated-conversation)))))
-
-(defun aibo:--on-conversation-title-change (&rest args)
-  (let* ((prev-conversation (plist-get args :prev-conversation))
-         (conversation (plist-get args :conversation))
-         (prev-buffer-name (aibo:--get-conversation-buffer-name
-                            :id (oref prev-conversation :id)
-                            :title (oref prev-conversation :title)))
-         (prev-buffer (get-buffer prev-buffer-name)))
-    (save-window-excursion
-      (aibo:homepage))
-
-    (if (string= prev-buffer-name (buffer-name))
-        (aibo:go-to-conversation :conversation conversation))
-
-    (if prev-buffer
-        (kill-buffer prev-buffer))))
+       (save-window-excursion (aibo:homepage))))))
 
 (defun aibo:submit-user-message ()
   (interactive)
-  (let* ((text (widget-value aibo:b-new-user-message-widget)))
+  (let* ((text (widget-value aibo:b-new-user-message-widget))
+         (conversation-id (ht-get aibo:b-conversation "id")))
     (widget-value-set aibo:b-new-user-message-widget "")
     (aibo:api-submit-user-message
-     :conversation-id (oref aibo:b-conversation :id)
+     :conversation-id conversation-id
      :text text
      :on-success
      (lambda (conversation)
        (aibo:go-to-conversation :conversation conversation)
-       (aibo:stream-assistant-message)))))
+       (aibo:stream-assistant-message
+        :conversation-id conversation-id)))))
 
 (defun aibo:stream-assistant-message (&rest args)
   (interactive)
-  (let* ((buffer (current-buffer))
-         (on-success (plist-get args :on-success)))
+  (let* ((conversation-id (plist-get args :conversation-id))
+         (on-success (plist-get args :on-success))
+         (buffer (aibo:--get-conversation-buffer conversation-id)))
     (aibo:api-ws-stream-assistant-message
-     :conversation-id (oref aibo:b-conversation :id)
-     :on-message (lambda (message)
-                   (with-current-buffer buffer
-                     (widget-value-set
-                      aibo:b-streaming-assistant-message-widget
-                      message)
-                     (set-buffer-modified-p nil)))
-     :on-success (lambda ()
-                   (with-current-buffer buffer
-                     (save-window-excursion
-                       (aibo:go-to-conversation-by-id
-                        :conversation-id (oref aibo:b-conversation :id)
-                        :buffer-open-style :nothing)
-                       (if on-success (funcall on-success))))))))
+     :conversation-id conversation-id
+     :message-callbacks
+     (ht ("current_conversation"
+          (lambda (ws-message)
+            (with-current-buffer buffer
+              (aibo:go-to-conversation
+               :conversation (ht-get ws-message "conversation")
+               :buffer-open-style :nothing))))
+
+         ("stream_assistant_message"
+          (lambda (ws-message)
+            (with-current-buffer buffer
+              (widget-value-set
+               aibo:b-streaming-assistant-message-widget
+               (ht-get ws-message "message"))
+              (set-buffer-modified-p nil))))
+
+         ("event_completed" on-success)))))
+
+(defun aibo:regenerate-current-conversation-last-assistant-message ()
+  (interactive)
+  (aibo:regenerate-last-assistant-message
+   :conversation-id (ht-get aibo:b-conversation "id")))
+
+(defun aibo:regenerate-last-assistant-message (&rest args)
+  (interactive)
+  (let* ((conversation-id (plist-get args :conversation-id))
+         (on-success (plist-get args :on-success))
+         (buffer (aibo:--get-conversation-buffer conversation-id)))
+    (aibo:api-ws-regenerate-last-assistant-message
+     :conversation-id conversation-id
+     :message-callbacks
+     (ht ("current_conversation"
+          (lambda (ws-message)
+            (with-current-buffer buffer
+              (aibo:go-to-conversation
+               :conversation (ht-get ws-message "conversation")
+               :buffer-open-style :nothing))))
+         ("stream_assistant_message"
+          (lambda (ws-message)
+            (with-current-buffer buffer
+              (widget-value-set
+               aibo:b-streaming-assistant-message-widget
+               (ht-get ws-message "message"))
+              (set-buffer-modified-p nil))))
+         ("event_completed" on-success)))))
 
 ;; ---[ Render conversation ]---------------------
 (define-widget 'chat-message 'default
@@ -242,7 +264,7 @@
   (if message
       (let* ((message-header-color (aibo::--get-message-color message "dark"))
              (message-content-color (aibo::--get-message-color message "light"))
-             (message-suffix (if (string= (oref message :status) "streaming") "█" "")))
+             (message-suffix (if (string= (ht-get message "status") "streaming") "█" "")))
         (concat
          (propertize
           (aibo::--get-message-header message)
@@ -250,7 +272,7 @@
           'message message
           'font-lock-face `(:background ,message-header-color))
          (propertize
-          (format "\n%s%s" (oref message :content-text) message-suffix)
+          (format "\n%s%s" (ht-get message "content_text") message-suffix)
           'read-only t
           'message message
           'font-lock-face `(:foreground ,message-content-color))
@@ -263,27 +285,26 @@
 (defun aibo:--render-message-widget (message)
   (let* ((message-widget (widget-create 'chat-message :value message)))
     (ht-set! aibo:b-message-widgets
-             (oref message :id)
+             (ht-get message "id")
              message-widget)))
 
 (defun aibo:--update-message-widget (message widget)
   (let* ((message-widget
-          (ht-get aibo:b-message-widgets (oref message :id))))
+          (ht-get aibo:b-message-widgets (ht-get message "id"))))
     (widget-value-set message-widget message)))
 
 (defun aibo:--render-conversation (conversation)
-  (let ((all-messages (oref conversation :all-messages))
+  (let ((all-messages (ht-get conversation "all_messages"))
         (rendered-messages nil)
-        (current-message-id (oref conversation :current-message-id)))
+        (current-message-id (ht-get conversation "current_message_id")))
 
     (while current-message-id
-      (setq message (cdr (assoc (intern current-message-id) all-messages)))
-
-      (if message
-          (progn
-            (push message rendered-messages)
-            (setq current-message-id (oref message :parent-id)))
-        (setq current-message-id nil)))
+      (let* ((message (ht-get all-messages current-message-id)))
+        (if message
+            (progn
+              (push message rendered-messages)
+              (setq current-message-id (ht-get message "parent_id")))
+          (setq current-message-id nil))))
 
     (--each rendered-messages (aibo:--render-message-widget it))))
 
@@ -296,14 +317,14 @@
 (defun aibo:--widget-at-point ()
   (interactive)
   (let* ((message (aibo:--message-at-point)))
-    (ht-get aibo:b-message-widgets (oref message :id))))
+    (ht-get aibo:b-message-widgets (ht-get message "id"))))
 
 (defun aibo:remove-message-at-point ()
   (interactive)
   (let* ((message (aibo:--message-at-point))
-         (message-id (oref message :id)))
+         (message-id (ht-get message "id")))
     (aibo:api-delete-message
-     :conversation-id (oref aibo:b-conversation :id)
+     :conversation-id (ht-get aibo:b-conversation "id")
      :message-id message-id
      :delete-after nil
      :on-success (lambda (conversation)
@@ -312,9 +333,9 @@
 (defun aibo:remove-messages-after-point ()
   (interactive)
   (let* ((message (aibo:--message-at-point))
-         (message-id (oref message :id)))
+         (message-id (ht-get message "id")))
     (aibo:api-delete-message
-     :conversation-id (oref aibo:b-conversation :id)
+     :conversation-id (ht-get aibo:b-conversation "id")
      :message-id message-id
      :delete-after t
      :on-success (lambda (conversation)
@@ -324,17 +345,7 @@
 (defun aibo:edit-message-at-point ()
   (interactive)
   (let* ((message (aibo:--message-at-point))
-         (message-id (oref message :id)))))
-
-(defun aibo:regenerate-last-message ()
-  (interactive)
-  (aibo:api-delete-message
-   :conversation-id (oref aibo:b-conversation :id)
-   :message-id (oref aibo:b-conversation :current-message-id)
-   :delete-after nil
-   :on-success (lambda (conversation)
-                 (aibo:go-to-conversation :conversation conversation)
-                 (aibo:stream-assistant-message))))
+         (message-id (ht-get message "id")))))
 
 ;; ---[ Create a conversation ]-------------------
 (defvar aibo:--create-conversation-history nil
@@ -369,13 +380,10 @@
                     content-input))
          (message-inputs (aibo:get-conversation-template-message-inputs
                           :template template
-                          :content content))
-         (api-message-inputs (--map
-                              (aibo:CreateMessageInput-to-api it)
-                              message-inputs)))
+                          :content content)))
 
     (aibo:api-create-conversation
-     :message-inputs api-message-inputs
+     :message-inputs message-inputs
      :on-success
      (lambda (conversation)
        (cond
@@ -384,20 +392,28 @@
            (aibo:go-to-conversation :conversation conversation)
            (with-current-buffer (current-buffer)
              (aibo:stream-assistant-message
-              :on-success (lambda ()
-                            (aibo:generate-current-conversation-title))))))
+              :conversation-id (ht-get conversation "id")
+              :on-success #'aibo:generate-current-conversation-title))))
 
         ((eq action-type :buffer-insert)
-         (with-current-buffer buffer
-           (save-excursion
-             (aibo:api-ws-stream-assistant-message-chunks
-              :conversation-id (oref conversation :id)
-              :on-message (lambda (text)
-                            (goto-char current-point)
-                            (insert text)
-                            (setq current-point (+ current-point (length text))))
-              :on-success (lambda ()
-                            (aibo:api-delete-conversation :id (oref conversation :id))))))))))))
+         (aibo:api-ws-stream-assistant-message-chunks
+          :conversation-id (ht-get conversation "id")
+          :message-callbacks
+          (ht ("stream_assistant_message_chunk"
+               (lambda (ws-message)
+                 (let* ((chunk (ht-get ws-message "chunk"))
+                        (status (ht-get chunk "status"))
+                        (text (cond
+                               ((string= status "streaming") (ht-get chunk "text"))
+                               ((string= status "error") (ht-get chunk "content")))))
+                   (with-current-buffer buffer
+                     (save-excursion
+                       (goto-char current-point)
+                       (insert text)
+                       (setq current-point (+ current-point (length text))))))))
+              ("event_completed"
+               (lambda ()
+                 (aibo:api-delete-conversation :id (ht-get conversation "id"))))))))))))
 
 ;; ---[ Search conversations ]--------------------
 (defvar aibo:--conversation-message-search-history nil
@@ -415,8 +431,8 @@
 
 (defun aibo:--ivy-conversation-message-search (query)
   (--map (format "%s: %s"
-                 (oref it :conversation-id)
-                 (replace-regexp-in-string "\n" "\\\\n" (oref it :content-text)))
+                 (ht-get it "conversation_id")
+                 (replace-regexp-in-string "\n" "\\\\n" (ht-get it "content_text")))
          (aibo:api-conversation-message-search
           :query query
           :limit 100

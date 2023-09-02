@@ -19,9 +19,11 @@ class StreamAssistantMessageEventRequest(BaseEvent):
     model: str
 
 
-class StreamAssistantMessageEventResponse(BaseEvent):
-    kind: Literal["stream_assistant_message"] = "stream_assistant_message"
-    message: api_models.Message
+class RegenerateLastAssistantMessageEventRequest(BaseEvent):
+    kind: Literal[
+        "regenerate_last_assistant_message"
+    ] = "regenerate_last_assistant_message"
+    conversation_id: UUID
 
 
 class StreamAssistantMessageChunksEventRequest(BaseEvent):
@@ -30,8 +32,20 @@ class StreamAssistantMessageChunksEventRequest(BaseEvent):
     model: str
 
 
-class StreamAssistantMessageChunksEventResponse(BaseEvent):
-    kind: Literal["stream_assistant_message_chunks"] = "stream_assistant_message_chunks"
+class CurrentConversationEventResponse(BaseEvent):
+    kind: Literal["current_conversation"] = "current_conversation"
+    conversation: api_models.Conversation
+
+
+class StreamAssistantMessageEventResponse(BaseEvent):
+    kind: Literal["stream_assistant_message"] = "stream_assistant_message"
+    conversation_id: UUID
+    message: api_models.Message
+
+
+class StreamAssistantMessageChunkEventResponse(BaseEvent):
+    kind: Literal["stream_assistant_message_chunk"] = "stream_assistant_message_chunk"
+    conversation_id: UUID
     chunk: chat.StreamingMessageResult
 
 
@@ -39,6 +53,17 @@ WebsocketEventRequest = Annotated[
     Union[
         StreamAssistantMessageEventRequest,
         StreamAssistantMessageChunksEventRequest,
+        RegenerateLastAssistantMessageEventRequest,
+    ],
+    Field(discriminator="kind"),
+]
+
+
+WebsocketEventResponse = Annotated[
+    Union[
+        CurrentConversationEventResponse,
+        StreamAssistantMessageEventResponse,
+        StreamAssistantMessageChunkEventResponse,
     ],
     Field(discriminator="kind"),
 ]
@@ -51,7 +76,7 @@ ws_router.set_event_class(WebsocketEventRequest)
 async def stream_assistant_message(
     websocket: WebSocket,
     event: StreamAssistantMessageEventRequest,
-) -> AsyncGenerator[StreamAssistantMessageEventResponse, None]:
+) -> AsyncGenerator[WebsocketEventResponse, None]:
     conversation = await chat.Conversation.get(event.conversation_id)
     assert conversation, f"Conversation doesn't exist: {event.conversation_id}"
 
@@ -59,22 +84,58 @@ async def stream_assistant_message(
     async for message in conversation.stream_assistant_message(source=source):
         yield StreamAssistantMessageEventResponse(
             id=event.id,
+            conversation_id=conversation.id,
             message=api_models.Message.from_chat(message),
         )
+
+    yield CurrentConversationEventResponse(
+        id=event.id, conversation=api_models.Conversation.from_chat(conversation)
+    )
+
+
+@ws_router.route
+async def regenerate_last_assistant_message(
+    websocket: WebSocket,
+    event: RegenerateLastAssistantMessageEventRequest,
+) -> AsyncGenerator[WebsocketEventResponse, None]:
+    conversation = await chat.Conversation.get(event.conversation_id)
+    assert conversation, f"Conversation doesn't exist: {event.conversation_id}"
+
+    for message in reversed(conversation.get_current_history()):
+        if message.role != chat.MessageRole.ASSISTANT:
+            break
+
+        await conversation.delete_message(message)
+
+    yield CurrentConversationEventResponse(
+        id=event.id, conversation=api_models.Conversation.from_chat(conversation)
+    )
+
+    async for message in conversation.stream_assistant_message():
+        yield StreamAssistantMessageEventResponse(
+            id=event.id,
+            conversation_id=conversation.id,
+            message=api_models.Message.from_chat(message),
+        )
+
+    yield CurrentConversationEventResponse(
+        id=event.id, conversation=api_models.Conversation.from_chat(conversation)
+    )
 
 
 @ws_router.route
 async def stream_assistant_message_chunks(
     websocket: WebSocket,
     event: StreamAssistantMessageChunksEventRequest,
-) -> AsyncGenerator[StreamAssistantMessageChunksEventResponse, None]:
+) -> AsyncGenerator[WebsocketEventResponse, None]:
     conversation = await chat.Conversation.get(event.conversation_id)
     assert conversation, f"Conversation doesn't exist: {event.conversation_id}"
 
     source = chat.OpenAIModelSource.build(model=event.model)
     async for chunk in conversation.stream_assistant_message_chunks(source=source):
-        yield StreamAssistantMessageChunksEventResponse(
+        yield StreamAssistantMessageChunkEventResponse(
             id=event.id,
+            conversation_id=conversation.id,
             chunk=chunk,
         )
 

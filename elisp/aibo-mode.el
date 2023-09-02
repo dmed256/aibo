@@ -17,7 +17,7 @@
     (define-key map (kbd "C-c C-k")     #'aibo:remove-message-at-point)
     (define-key map (kbd "C-c C-x C-k") #'aibo:remove-messages-after-point)
     (define-key map (kbd "C-c C-e")     #'aibo:edit-message-at-point)
-    (define-key map (kbd "C-c C-c")     #'aibo:regenerate-last-message)
+    (define-key map (kbd "C-c C-c")     #'aibo:regenerate-current-conversation-last-assistant-message)
     (define-key map (kbd "C-c C-x C-t") #'aibo:generate-current-conversation-title)
     (define-key map (kbd "M-RET")       #'aibo:submit-user-message)
     map))

@@ -49,6 +49,11 @@
 
 
 ;; ---[ Request Wrappers ]------------------------
+(defun aibo:--request-json-parser ()
+  (let ((json-object-type 'hash-table)
+        (json-array-type 'list))
+    (json-read)))
+
 (defun aibo:--api-request (&rest args)
   (let* ((path (plist-get args :path))
          (type (plist-get args :type))
@@ -60,7 +65,7 @@
          (response (request (format "http://localhost:%s%s" aibo:server-port path)
                      :type type
                      :headers '(("Content-Type" . "application/json"))
-                     :parser 'json-read
+                     :parser #'aibo:--request-json-parser
                      :encoding 'utf-8
                      :sync sync
                      :timeout (or timeout 1)
@@ -104,9 +109,7 @@
   (let* ((on-success (plist-get args :on-success)))
     (aibo:--api-post
      :path "/chat/conversations/search"
-     :response-transform (lambda (response)
-                           (let* ((api-conversations (cdr (assoc 'conversations response))))
-                             (--map (aibo:ConversationSummary-from-api it) api-conversations)))
+     :response-transform (lambda (response) (ht-get response "conversations"))
      :on-success on-success)))
 
 (defun aibo:api-get-conversation (&rest args)
@@ -114,9 +117,7 @@
          (on-success (plist-get args :on-success)))
     (aibo:--api-get
      :path (format "/chat/conversations/%s" id)
-     :response-transform (lambda (response)
-                           (let* ((api-conversation (cdr (assoc 'conversation response))))
-                             (aibo:Conversation-from-api api-conversation)))
+     :response-transform (lambda (response) (ht-get response "conversation"))
      :on-success on-success)))
 
 (defun aibo:api-create-conversation (&rest args)
@@ -124,11 +125,9 @@
          (on-success (plist-get args :on-success)))
     (aibo:--api-post
      :path "/chat/conversations"
-     :data `(("messages" . ,message-inputs)
-             ("model"    . ,aibo:model))
-     :response-transform (lambda (response)
-                           (let* ((api-conversation (cdr (assoc 'conversation response))))
-                             (aibo:Conversation-from-api api-conversation)))
+     :data (ht ("messages" message-inputs)
+               ("model"    aibo:model))
+     :response-transform (lambda (response) (ht-get response "conversation"))
      :on-success on-success)))
 
 (defun aibo:api-delete-conversation (&rest args)
@@ -144,10 +143,8 @@
          (on-success (plist-get args :on-success)))
     (aibo:--api-post
      :path (format "/chat/conversations/%s/submit-user-message" conversation-id)
-     :data `(("text" . ,text))
-     :response-transform (lambda (response)
-                           (let* ((api-conversation (cdr (assoc 'conversation response))))
-                             (aibo:Conversation-from-api api-conversation)))
+     :data (ht ("text" text))
+     :response-transform (lambda (response) (ht-get response "conversation"))
      :on-success on-success)))
 
 (defun aibo:api-edit-message (&rest args)
@@ -157,10 +154,8 @@
          (on-success (plist-get args :on-success)))
     (aibo:--api-put
      :path (format "/chat/conversations/%s/messages/%s" conversation-id message-id)
-     :data `(("text" . ,text))
-     :response-transform (lambda (response)
-                           (let* ((api-conversation (cdr (assoc 'conversation response))))
-                             (aibo:Conversation-from-api api-conversation)))
+     :data (ht ("text" text))
+     :response-transform (lambda (response) (ht-get response "conversation"))
      :on-success on-success)))
 
 (defun aibo:api-delete-message (&rest args)
@@ -173,9 +168,7 @@
                    conversation-id
                    message-id
                    (if delete-after "true" "false"))
-     :response-transform (lambda (response)
-                           (let* ((api-conversation (cdr (assoc 'conversation response))))
-                             (aibo:Conversation-from-api api-conversation)))
+     :response-transform (lambda (response) (ht-get response "conversation"))
      :on-success on-success)))
 
 (defun aibo:api-set-conversation-title (&rest args)
@@ -184,10 +177,8 @@
          (on-success (plist-get args :on-success)))
     (aibo:--api-patch
      :path (format "/chat/conversations/%s" id)
-     :data `((:title . ,title))
-     :response-transform (lambda (response)
-                           (let* ((api-conversation (cdr (assoc 'conversation response))))
-                             (aibo:Conversation-from-api api-conversation)))
+     :data (ht (:title title))
+     :response-transform (lambda (response) (ht-get response "conversation"))
      :on-success on-success)))
 
 (defun aibo:api-conversation-message-search (&rest args)
@@ -197,22 +188,18 @@
          (sync (plist-get args :sync)))
     (aibo:--api-post
      :path "/chat/conversations/message-search"
-     :data `((:query . ,query)
-             (:limit . ,limit))
+     :data (ht (:query query)
+               (:limit limit))
      :sync sync
-     :response-transform (lambda (response)
-                           (let* ((api-search-results (cdr (assoc 'search_results response))))
-                             (--map (aibo:MessageSearchResult-from-api it) api-search-results))))))
+     :response-transform (lambda (response) (ht-get response "search_results")))))
 
 (defun aibo:api-generate-conversation-title (&rest args)
   (let* ((id (plist-get args :id))
          (on-success (plist-get args :on-success)))
     (aibo:--api-post
      :path (format "/chat/conversations/%s/generate-title" id)
-     :data `(("model" . ,aibo:model))
-     :response-transform (lambda (response)
-                           (let* ((api-conversation (cdr (assoc 'conversation response))))
-                             (aibo:Conversation-from-api api-conversation)))
+     :data (ht ("model" aibo:model))
+     :response-transform (lambda (response) (ht-get response "conversation"))
      :on-success on-success)))
 
 
@@ -237,7 +224,7 @@
                   (is-completed (string= event-kind "event_completed"))
                   (callback (ht-get aibo:--websocket-callbacks event-id)))
              (if callback
-                 (funcall callback event is-completed))
+                 (funcall callback event))
              (if is-completed
                  (ht-remove! aibo:--websocket-callbacks event-id))))
          :on-close
@@ -246,50 +233,44 @@
            (setq aibo:--websocket-callbacks (ht-create))))))
 
 (defun aibo:--api-ws-send (&rest args)
-  (let* ((partial-event (plist-get args :event))
-         (response-transform (plist-get args :response-transform))
-         (on-message (plist-get args :on-message))
-         (on-success (plist-get args :on-success))
-         (event-id (uuidgen-4))
-         (event (add-to-list 'partial-event `("id" . ,event-id))))
+  (let* ((event (plist-get args :event))
+         (message-callbacks (plist-get args :message-callbacks))
+         (event-id (uuidgen-4)))
+    (ht-set! event "id" event-id)
     (ht-set! aibo:--websocket-callbacks
              event-id
-             (lambda (event is-completed)
-               (if is-completed
-                   (funcall on-success)
-                 (funcall on-message (funcall response-transform event)))))
+             (lambda (ws-message)
+               (let* ((event-kind (ht-get ws-message "kind"))
+                      (callback (ht-get message-callbacks event-kind)))
+                 (if callback
+                     (funcall callback ws-message)))))
     (websocket-send-text (aibo:websocket) (json-encode event))))
 
 (defun aibo:api-ws-stream-assistant-message (&rest args)
   (let* ((conversation-id (plist-get args :conversation-id))
-         (on-message (plist-get args :on-message))
-         (on-success (plist-get args :on-success)))
+         (message-callbacks (plist-get args :message-callbacks)))
     (aibo:--api-ws-send
-     :event `(("kind"            . "stream_assistant_message")
-              ("conversation_id" . ,conversation-id)
-              ("model"           . ,aibo:model))
-     :response-transform (lambda (response)
-                           (let* ((api-message (ht-get response "message")))
-                             (aibo:Message-from-api api-message)))
-     :on-message on-message
-     :on-success on-success)))
+     :event (ht ("kind"            "stream_assistant_message")
+                ("conversation_id" conversation-id)
+                ("model"           aibo:model))
+     :message-callbacks message-callbacks)))
+
+(defun aibo:api-ws-regenerate-last-assistant-message (&rest args)
+  (let* ((conversation-id (plist-get args :conversation-id))
+         (message-callbacks (plist-get args :message-callbacks)))
+    (aibo:--api-ws-send
+     :event (ht ("kind"            "regenerate_last_assistant_message")
+                ("conversation_id" conversation-id)
+                ("model"           aibo:model))
+     :message-callbacks message-callbacks)))
 
 (defun aibo:api-ws-stream-assistant-message-chunks (&rest args)
   (let* ((conversation-id (plist-get args :conversation-id))
-         (on-message (plist-get args :on-message))
-         (on-success (plist-get args :on-success)))
+         (message-callbacks (plist-get args :message-callbacks)))
     (aibo:--api-ws-send
-     :event `(("kind"            . "stream_assistant_message_chunks")
-              ("conversation_id" . ,conversation-id)
-              ("model"           . ,aibo:model))
-     :response-transform
-     (lambda (response)
-       (let* ((chunk (ht-get response "chunk"))
-              (status (ht-get chunk "status")))
-       (cond
-        ((string= status "streaming") (ht-get chunk "text"))
-        ((string= status "error") (ht-get chunk "content")))))
-     :on-message on-message
-     :on-success on-success)))
+     :event (ht ("kind"            "stream_assistant_message_chunks")
+                ("conversation_id" conversation-id)
+                ("model"           aibo:model))
+     :message-callbacks message-callbacks)))
 
 (provide 'aibo-api)

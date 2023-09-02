@@ -1,4 +1,5 @@
 import inspect
+import logging
 import typing
 from typing import Any, Callable, Literal, Type, TypeVar, Union
 from uuid import UUID
@@ -6,6 +7,8 @@ from uuid import UUID
 import pydantic
 from fastapi import WebSocket
 from pydantic import BaseModel
+
+logger = logging.getLogger(__name__)
 
 T = TypeVar("T")
 EventRoute = Callable[[WebSocket, T], Any]
@@ -61,6 +64,8 @@ class WebsocketRouter:
         event_json = await websocket.receive_json()
         event = pydantic.parse_obj_as(self._event_request_class, event_json)
 
+        logger.info(f"Received websocket event: {event.kind} ({event.id})")
+
         event_route = self._routes_by_event.get(event.__class__)
         if not event_route:
             raise ValueError(f"No route for event: {event.__class__}")
@@ -71,3 +76,5 @@ class WebsocketRouter:
         await websocket.send_text(
             EventCompleted(id=event.id).json(),
         )
+
+        logger.info(f"Completed websocket event: {event.kind} ({event.id})")

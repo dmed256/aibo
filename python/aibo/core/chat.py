@@ -9,6 +9,7 @@ from typing import (
     Annotated,
     Any,
     AsyncGenerator,
+    Generator,
     Iterable,
     Literal,
     Optional,
@@ -532,7 +533,7 @@ class Conversation(ConversationSummary):
             content=TextMessageContent(
                 text=f"""
 --------------------
-{self.stringify_conversation()}
+{await self.stringify_conversation()}
 --------------------
 
 Create a small 3-6 word tweet that captures the intent of the above within three to six words and 2 lowercase twitter-like tags. Do not use newlines or quotes. Here are some examples of good correct tweets:
@@ -603,6 +604,14 @@ Create a small 3-6 word tweet that captures the intent of the above within three
                 id=self.id,
                 current_message_id=self.current_message.id,
             )
+
+    def iter_current_history(self) -> Generator[Message, None, None]:
+        for message in self.get_current_history():
+            yield message
+
+    def iter_message_history(self, message: Message) -> Generator[Message, None, None]:
+        for message in self.get_message_history(message):
+            yield message
 
     def get_current_history(self) -> list[Message]:
         return self.get_message_history(self.current_message)

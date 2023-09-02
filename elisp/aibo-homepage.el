@@ -1,6 +1,7 @@
 ;;; aibo-homepage.el --- Methods related to the homepage view which lists historical conversations -*- lexical-binding: t -*-
 (require 's)
 (require 'dash)
+(require 'ht)
 (require 'ivy)
 (require 'widget)
 
@@ -41,7 +42,7 @@
                (aibo:--render-conversation-section it))
            (widget-insert (propertize
                            "No conversations"
-                           'font-lock-face '(:foreground "#9c9c9c"))))
+                           'font-lock-face `(:foreground ,aibo:header-foreground-color))))
 
          (widget-setup)
 
@@ -53,7 +54,7 @@
     ;; Add the section title
     (widget-insert (propertize
                     (format "%s\n" (oref section :name))
-                    'font-lock-face '(:foreground "#9c9c9c")))
+                    'font-lock-face `(:foreground ,aibo:homepage-header-foreground-color)))
 
     ;; Add conversation titles for the section
     (--each-indexed conversations
@@ -65,8 +66,8 @@
         (widget-create
          'link
          :notify (lambda (&rest ignore)
-                   (let* ((id (oref conversation :id))
-                          (title (oref conversation :title))
+                   (let* ((id (ht-get conversation "id"))
+                          (title (ht-get conversation "title"))
                           (conversation-buffer (get-buffer
                                                 (aibo:--get-conversation-buffer-name
                                                  :id id
@@ -97,11 +98,11 @@
          'link
          :notify (lambda (&rest _ignore)
                    (aibo:go-to-conversation-by-id
-                    :conversation-id (oref conversation :id)))
+                    :conversation-id (ht-get conversation "id")))
          :button-prefix ""
          :button-suffix ""
          :tag (aibo:--stylize-conversation-title
-               (oref conversation :title)))))))
+               (ht-get conversation "title")))))))
 
 (defun aibo:--stylize-conversation-title (title)
   (let* ((parts (s-split " " title))
@@ -109,7 +110,9 @@
           (--map
            (let* ((part it)
                   (is-tag? (s-starts-with? "#" part))
-                  (color (if is-tag? "#8cc4ff" "#e9b96e")))
+                  (color (if is-tag?
+                             aibo:conversation-tag-foreground-color
+                           aibo:conversation-title-foreground-color)))
              (propertize part 'face `(:foreground ,color)))
            parts)))
     (concat (s-join " " stylized-parts) "\n")))
