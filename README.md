@@ -11,7 +11,7 @@
 
 ## ⚠️  Disclaimer
 
-- I'm not familiar with elisp so there might be quicky code conventions used
+- I'm not familiar with elisp so there might be quirky code conventions used
 - It's mainly a personal project but will try hard to keep things backwards compatible
 - Since I do a lot of coding, I'll be adding more utilities to help with coding flows (e.g. LSP-integration and git repo integrations) so expect potentially random features
 
