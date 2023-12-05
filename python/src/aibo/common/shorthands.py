@@ -11,13 +11,15 @@ __all__ = [
     "expand_contents_shorthands_inplace",
 ]
 
+IMAGE_SHORTHANDS_PATTERN = "(?:im|sc)"
+
 
 async def message_content_expands_image(
     contents: list[chat.MessageContent],
 ) -> bool:
-    im_pattern = _shorthand_pattern("im")
+    image_pattern = _shorthand_pattern(IMAGE_SHORTHANDS_PATTERN)
     return any(
-        im_pattern.search(content.text)
+        image_pattern.search(content.text)
         for content in contents
         if isinstance(content, chat.TextMessageContent)
     )
@@ -62,22 +64,41 @@ async def expand_contents_shorthands_inplace(
             )
 
     # Replace image shorthand (Requires vision model!)
-    im_pattern = _shorthand_pattern("im")
+    image_pattern = _shorthand_pattern(IMAGE_SHORTHANDS_PATTERN)
     message_content_indices_with_image = {
-        indices
+        indices: {
+            "is_im": r"\im" in re_match.group(),
+            "is_sc": r"\sc" in re_match.group(),
+        }
         for indices, content in text_contents.items()
-        if im_pattern.search(content.text)
+        if (re_match := image_pattern.search(content.text))
     }
     if not message_content_indices_with_image:
         return
 
-    if not (image := await ImageModel.from_clipboard(trace_id=trace_id)):
-        raise ValueError(f"No image in clipboard")
+    has_clipboard_image = any(
+        matches["is_im"]
+        for matches in message_content_indices_with_image.values()
+    )
+    has_screen_image = any(
+        matches["is_sc"]
+        for matches in message_content_indices_with_image.values()
+    )
+
+    clipboard_image: ImageModel | None = None
+    screen_image: ImageModel | None = None
+
+    if has_clipboard_image and not (clipboard_image := await ImageModel.from_clipboard(trace_id=trace_id)):
+        raise ValueError("No image in clipboard")
+
+    if has_screen_image and not (screen_image := await ImageModel.from_screen(trace_id=trace_id)):
+        raise ValueError("Unable to screenshot screen")
 
     for message_index, contents in enumerate(message_contents):
         new_contents: list[chat.MessageContent] = []
         for content_index, content in enumerate(contents):
-            if (message_index, content_index) not in message_content_indices_with_image:
+            maybe_match = message_content_indices_with_image.get((message_index, content_index))
+            if not maybe_match:
                 new_contents.append(content)
                 continue
 
@@ -85,8 +106,9 @@ async def expand_contents_shorthands_inplace(
                 new_contents.append(content)
                 continue
 
-            for sub_content_index, text in enumerate(im_pattern.split(content.text)):
+            for sub_content_index, text in enumerate(image_pattern.split(content.text)):
                 if sub_content_index % 2:
+                    image = clipboard_image if maybe_match['is_im'] else screen_image
                     new_contents.append(chat.ImageMessageContent(image_id=image.id))
                 elif text:
                     new_contents.append(chat.TextMessageContent(text=text))
@@ -109,6 +131,7 @@ def _shorthand_pattern(shorthand: str) -> re.Pattern:
 
     Builtins:
     - \im: Clipboard image
+    - \sc: Monitor screenshot
 
     Common:
     - \r: Emacs region
