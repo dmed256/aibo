@@ -178,7 +178,7 @@ class OpenAIModel(BaseModel):
 OPENAI_MODELS = [
     # GPT 3.5
     OpenAIModel(
-        name="gpt3.5",
+        name="gpt-3.5",
         model="gpt-3.5-turbo-16k",
         model_family="gpt-3.5",
         modalities={"text"},
@@ -187,7 +187,7 @@ OPENAI_MODELS = [
     ),
     # GPT 4
     OpenAIModel(
-        name="gpt4",
+        name="gpt-4",
         model="gpt-4",
         model_family="gpt-4",
         modalities={"text"},
@@ -195,7 +195,7 @@ OPENAI_MODELS = [
         cost_per_unit=0.06 / 1_000,
     ),
     OpenAIModel(
-        name="gpt4-32k",
+        name="gpt-4-32k",
         model="gpt-4-32k",
         model_family="gpt-4",
         modalities={"text"},
@@ -203,7 +203,7 @@ OPENAI_MODELS = [
         cost_per_unit=0.12 / 1_000,
     ),
     OpenAIModel(
-        name="gpt4-turbo",
+        name="gpt-4-turbo",
         model="gpt-4-1106-preview",
         model_family="gpt-4",
         modalities={"text"},
@@ -211,7 +211,7 @@ OPENAI_MODELS = [
         cost_per_unit=0.03 / 1_000,
     ),
     OpenAIModel(
-        name="gpt4v",
+        name="gpt-4v",
         model="gpt-4-vision-preview",
         model_family="gpt-4",
         modalities={"text", "image"},

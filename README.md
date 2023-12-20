@@ -21,7 +21,7 @@
 - Persist all conversations and messages, enabling search on past conversations in a SQLite DB (Default: `~/.aibo/database.db`)
 - Supports function-calling API through simple function decorators ([package.py](https://github.com/dmed256/aibo/tree/main/python/aibo/core/package.py)). To add custom packages, define `AIBO_CUSTOM_PACKAGES_MODULE` to your custom Python module (e.g. `aibo.packages`).
 - The `aibo` server automatically runs on emacs which includes hot-reloading (Default: `localhost:5000` on the `*Aibo server*` buffer)
-- Inject images from clipboard using the `\im` shorthand (⚠️  requires gpt4-v access). Press `[RET]` on conversation `[Image:<id>]` links to open in a local browser.
+- Inject images from clipboard using the `\im` shorthand (⚠️  requires gpt-4-vision access). Press `[RET]` on conversation `[Image:<id>]` links to open in a local browser.
 
 ## Installation
 
