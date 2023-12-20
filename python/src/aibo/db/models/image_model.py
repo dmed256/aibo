@@ -50,7 +50,7 @@ class ImageModel(BaseDBModel):
 
     @classmethod
     async def from_clipboard(cls, *, trace_id: UUID) -> Optional[Self]:
-        if (clipboard_image := ImageGrab.grabclipboard()):
+        if clipboard_image := ImageGrab.grabclipboard():
             return await cls.from_image(
                 image=clipboard_image,
                 trace_id=trace_id,
@@ -60,7 +60,7 @@ class ImageModel(BaseDBModel):
 
     @classmethod
     async def from_screen(cls, *, trace_id: UUID) -> Optional[Self]:
-        if (screen_image := ImageGrab.grab()):
+        if screen_image := ImageGrab.grab():
             return await cls.from_image(
                 image=screen_image,
                 trace_id=trace_id,

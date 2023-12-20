@@ -77,27 +77,31 @@ async def expand_contents_shorthands_inplace(
         return
 
     has_clipboard_image = any(
-        matches["is_im"]
-        for matches in message_content_indices_with_image.values()
+        matches["is_im"] for matches in message_content_indices_with_image.values()
     )
     has_screen_image = any(
-        matches["is_sc"]
-        for matches in message_content_indices_with_image.values()
+        matches["is_sc"] for matches in message_content_indices_with_image.values()
     )
 
     clipboard_image: ImageModel | None = None
     screen_image: ImageModel | None = None
 
-    if has_clipboard_image and not (clipboard_image := await ImageModel.from_clipboard(trace_id=trace_id)):
+    if has_clipboard_image and not (
+        clipboard_image := await ImageModel.from_clipboard(trace_id=trace_id)
+    ):
         raise ValueError("No image in clipboard")
 
-    if has_screen_image and not (screen_image := await ImageModel.from_screen(trace_id=trace_id)):
+    if has_screen_image and not (
+        screen_image := await ImageModel.from_screen(trace_id=trace_id)
+    ):
         raise ValueError("Unable to screenshot screen")
 
     for message_index, contents in enumerate(message_contents):
         new_contents: list[chat.MessageContent] = []
         for content_index, content in enumerate(contents):
-            maybe_match = message_content_indices_with_image.get((message_index, content_index))
+            maybe_match = message_content_indices_with_image.get(
+                (message_index, content_index)
+            )
             if not maybe_match:
                 new_contents.append(content)
                 continue
@@ -108,7 +112,7 @@ async def expand_contents_shorthands_inplace(
 
             for sub_content_index, text in enumerate(image_pattern.split(content.text)):
                 if sub_content_index % 2:
-                    image = clipboard_image if maybe_match['is_im'] else screen_image
+                    image = clipboard_image if maybe_match["is_im"] else screen_image
                     new_contents.append(chat.ImageMessageContent(image_id=image.id))
                 elif text:
                     new_contents.append(chat.TextMessageContent(text=text))

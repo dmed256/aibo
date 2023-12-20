@@ -211,7 +211,7 @@ OPENAI_MODELS = [
         cost_per_unit=0.03 / 1_000,
     ),
     OpenAIModel(
-        name="gpt-4v",
+        name="gpt-4-v",
         model="gpt-4-vision-preview",
         model_family="gpt-4",
         modalities={"text", "image"},
