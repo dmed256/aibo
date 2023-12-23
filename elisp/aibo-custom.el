@@ -101,7 +101,7 @@
   "Conversation header subheader face"
   :group 'aibo)
 
-(defface aibo:conversation-content-face
+(defface aibo:conversation-header-content-face
   '((t :foreground "#9c9c9c"))
   "Conversation header content face"
   :group 'aibo)

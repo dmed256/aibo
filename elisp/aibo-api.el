@@ -212,6 +212,17 @@
        (--sort #'string< (ht-get response "packages")))
      :on-success on-success)))
 
+(defun aibo:api-set-package-enabled (&rest args)
+  (let* ((conversation-id (plist-get args :conversation-id))
+         (package-name (plist-get args :package-name))
+         (is-enabled (plist-get args :is-enabled))
+         (on-success (plist-get args :on-success)))
+    (aibo:--api-patch
+     :path (format "/chat/conversations/%s/packages" conversation-id)
+     :data (ht ("package_enabled_updates" (ht (package-name is-enabled))))
+     :response-transform (lambda (response) (ht-get response "conversation"))
+     :on-success on-success)))
+
 
 ;; ---[ Websocket ]-------------------------------
 (setq aibo:--websocket-callbacks (ht-create))
@@ -223,7 +234,7 @@
       aibo:--websocket
     (setq aibo:--websocket (aibo:--connect-defun))))
 
-(websocket aibo:--connect-websocket ()
+(defun aibo:--connect-websocket ()
   (interactive)
   (setq aibo:--websocket
         (websocket-open

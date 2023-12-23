@@ -1,4 +1,5 @@
 import datetime as dt
+import logging
 import re
 from functools import cache
 from typing import Optional
@@ -21,6 +22,8 @@ from aibo.db.client import get_session
 from aibo.db.models import ConversationModel, ImageModel, MessageModel
 from aibo.server.routes import api_models
 
+logger = logging.getLogger(__name__)
+
 router = APIRouter(prefix="/chat")
 
 
@@ -32,8 +35,8 @@ class GetModelsResponse(BaseModel):
     models: list[str]
 
 
-class GetPackagesResponse(BaseModel):
-    package_names: list[str]
+class GetRegisteredPackagesResponse(BaseModel):
+    packages: list[str]
 
 
 class SearchConversationsRequest(BaseModel):
@@ -125,8 +128,12 @@ class DeleteMessageResponse(BaseModel):
     conversation: api_models.Conversation
 
 
-class GetRegisteredPackagesResponse(BaseModel):
-    packages: list[str]
+class UpdateConversationPackagesRequest(BaseModel):
+    package_enabled_updates: dict[str, bool | None]
+
+
+class UpdateConversationPackagesResponse(BaseModel):
+    conversation: api_models.Conversation
 
 
 @router.get("/models")
@@ -425,5 +432,35 @@ async def delete_message(
         await conversation.delete_message(message)
 
     return DeleteMessageResponse(
+        conversation=api_models.Conversation.from_chat(conversation),
+    )
+
+
+@router.patch("/conversations/{conversation_id}/packages")
+async def update_conversation_packages(
+    conversation_id: UUID,
+    request: UpdateConversationPackagesRequest,
+) -> UpdateConversationPackagesResponse:
+    conversation = await chat.Conversation.get(conversation_id)
+    assert conversation, "Conversation not found"
+
+    # Keep packages that weren't specified or were explicitly set to enabled
+    enabled_package_names = {
+        package.name
+        for package in conversation.packages
+        if request.package_enabled_updates.get(package.name, True)
+    }
+
+    # Add potentially new enabled packages
+    enabled_package_names |= {
+        package_name
+        for package_name, is_enabled in request.package_enabled_updates.items()
+        if is_enabled
+    }
+
+    # Sort and remove non-existent packages
+    await conversation.set_enabled_packages(list(enabled_package_names))
+
+    return UpdateConversationPackagesResponse(
         conversation=api_models.Conversation.from_chat(conversation),
     )

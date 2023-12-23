@@ -115,7 +115,7 @@
 
 (defun aibo:get-packages (conversation)
   (if (null aibo:--has-cached-packages)
-      (aibo:--refresh-cached-packages))
+      (aibo:refresh-packages))
   (let* ((enabled-packages (ht-get conversation "enabled_package_names")))
     (--map
      (ht ("name" it)
@@ -282,13 +282,26 @@
          (propertize
           "Packages\n"
           'font-lock-face 'aibo:conversation-header-content-face)))
-    (--each packages
-      (widget-insert (propertize
-                      (format
-                       "[%s] %s\n"
-                       (if (ht-get it "is-enabled") "x" " ")
-                       (ht-get it "name"))
-                      'font-lock-face 'aibo:conversation-header-content-face)))))
+    (-each packages
+      (lambda (package)
+        (let* ((name (ht-get package "name"))
+               (is-enabled (ht-get package "is-enabled"))
+               (link-text (format "- [%s] %s\n" (if is-enabled "X" " ") name)))
+          (widget-create
+           'link
+           :notify (lambda (&rest _)
+                     (aibo:api-set-package-enabled
+                      :conversation-id (ht-get conversation "id")
+                      :package-name name
+                      :is-enabled (not is-enabled)
+                      :on-success (lambda (conversation)
+                                    (aibo:go-to-conversation :conversation conversation))))
+           :button-prefix ""
+           :button-suffix ""
+           :tag (propertize
+                 link-text
+                 'read-only t
+                 'font-lock-face 'aibo:conversation-header-content-face)))))))
 
 (defun aibo:submit-user-message ()
   (interactive)
@@ -356,6 +369,23 @@
                (ht-get ws-message "message"))
               (set-buffer-modified-p nil))))
          ("event_completed" on-success)))))
+
+(defun aibo:toggle-package (&rest args)
+  (interactive)
+  (let* ((package-name (plist-get args :package-name))
+         (conversation-id (ht-get aibo:b-conversation "id"))
+         ((enabled-packages (ht-get aibo:b-conversation "enabled_package_names"))))
+    (aibo:aibo:api-set-package-enabled
+     :conversation-id conversation-id
+     :package-name package-name
+     :is-enabled (not (-any?
+                       (lambda (package)
+                         (and (string= package-name (ht-get package "name"))
+                              (ht-get package "is-enabled")))
+                       enabled-packages))
+     :on-success
+     (lambda (conversation)
+       (aibo:go-to-conversation :conversation conversation)))))
 
 ;; ---[ Render conversation ]---------------------
 (define-widget 'chat-message 'default

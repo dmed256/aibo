@@ -297,6 +297,23 @@ class ConversationSummary(BaseModel):
 
         return self
 
+    async def set_enabled_packages(self, package_names: list[str]) -> Self:
+        self.packages = [
+            package
+            for package_name in set(package_names)
+            if (package := Package.get(package_name))
+        ]
+        enabled_package_names = [package.name for package in self.packages]
+        async with get_session() as session:
+            await session.execute(
+                sa.update(ConversationModel)
+                .where(ConversationModel.id == self.id)
+                .values(enabled_package_names=enabled_package_names)
+            )
+            await session.commit()
+
+        return self
+
 
 class Conversation(ConversationSummary):
     root_message: Message
