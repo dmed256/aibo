@@ -681,8 +681,15 @@ Create a small 3-6 word tweet that captures the intent of the above within three
         *_, generated_message = await title_conversation.generate_assistant_message()
         await title_conversation.soft_delete()
 
-        sampled_title = str(generated_message.contents[0])
-        await self.set_title(re.sub(r"\s+", " ", sampled_title))
+        title = str(generated_message.contents[0])
+
+        # Combine whitespace
+        title = re.sub(r"\s+", " ", title)
+        # Remove annoying wrapper comments
+        title = re.sub(r"""^['"`]?""", "", title)
+        title = re.sub(r"""['"`]?$""", "", title)
+
+        await self.set_title(title)
 
     async def edit_message(
         self,
