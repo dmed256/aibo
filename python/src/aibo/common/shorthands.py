@@ -113,6 +113,12 @@ async def expand_contents_shorthands_inplace(
             for sub_content_index, text in enumerate(image_pattern.split(content.text)):
                 if sub_content_index % 2:
                     image = clipboard_image if maybe_match["is_im"] else screen_image
+                    if not image:
+                        if maybe_match["is_im"]:
+                            raise ValueError("Expected clipboard image")
+                        else:
+                            raise ValueError("Missing display screenshot image")
+
                     new_contents.append(chat.ImageMessageContent(image_id=image.id))
                 elif text:
                     new_contents.append(chat.TextMessageContent(text=text))
