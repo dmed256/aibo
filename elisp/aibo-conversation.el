@@ -555,6 +555,11 @@
   (let* ((message (aibo:--message-at-point))
          (message-id (ht-get message "id")))))
 
+(defun aibo:copy-message-contents-at-point ()
+  (interactive)
+  (let* ((message (aibo:--message-at-point)))
+    (kill-new (ht-get message "content_text") nil)))
+
 ;; ---[ Create a conversation ]-------------------
 (defvar aibo:--create-conversation-history nil
   "History for `aibo:create-conversation'")
