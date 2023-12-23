@@ -232,7 +232,7 @@
   (interactive)
   (if (and aibo:--websocket (websocket-openp aibo:--websocket))
       aibo:--websocket
-    (setq aibo:--websocket (aibo:--connect-defun))))
+    (aibo:--connect-websocket)))
 
 (defun aibo:--connect-websocket ()
   (interactive)
