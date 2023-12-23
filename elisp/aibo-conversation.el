@@ -161,7 +161,7 @@
      :on-create
      (lambda (buffer)
        (aibo:api-get-conversation
-        :id conversation-id
+        :conversation-id conversation-id
         :on-success (lambda (conversation)
                       (with-current-buffer buffer
                         (aibo:--dangerously-render-conversation conversation))))))))
@@ -248,7 +248,7 @@
 (defun aibo:generate-current-conversation-title ()
   (interactive)
   (aibo:api-generate-conversation-title
-   :id (ht-get aibo:b-conversation "id")
+   :conversation-id (ht-get aibo:b-conversation "id")
    :on-success #'aibo:--on-conversation-title-change))
 
 (defun aibo:set-conversation-title (conversation)
@@ -256,7 +256,7 @@
   (let* ((id (ht-get conversation "id"))
          (title (read-string "Title: ")))
     (aibo:api-set-conversation-title
-     :id id
+     :conversation-id id
      :title title
      :on-success #'aibo:--on-conversation-title-change)))
 
@@ -625,7 +625,8 @@
                        (setq current-point (+ current-point (length text))))))))
               ("event_completed"
                (lambda ()
-                 (aibo:api-delete-conversation :id (ht-get conversation "id"))))))))))))
+                 (aibo:api-delete-conversation
+                  :conversation-id (ht-get conversation "id"))))))))))))
 
 ;; ---[ Search conversations ]--------------------
 (defvar aibo:--conversation-message-search-history nil

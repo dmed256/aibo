@@ -113,10 +113,10 @@
      :on-success on-success)))
 
 (defun aibo:api-get-conversation (&rest args)
-  (let* ((id (plist-get args :id))
+  (let* ((conversation-id (plist-get args :conversation-id))
          (on-success (plist-get args :on-success)))
     (aibo:--api-get
-     :path (format "/chat/conversations/%s" id)
+     :path (format "/chat/conversations/%s" conversation-id)
      :response-transform (lambda (response) (ht-get response "conversation"))
      :on-success on-success)))
 
@@ -132,10 +132,10 @@
      :on-success on-success)))
 
 (defun aibo:api-delete-conversation (&rest args)
-  (let* ((id (plist-get args :id))
+  (let* ((conversation-id (plist-get args :conversation-id))
          (on-success (plist-get args :on-success)))
     (aibo:--api-delete
-     :path (format "/chat/conversations/%s" id)
+     :path (format "/chat/conversations/%s" conversation-id)
      :on-success on-success)))
 
 (defun aibo:api-submit-user-message (&rest args)
@@ -173,11 +173,11 @@
      :on-success on-success)))
 
 (defun aibo:api-set-conversation-title (&rest args)
-  (let* ((id (plist-get args :id))
+  (let* ((conversation-id (plist-get args :conversation-id))
          (title (plist-get args :title))
          (on-success (plist-get args :on-success)))
     (aibo:--api-patch
-     :path (format "/chat/conversations/%s" id)
+     :path (format "/chat/conversations/%s" conversation-id)
      :data (ht (:title title))
      :response-transform (lambda (response) (ht-get response "conversation"))
      :on-success on-success)))
@@ -195,10 +195,10 @@
      :response-transform (lambda (response) (ht-get response "search_results")))))
 
 (defun aibo:api-generate-conversation-title (&rest args)
-  (let* ((id (plist-get args :id))
+  (let* ((conversation-id (plist-get args :conversation-id))
          (on-success (plist-get args :on-success)))
     (aibo:--api-post
-     :path (format "/chat/conversations/%s/generate-title" id)
+     :path (format "/chat/conversations/%s/generate-title" conversation-id)
      :data (ht ("model" aibo:model))
      :response-transform (lambda (response) (ht-get response "conversation"))
      :on-success on-success)))

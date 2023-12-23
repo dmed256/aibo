@@ -73,7 +73,7 @@
                                                 (aibo:--get-conversation-buffer-name id))))
 
                      (aibo:api-delete-conversation
-                      :id id
+                      :conversation-id id
                       :on-success
                       (lambda (_)
                         (if conversation-buffer
