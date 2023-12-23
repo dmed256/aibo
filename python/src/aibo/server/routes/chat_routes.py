@@ -268,7 +268,8 @@ async def conversation_message_search(
             )
             .where(
                 MessageModel.content_text.ilike(f"%{request.query}%"),
-                ConversationModel.deleted_at != None,
+                MessageModel.deleted_at == None,
+                ConversationModel.deleted_at == None,
             )
             .order_by(ConversationModel.created_at.desc())
             .limit(request.limit)
