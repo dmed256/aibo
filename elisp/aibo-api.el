@@ -219,9 +219,11 @@
 
 (defun aibo:websocket ()
   (interactive)
-  (or aibo:--websocket (aibo:--connect-websocket)))
+  (if (and aibo:--websocket (websocket-openp aibo:--websocket))
+      aibo:--websocket
+    (setq aibo:--websocket (aibo:--connect-defun))))
 
-(defun aibo:--connect-websocket ()
+(websocket aibo:--connect-websocket ()
   (interactive)
   (setq aibo:--websocket
         (websocket-open
