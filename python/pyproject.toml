@@ -23,7 +23,7 @@ dependencies = [
   "Pillow==10.1.*",
   "pydantic==2.2.*",
   "sqlalchemy[asyncio]==2.0.21",
-  "termcolor==2.*",
+  "termcolor==2.3.0",
   "tiktoken==0.4.*",
   "types-cachetools==5.*",
   "uvicorn[standard]==0.22.*",
