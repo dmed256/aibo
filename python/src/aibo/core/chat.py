@@ -592,8 +592,18 @@ class Conversation(ConversationSummary):
         model: str,
     ) -> OpenAIModelSource:
         current_openai_model = self.openai_model_source.openai_model
+
+        new_modalities = set(current_openai_model.modalities)
+        if "image" not in new_modalities:
+            if any(
+                isinstance(content, ImageMessageContent)
+                for message in self.all_messages.values()
+                for content in message.contents
+            ):
+                new_modalities.add("image")
+
         new_openai_model = get_openai_model(
-            modalities=current_openai_model.modalities,
+            modalities=new_modalities,
             name=model,
         )
 

@@ -14,7 +14,7 @@ __all__ = [
 IMAGE_SHORTHANDS_PATTERN = "(?:im|sc)"
 
 
-async def message_content_expands_image(
+def message_content_expands_image(
     contents: list[chat.MessageContent],
 ) -> bool:
     image_pattern = _shorthand_pattern(IMAGE_SHORTHANDS_PATTERN)

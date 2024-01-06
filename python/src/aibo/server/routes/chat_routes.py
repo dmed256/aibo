@@ -193,20 +193,7 @@ async def create_conversation(
 
     trace_id = uuid4()
 
-    modalities: list[Modality] = ["text"]
-    if await message_content_expands_image(
-        [
-            content
-            for message_input in request.messages
-            for content in message_input.contents
-        ]
-    ):
-        modalities.append("image")
-
-    openai_model = get_openai_model(
-        modalities=modalities,
-        model=request.model,
-    )
+    openai_model = get_openai_model(model=request.model, modalities=["text"])
     openai_model_source = chat.OpenAIModelSource.build(
         model=openai_model.model,
         temperature=request.temperature,
@@ -234,6 +221,11 @@ async def create_conversation(
             role=message_input.role,
             contents=message_input.contents,
         )
+
+    # Make sure that we have a model set with the right modalities
+    await conversation.maybe_override_openai_model_source(
+        model=conversation.openai_model_source.model,
+    )
 
     return CreateConversationResponse(
         conversation=api_models.Conversation.from_chat(conversation)
