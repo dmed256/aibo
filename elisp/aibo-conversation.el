@@ -574,17 +574,20 @@
   (ivy-read "Template: " (aibo:--conversation-template-options)
             :require-match t
             :history #'aibo:--create-conversation-history
-            :action #'aibo:--create-conversation-from-template
+            :action #'aibo:--create-conversation-from-template-option
             :caller #'aibo:--create-conversation-with-content))
 
 (ivy-configure 'aibo:--create-conversation-with-content
   :initial-input "^")
 
-(defun aibo:--create-conversation-from-template (template-option)
+(defun aibo:--create-conversation-from-template-option (template-option)
   (let* ((template-short-name (car (split-string template-option "\\s-+")))
          (template (aibo:get-conversation-template
-                    :short-name template-short-name))
-         (action-type (oref template :action-type))
+                    :short-name template-short-name)))
+    (aibo:--create-conversation-from-template template)))
+
+(defun aibo:--create-conversation-from-template (template)
+  (let* ((action-type (oref template :action-type))
          (buffer (current-buffer))
          (current-point (point))
          (content-input (read-string (format "%s: " (oref template :name))))
@@ -607,7 +610,7 @@
              (aibo:stream-assistant-message
               :conversation-id (ht-get conversation "id")))))
 
-        ((eq action-type :buffer-insert)
+        ((eq action-type :buffer-stream-insert)
          (aibo:api-ws-stream-assistant-message-chunks
           :conversation-id (ht-get conversation "id")
           :message-callbacks

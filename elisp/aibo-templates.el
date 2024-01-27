@@ -52,17 +52,17 @@
           (lambda (content)
             `(,(ht ("role"     "system")
                    ("contents" `(,(ht ("kind" "text")
-                                      ("text" aibo:--generic-system-message))))))
-            ,(ht ("role"     "user")
-                 ("contents" `(,(ht ("kind" "text")
-                                    ("text" (concat "Can you spellcheck and review the grammar for this with minimal changes?:\n"
+                                      ("text" aibo:--generic-system-message)))))
+              ,(ht ("role"     "user")
+                   ("contents" `(,(ht ("kind" "text")
+                                      ("text" (concat "Can you spellcheck and review the grammar for this with minimal changes?:\n"
                                                     "\n"
-                                                    content))))))))
+                                                    content)))))))))
         ;; ---[ Copilot ]------------------
         ,(aibo:ConversationTemplate
           :short-name "cp"
           :name "Copilot"
-          :action-type :buffer-insert
+          :action-type :buffer-stream-insert
           :get-message-inputs
           (lambda (content)
             (let* ((prefix (buffer-substring (point-min) (point)))

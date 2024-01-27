@@ -255,7 +255,8 @@
          :on-close
          (lambda (websocket)
            (setq aibo:--websocket nil)
-           (setq aibo:--websocket-callbacks (ht-create))))))
+           (setq aibo:--websocket-callbacks (ht-create)))))
+  aibo:--websocket)
 
 (defun aibo:--api-ws-send (&rest args)
   (let* ((event (plist-get args :event))

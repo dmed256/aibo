@@ -59,12 +59,15 @@ Optional keybindings and Ivy buffer configurations are detailed below.
 
 ## Keybindings and Configurations
 
-Here are my personal keybindings
+Here are my personal keybindings:
 ```elisp
 (global-set-key (kbd "C-M-h") 'aibo:homepage)
 (global-set-key (kbd "C-M-s") 'aibo:message-search)
+(global-set-key (kbd "C-M-y") 'aibo:rephrase-yank)
 (global-set-key (kbd "M-/") 'aibo:create-conversation)
 ```
+
+Rephrase-yank inspired by [this tweet](https://twitter.com/johnschulman2/status/1744114169228771563).
 
 Hide `aibo` buffers from Ivy by adding the following:
 ```elisp
