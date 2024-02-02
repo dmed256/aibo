@@ -42,6 +42,7 @@ class OpenAITextContent(TypedDict):
 
 class OpenAIImageUrlField(TypedDict):
     url: str
+    detail: Literal["auto", "low", "high"] | None
 
 
 class OpenAIImageUrlContent(TypedDict):

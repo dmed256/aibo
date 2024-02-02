@@ -10,6 +10,7 @@ from uuid import UUID
 import openai
 from pydantic import BaseModel, Field, TypeAdapter
 
+from aibo.common.constants import Env
 from aibo.common.openai import CompletionError, OpenAIContent, OpenAIModel
 from aibo.common.types import JsonValue
 
@@ -94,7 +95,8 @@ class ImageMessageContent(BaseMessageContent):
         return {
             "type": "image_url",
             "image_url": {
-                "url": f"data:image/{image.format};base64,{image.contents_b64}"
+                "url": f"data:image/{image.format};base64,{image.contents_b64}",
+                "detail": Env.get().OPENAI_IMAGE_DETAIL,
             },
         }
 
