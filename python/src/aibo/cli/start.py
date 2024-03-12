@@ -9,6 +9,8 @@ Options:
     python -m aibo.cli.start --port [PORT]
 
 """
+import os
+
 import fire
 import uvicorn
 
@@ -16,6 +18,7 @@ from aibo.common.constants import PACKAGE_DIR
 
 
 def main(port: int = 5000) -> None:
+    os.chdir(PACKAGE_DIR)
     uvicorn.run(
         "aibo.server.main:create_app",
         port=port,
