@@ -1,4 +1,3 @@
-import datetime as dt
 import logging
 from typing import Annotated, AsyncGenerator, Literal, Union
 from uuid import UUID
@@ -6,7 +5,6 @@ from uuid import UUID
 from fastapi import APIRouter, WebSocket
 from pydantic import Field
 
-from aibo.common.openai import get_openai_model
 from aibo.core import chat
 from aibo.server.routes import api_models
 from aibo.server.routes.websocket_route import BaseEvent, WebsocketRouter

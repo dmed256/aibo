@@ -196,6 +196,14 @@ OPENAI_MODELS = [
         cost_per_unit=0.06 / 1_000,
     ),
     OpenAIModel(
+        name="gpt-4-turbo",
+        model="gpt-4-turbo-2024-04-09",
+        model_family="gpt-4",
+        modalities={"text", "image"},
+        context_length=128_000,
+        cost_per_unit=30_00 / 1_000_000,
+    ),
+    OpenAIModel(
         name="gpt-4-32k",
         model="gpt-4-32k",
         model_family="gpt-4",
@@ -204,21 +212,13 @@ OPENAI_MODELS = [
         cost_per_unit=0.12 / 1_000,
     ),
     OpenAIModel(
-        name="gpt-4-turbo",
-        model="gpt-4-1106-preview",
-        model_family="gpt-4",
-        modalities={"text"},
-        context_length=128_000,
-        cost_per_unit=0.03 / 1_000,
-    ),
-    OpenAIModel(
         name="gpt-4-v",
         model="gpt-4-vision-preview",
         model_family="gpt-4",
         modalities={"text", "image"},
         context_length=128_000,
         cost_per_unit=0.03 / 1_000,
-    ),
+     ),
     # Whisper
     OpenAIModel(
         name="whisper",
