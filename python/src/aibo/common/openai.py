@@ -218,7 +218,7 @@ OPENAI_MODELS = [
         modalities={"text", "image"},
         context_length=128_000,
         cost_per_unit=0.03 / 1_000,
-     ),
+    ),
     # Whisper
     OpenAIModel(
         name="whisper",
