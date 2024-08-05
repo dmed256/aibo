@@ -219,7 +219,22 @@ OPENAI_MODELS = [
         context_length=128_000,
         cost_per_unit=0.03 / 1_000,
     ),
-    # Whisper
+    OpenAIModel(
+        name="gpt-4o",
+        model="gpt-4o",
+        model_family="gpt-4",
+        modalities={"text", "image"},
+        context_length=128_000,
+        cost_per_unit=15.0 / 1_000_000,
+    ),
+    OpenAIModel(
+        name="gpt-4o-mini",
+        model="gpt-4o-mini",
+        model_family="gpt-4",
+        modalities={"text", "image"},
+        context_length=128_000,
+        cost_per_unit=0.15 / 1_000_000,
+    ),    # Whisper
     OpenAIModel(
         name="whisper",
         model="whisper-1",
