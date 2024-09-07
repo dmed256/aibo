@@ -232,11 +232,14 @@
 
     (if (or point-was-inside-user-widget? (not original-point))
         (progn
-          (goto-char (+
-                      (widget-field-start aibo:b-new-user-message-widget)
-                      user-widget-point-shift))
-          (let ((recenter-positions '(bottom)))
-            (recenter-top-bottom)))
+          (when-let ((window (get-buffer-window (current-buffer))))
+            ;; Select the window and update its point
+            (with-selected-window window
+              (goto-char (+
+                          (widget-field-start aibo:b-new-user-message-widget)
+                          user-widget-point-shift))
+              (let ((recenter-positions '(bottom)))
+                (recenter-top-bottom)))))
       (progn
         (goto-char original-point)
         (set-window-start nil original-window-start)))))
@@ -265,7 +268,9 @@
           (format "[%s] %s"
                   aibo:model
                   (ht-get conversation "title")))
-  (save-window-excursion (aibo:homepage)))
+  ;; Locks down emacs for a while
+  ;; (save-window-excursion (aibo:homepage))
+  )
 
 (defun aibo:--render-conversation-header (conversation)
   (let* ((id (ht-get conversation "id"))
