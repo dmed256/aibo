@@ -73,14 +73,17 @@ class SourceFinder:
         return typing.cast(ast.AST, self._root_node)
 
     def get_node_location(self, node: ast.AST) -> lsp_types.Location:
-        end_lineno = node.end_lineno or node.lineno
-        end_col_offset = node.end_col_offset or node.col_offset
+        node_lineno = node.lineno  # type: ignore[attr-defined]
+        node_col_offset = node.col_offset  # type: ignore[attr-defined]
+
+        end_lineno = node.end_lineno or node_lineno  # type: ignore[attr-defined]
+        end_col_offset = node.end_col_offset or node_col_offset  # type: ignore[attr-defined]
 
         return lsp_types.Location(
             uri=self._uri,
             range=lsp_types.Range(
                 start=lsp_types.Position(
-                    line=node.lineno - 1, character=node.col_offset - 1
+                    line=node_lineno - 1, character=node_col_offset - 1
                 ),
                 end=lsp_types.Position(
                     line=end_lineno - 1, character=end_col_offset - 1
