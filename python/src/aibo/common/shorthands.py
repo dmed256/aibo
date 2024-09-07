@@ -128,10 +128,7 @@ async def expand_contents_shorthands_inplace(
 
 def _shorthand_replace(*, content: str, shorthand: str, replacement: str) -> str:
     p = _shorthand_pattern(shorthand)
-    try:
-        return p.sub(replacement, content)
-    except:
-        return content
+    return p.sub(lambda m: replacement, content)
 
 
 @cache
