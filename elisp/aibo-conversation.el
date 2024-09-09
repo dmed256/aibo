@@ -651,18 +651,22 @@
               :action #'aibo:--conversation-message-search-action)))
 
 (defun aibo:--ivy-conversation-message-search (query)
-  (--map (format "%s: %s"
-                 (ht-get it "conversation_id")
-                 (replace-regexp-in-string "\n" "\\\\n" (ht-get it "content_text")))
+  (--map (let* ((conversation_id (ht-get it "conversation_id"))
+                (conversation_title (ht-get it "conversation_title"))
+                (search_result (ht-get it "search_result")))
+           (format "%s: %s"
+                   (propertize
+                    conversation_title
+                    'conversation_id conversation_id
+                    'face '(:foreground "#b4fa70"))
+                   (replace-regexp-in-string "\n" "\\\\n" search_result)))
          (aibo:api-conversation-message-search
           :query query
           :limit 100
           :sync t)))
 
 (defun aibo:--conversation-message-search-action (search-result)
-  (when (string-match "^\\(.*?\\):.*" search-result)
-    (let ((conversation-id (match-string-no-properties 1 search-result)))
-      (aibo:go-to-conversation-by-id
-       :conversation-id conversation-id))))
+  (let ((conversation-id (get-text-property 0 'conversation_id search-result)))
+    (aibo:go-to-conversation-by-id :conversation-id conversation-id)))
 
 (provide 'aibo-conversation)

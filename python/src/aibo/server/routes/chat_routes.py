@@ -77,7 +77,8 @@ class ConversationMessageSearchRequest(BaseModel):
 
 class MessageSearchResult(BaseModel):
     conversation_id: UUID
-    content_text: str
+    conversation_title: str
+    search_result: str
 
 
 class ConversationMessageSearchResponse(BaseModel):
@@ -248,30 +249,39 @@ async def get_conversation(
 async def conversation_message_search(
     request: ConversationMessageSearchRequest,
 ) -> ConversationMessageSearchResponse:
+    if not request.query:
+        return ConversationMessageSearchResponse(search_results=[])
+
+    query = " AND ".join(
+        [clean_part for part in request.query.split() if (clean_part := part.strip())]
+    )
     async with get_session() as session:
         query_result = await session.execute(
-            sa.select(MessageModel)
-            .join(
-                ConversationModel, MessageModel.conversation_id == ConversationModel.id
+            sa.text(
+                """
+                SELECT
+                    conversations.id as conversation_id,
+                    conversations.title as conversation_title,
+                    snippet(message_content_search, 2, '', '', '...', 5) AS search_result
+                FROM message_content_search
+                JOIN conversations
+                    ON conversations.id = message_content_search.conversation_id
+                WHERE
+                    message_content_search MATCH :query
+                LIMIT :limit
+                """
+            ).params(
+                query=query,
+                limit=request.limit,
             )
-            .with_only_columns(
-                ConversationModel.id.label("conversation_id"),
-                MessageModel.content_text,
-            )
-            .where(
-                MessageModel.content_text.ilike(f"%{request.query}%"),
-                MessageModel.deleted_at == None,
-                ConversationModel.deleted_at == None,
-            )
-            .order_by(ConversationModel.created_at.desc())
-            .limit(request.limit)
         )
 
     return ConversationMessageSearchResponse(
         search_results=[
             MessageSearchResult(
                 conversation_id=row.conversation_id,
-                content_text=row.content_text,
+                conversation_title=row.conversation_title,
+                search_result=row.search_result,
             )
             for row in query_result.all()
         ]

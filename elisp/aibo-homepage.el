@@ -38,6 +38,8 @@
            (erase-buffer))
          (remove-overlays)
 
+         (aibo:--render-sync-header)
+
          (if sections
              (--each-indexed sections
                (aibo:--render-conversation-section it))
@@ -49,6 +51,20 @@
 
          (set-buffer-modified-p nil)
          (goto-char current-point))))))
+
+(defun aibo:--render-sync-header()
+  ;; [Resync]
+  (widget-create
+   'link
+   :notify (lambda (&rest ignore)
+             (aibo:refresh-homepage))
+   :button-prefix "["
+   :button-suffix "] "
+   :tag "Resync")
+
+  (widget-insert "\n\n")
+  )
+
 
 (defun aibo:--render-conversation-section (section)
   (let ((conversations (oref section :conversations)))
