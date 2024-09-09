@@ -1,6 +1,6 @@
 from enum import StrEnum
 from functools import cache
-from typing import Annotated, Any, Iterable, Literal, Optional, Self, Union
+from typing import Annotated, Any, Iterable, Literal, Self, Union
 
 import numpy as np
 import openai
@@ -56,8 +56,8 @@ OpenAIContent = OpenAITextContent | OpenAIImageUrlContent
 class OpenAIMessage(BaseModel):
     role: OpenAIRole
     content: list[OpenAIContent]
-    name: Optional[str] = None
-    function_call: Optional[dict[str, Any]] = None
+    name: str | None = None
+    function_call: dict[str, Any] | None = None
 
 
 class OpenAIFunction(BaseModel):
@@ -152,7 +152,7 @@ OpenAIModelFamily = Literal[
     "whisper-1",
     "text-embedding-ada-2",
 ]
-Modality = Literal["text", "image", "audio", "speech"]
+Modality = Literal["text", "image", "audio", "speech", "embedding"]
 
 
 class OpenAIModel(BaseModel):
@@ -165,75 +165,52 @@ class OpenAIModel(BaseModel):
     model_family: OpenAIModelFamily
     modalities: set[Modality]
 
-    # For text-models, how many tokens can be in context
-    context_length: Optional[int] = None
 
-    # Approximate pricing, unit being
-    # - Token (max of input + output)
-    # - Image (for dall-e)
-    # - Characters (TTS)
-    # - Seconds (Whisper)
-    cost_per_unit: float
-
-
+# Ordered by first = latest
 OPENAI_MODELS = [
-    # GPT 3.5
     OpenAIModel(
-        name="gpt-3.5",
-        model="gpt-3.5-turbo-16k",
-        model_family="gpt-3.5",
-        modalities={"text"},
-        context_length=16_000,
-        cost_per_unit=0.002 / 1_000,
-    ),
-    # GPT 4
-    OpenAIModel(
-        name="gpt-4",
-        model="gpt-4",
-        model_family="gpt-4",
-        modalities={"text"},
-        context_length=8_000,
-        cost_per_unit=0.06 / 1_000,
-    ),
-    OpenAIModel(
-        name="gpt-4-turbo",
-        model="gpt-4-turbo-2024-04-09",
+        name="gpt-4o-mini",
+        model="gpt-4o-mini",
         model_family="gpt-4",
         modalities={"text", "image"},
-        context_length=128_000,
-        cost_per_unit=30_00 / 1_000_000,
-    ),
-    OpenAIModel(
-        name="gpt-4-32k",
-        model="gpt-4-32k",
-        model_family="gpt-4",
-        modalities={"text"},
-        context_length=32_000,
-        cost_per_unit=0.12 / 1_000,
-    ),
-    OpenAIModel(
-        name="gpt-4-v",
-        model="gpt-4-vision-preview",
-        model_family="gpt-4",
-        modalities={"text", "image"},
-        context_length=128_000,
-        cost_per_unit=0.03 / 1_000,
     ),
     OpenAIModel(
         name="gpt-4o",
         model="gpt-4o",
         model_family="gpt-4",
         modalities={"text", "image"},
-        context_length=128_000,
-        cost_per_unit=15.0 / 1_000_000,
     ),
+    # GPT 4
     OpenAIModel(
-        name="gpt-4o-mini",
-        model="gpt-4o-mini",
+        name="gpt-4-v",
+        model="gpt-4-vision-preview",
         model_family="gpt-4",
         modalities={"text", "image"},
-        context_length=128_000,
-        cost_per_unit=0.15 / 1_000_000,
+    ),
+    OpenAIModel(
+        name="gpt-4-32k",
+        model="gpt-4-32k",
+        model_family="gpt-4",
+        modalities={"text"},
+    ),
+    OpenAIModel(
+        name="gpt-4-turbo",
+        model="gpt-4-turbo-2024-04-09",
+        model_family="gpt-4",
+        modalities={"text", "image"},
+    ),
+    OpenAIModel(
+        name="gpt-4",
+        model="gpt-4",
+        model_family="gpt-4",
+        modalities={"text"},
+    ),
+    # GPT 3.5
+    OpenAIModel(
+        name="gpt-3.5",
+        model="gpt-3.5-turbo-16k",
+        model_family="gpt-3.5",
+        modalities={"text"},
     ),
     # Whisper
     OpenAIModel(
@@ -241,7 +218,6 @@ OPENAI_MODELS = [
         model="whisper-1",
         model_family="whisper-1",
         modalities={"audio"},
-        cost_per_unit=0.006 / 60,
     ),
     # TTS
     OpenAIModel(
@@ -249,22 +225,19 @@ OPENAI_MODELS = [
         model="tts-1",
         model_family="tts-1",
         modalities={"speech"},
-        cost_per_unit=0.015 / 1_000,
     ),
     OpenAIModel(
         name="tts-hd",
         model="tts-1-hd",
         model_family="tts-1",
         modalities={"speech"},
-        cost_per_unit=0.03 / 1_000,
     ),
     # Embeddings
     OpenAIModel(
         name="embedding",
         model="text-embedding-ada-002",
         model_family="text-embedding-ada-2",
-        modalities=set(),
-        cost_per_unit=0.0001 / 1_000,
+        modalities={"embedding"},
     ),
 ]
 
@@ -294,17 +267,15 @@ def get_openai_model(
     *,
     modalities: Iterable[Modality],
     # Optional filters
-    name: Optional[str] = None,
-    model: Optional[str] = None,
-    model_family: Optional[OpenAIModelFamily] = None,
-    context_length: Optional[int] = None,
+    name: str | None = None,
+    model: str | None = None,
+    model_family: OpenAIModelFamily | None = None,
 ) -> OpenAIModel:
     return _cached_get_openai_model(
         modalities=tuple(modalities),
         name=name,
         model=model,
         model_family=model_family,
-        context_length=context_length,
     )
 
 
@@ -313,21 +284,16 @@ def _cached_get_openai_model(
     *,
     modalities: tuple[Modality],
     # Optional filters
-    name: Optional[str] = None,
-    model: Optional[str] = None,
-    model_family: Optional[OpenAIModelFamily] = None,
-    context_length: Optional[int] = None,
+    name: str | None = None,
+    model: str | None = None,
+    model_family: OpenAIModelFamily | None = None,
 ) -> OpenAIModel:
     modalities: set[Modality] = set(modalities)
     potential_models: list[OpenAIModel] = [
         model for model in OPENAI_MODELS if modalities.issubset(model.modalities)
     ]
 
-    # The default model should prioritize modality capabilities followed by cost
-    default_openai_model = min(
-        potential_models,
-        key=lambda model: model.cost_per_unit,
-    )
+    default_openai_model = potential_models[0]
 
     for field, value in [
         ("name", name),
@@ -341,15 +307,15 @@ def _cached_get_openai_model(
                 if getattr(potential_model, field) == value
             ]
 
-    if context_length is not None:
-        potential_models = [
-            model
-            for model in potential_models
-            if model.context_length and model.context_length >= context_length
-        ]
+    if potential_models:
+        return potential_models[0]
 
-    return min(
-        potential_models,
-        default=default_openai_model,
-        key=lambda model: model.cost_per_unit,
-    )
+    if name:
+        return OpenAIModel(
+            name=name,
+            model=name,
+            model_family="gpt-4",
+            modalities=modalities or {"text", "image"},
+        )
+
+    return default_openai_model
