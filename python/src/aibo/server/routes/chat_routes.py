@@ -1,7 +1,5 @@
 import datetime as dt
 import logging
-import re
-from functools import cache
 from typing import Optional
 from uuid import UUID, uuid4
 
@@ -10,16 +8,14 @@ from fastapi import APIRouter
 from pydantic import BaseModel, ConfigDict
 
 from aibo.common.constants import Env
-from aibo.common.openai import Modality, get_openai_model
+from aibo.common.openai import get_openai_model
 from aibo.common.shorthands import (
     expand_contents_shorthands_inplace,
     expand_messages_shorthands_inplace,
-    message_content_expands_image,
 )
 from aibo.core import chat
 from aibo.core.package import Package
 from aibo.db.client import get_session
-from aibo.db.models import ConversationModel, ImageModel, MessageModel
 from aibo.server.routes import api_models
 
 logger = logging.getLogger(__name__)
@@ -56,7 +52,6 @@ class CreateConversationRequest(BaseModel):
 
     model: Optional[str] = None
     temperature: Optional[float] = None
-    max_tokens: Optional[int] = None
     enabled_package_names: list[str] = []
     messages: list[chat.CreateMessageInputs]
     shorthands: dict[str, str] = {}
@@ -198,7 +193,6 @@ async def create_conversation(
     openai_model_source = chat.OpenAIModelSource.build(
         model=openai_model.model,
         temperature=request.temperature,
-        max_tokens=request.max_tokens,
     )
 
     await expand_messages_shorthands_inplace(
@@ -226,6 +220,7 @@ async def create_conversation(
     # Make sure that we have a model set with the right modalities
     await conversation.maybe_override_openai_model_source(
         model=conversation.openai_model_source.model,
+        temperature=request.temperature,
     )
 
     return CreateConversationResponse(

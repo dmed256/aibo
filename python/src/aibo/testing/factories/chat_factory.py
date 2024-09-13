@@ -51,12 +51,10 @@ class OpenAIModelSourceFactory(BaseFactory[OpenAIModelSource]):
         *,
         model: Optional[str] = None,
         temperature: Optional[float] = None,
-        max_tokens: Optional[int] = None,
     ) -> OpenAIModelSource:
         return OpenAIModelSource(
             model=model or "fake-model",
-            temperature=temperature or 0.5,
-            max_tokens=max_tokens,
+            temperature=temperature or 0.3,
         )
 
 

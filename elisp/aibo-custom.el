@@ -16,6 +16,11 @@
   :type 'string
   :group 'aibo)
 
+(defcustom aibo:temperature 0.3
+  "The temperature used when sampling the model"
+  :type 'string
+  :group 'aibo)
+
 (defcustom aibo:enable-debug-logging t
   "If set to t, adds logging in *Aibo logs*"
   :type 'boolean

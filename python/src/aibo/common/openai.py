@@ -146,8 +146,9 @@ StreamingMessageResult = Annotated[
 ]
 
 OpenAIModelFamily = Literal[
-    "gpt-3.5",
+    "o1",
     "gpt-4",
+    "gpt-3.5",
     "tts-1",
     "whisper-1",
     "text-embedding-ada-2",
@@ -168,6 +169,20 @@ class OpenAIModel(BaseModel):
 
 # Ordered by first = latest
 OPENAI_MODELS = [
+    # o1
+    OpenAIModel(
+        name="o1-preview",
+        model="o1-preview",
+        model_family="o1",
+        modalities={"text"},
+    ),
+    OpenAIModel(
+        name="o1-mini",
+        model="o1-mini",
+        model_family="o1",
+        modalities={"text"},
+    ),
+    # GPT 4o
     OpenAIModel(
         name="gpt-4o-mini",
         model="gpt-4o-mini",

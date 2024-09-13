@@ -589,7 +589,9 @@ class Conversation(ConversationSummary):
 
     async def maybe_override_openai_model_source(
         self,
+        *,
         model: str,
+        temperature: float | None = None,
     ) -> OpenAIModelSource:
         current_openai_model = self.openai_model_source.openai_model
 
@@ -607,7 +609,10 @@ class Conversation(ConversationSummary):
             name=model,
         )
 
-        source = OpenAIModelSource.build(model=new_openai_model.model)
+        source = OpenAIModelSource.build(
+            model=new_openai_model.model,
+            temperature=temperature,
+        )
         if new_openai_model.model != current_openai_model.model:
             await self.set_openai_model_source(source)
 

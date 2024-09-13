@@ -72,7 +72,7 @@ class Env(BaseModel):
             OPENAI_EMBEDDING_MODEL=os.environ.get(
                 "OPENAI_EMBEDDING_MODEL", "text-embedding-ada-002"
             ),
-            OPENAI_TEMPERATURE=float(os.environ.get("OPENAI_TEMPERATURE", "0.9")),
+            OPENAI_TEMPERATURE=float(os.environ.get("OPENAI_TEMPERATURE", "0.3")),
             OPENAI_IMAGE_DETAIL=typing.cast(
                 Literal["auto", "low", "high"],
                 os.environ.get("OPENAI_IMAGE_DETAIL", "auto"),
@@ -101,7 +101,7 @@ class Env(BaseModel):
             # OpenAI
             OPENAI_MODEL="fake-model",
             OPENAI_EMBEDDING_MODEL="fake-embedding-model",
-            OPENAI_TEMPERATURE=float(os.environ.get("OPENAI_TEMPERATURE", "0.9")),
+            OPENAI_TEMPERATURE=float(os.environ.get("OPENAI_TEMPERATURE", "0.3")),
             OPENAI_IMAGE_DETAIL="auto",
             # Packages
             AIBO_CUSTOM_PACKAGES_MODULE=os.environ.get("AIBO_CUSTOM_PACKAGES_MODULE"),

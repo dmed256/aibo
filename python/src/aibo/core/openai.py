@@ -101,10 +101,10 @@ async def _build_openai_args(
         ],
     )
 
-    if source.max_tokens:
-        args["max_tokens"] = source.max_tokens
-    else:
-        args["max_tokens"] = 2000
+    # o1 doesn't support stream or temperature yet
+    if args["model"].startswith("o1"):
+        args.pop("stream", None)
+        args.pop("temperature", None)
 
     # API expects functions to only be defined if it's a non-empty list
     if functions:
@@ -125,15 +125,23 @@ async def stream_completion(
     _verify_openai_enabled()
 
     try:
-        completion_stream = await openai_client().chat.completions.create(
-            **await _build_openai_args(
-                stream=True,
-                source=source,
-                messages=messages,
-                packages=packages,
-                force_function=force_function,
-            )
+        completion_args = await _build_openai_args(
+            stream=True,
+            source=source,
+            messages=messages,
+            packages=packages,
+            force_function=force_function,
         )
+        completion_stream = await openai_client().chat.completions.create(
+            **completion_args
+        )
+
+        # Hack to support o1
+        if not completion_args.get("stream"):
+            completion = completion_stream.choices[0]
+            yield StreamingMessageChunk(text=completion.message.content)
+            yield SuccessMessageChunk()
+            return
 
         async for chunk in completion_stream:
             chunk_info = chunk.choices[0]

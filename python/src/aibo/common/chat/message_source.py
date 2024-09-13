@@ -34,7 +34,6 @@ class OpenAIModelSource(BaseModel):
     kind: Literal["openai_model"] = "openai_model"
     model: str
     temperature: float
-    max_tokens: Optional[int]
 
     @classmethod
     def build(
@@ -42,18 +41,23 @@ class OpenAIModelSource(BaseModel):
         *,
         model: Optional[str] = None,
         temperature: Optional[float] = None,
-        max_tokens: Optional[int] = None,
     ) -> Self:
         env = Env.get()
         return cls(
             model=model or env.OPENAI_MODEL,
             temperature=env.OPENAI_TEMPERATURE if temperature is None else temperature,
-            max_tokens=max_tokens,
         )
 
     @property
     def openai_model(self) -> OpenAIModel:
-        return OPENAI_MODELS_BY_MODEL[self.model]
+        if openai_model := OPENAI_MODELS_BY_MODEL.get(self.model):
+            return openai_model
+        return OpenAIModel(
+            name=self.model,
+            model=self.model,
+            model_family="gpt-4",
+            modalities={"text", "image"},
+        )
 
     def __str__(self) -> str:
         return f"model:{self.model}"

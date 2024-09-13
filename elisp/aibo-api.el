@@ -125,9 +125,10 @@
          (on-success (plist-get args :on-success)))
     (aibo:--api-post
      :path "/chat/conversations"
-     :data (ht ("messages"   message-inputs)
-               ("model"      aibo:model)
-               ("shorthands" (aibo:--conversation-shorthands)))
+     :data (ht ("messages"    message-inputs)
+               ("model"       aibo:model)
+               ("temperature" aibo:temperature)
+               ("shorthands"  (aibo:--conversation-shorthands)))
      :response-transform (lambda (response) (ht-get response "conversation"))
      :on-success on-success)))
 
@@ -278,7 +279,8 @@
     (aibo:--api-ws-send
      :event (ht ("kind"            "stream_assistant_message")
                 ("conversation_id" conversation-id)
-                ("model"           aibo:model))
+                ("model"           aibo:model)
+                ("temperature"     aibo:temperature))
      :message-callbacks message-callbacks)))
 
 (defun aibo:api-ws-regenerate-last-assistant-message (&rest args)
@@ -296,7 +298,8 @@
     (aibo:--api-ws-send
      :event (ht ("kind"            "stream_assistant_message_chunks")
                 ("conversation_id" conversation-id)
-                ("model"           aibo:model))
+                ("model"           aibo:model)
+                ("temperature"     aibo:temperature))
      :message-callbacks message-callbacks)))
 
 

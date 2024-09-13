@@ -19,6 +19,7 @@ class StreamAssistantMessageEventRequest(BaseEvent):
     kind: Literal["stream_assistant_message"] = "stream_assistant_message"
     conversation_id: UUID
     model: str
+    temperature: float | None = None
 
 
 class RegenerateLastAssistantMessageEventRequest(BaseEvent):
@@ -33,6 +34,7 @@ class StreamAssistantMessageChunksEventRequest(BaseEvent):
     kind: Literal["stream_assistant_message_chunks"] = "stream_assistant_message_chunks"
     conversation_id: UUID
     model: str
+    temperature: float | None = None
 
 
 class CurrentConversationEventResponse(BaseEvent):
@@ -88,7 +90,10 @@ async def stream_assistant_message(
         for message in conversation.get_current_history()
     )
 
-    source = await conversation.maybe_override_openai_model_source(event.model)
+    source = await conversation.maybe_override_openai_model_source(
+        model=event.model,
+        temperature=event.temperature,
+    )
     async for messages in conversation.stream_assistant_messages(source=source):
         # TODO(dmed):
         #   Assumes we only stream 1 message at a time since we haven't added logic in elip
@@ -143,7 +148,10 @@ async def stream_assistant_message_chunks(
     conversation = await chat.Conversation.get(event.conversation_id)
     assert conversation, f"Conversation doesn't exist: {event.conversation_id}"
 
-    source = await conversation.maybe_override_openai_model_source(event.model)
+    source = await conversation.maybe_override_openai_model_source(
+        model=event.model,
+        temperature=event.temperature,
+    )
     async for chunk in conversation.stream_assistant_message_chunks(source=source):
         yield StreamAssistantMessageChunkEventResponse(
             id=event.id,
