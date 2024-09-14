@@ -320,6 +320,10 @@ class Conversation(ConversationSummary):
     current_message: Message
     all_messages: dict[UUID, Message]
 
+    @staticmethod
+    def default_title() -> str:
+        return "New chat"
+
     @classmethod
     async def create(
         cls,
@@ -335,7 +339,7 @@ class Conversation(ConversationSummary):
 
         conversation_model = await ConversationModel(
             trace_id=trace_id,
-            title=title or "New chat",
+            title=title or cls.default_title(),
             openai_model_source=openai_model_source,
             enabled_package_names=list(
                 {

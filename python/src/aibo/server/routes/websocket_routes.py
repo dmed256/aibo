@@ -78,17 +78,32 @@ ws_router.set_event_class(WebsocketEventRequest)
 
 
 @ws_router.route
+async def stream_assistant_message_route(
+    websocket: WebSocket,
+    event: StreamAssistantMessageEventRequest,
+) -> AsyncGenerator[WebsocketEventResponse, None]:
+    async for message in stream_assistant_message(websocket, event):
+        yield message
+
+
 async def stream_assistant_message(
     websocket: WebSocket,
     event: StreamAssistantMessageEventRequest,
+    *,
+    is_resample: bool = False,
 ) -> AsyncGenerator[WebsocketEventResponse, None]:
     conversation = await chat.Conversation.get(event.conversation_id)
     assert conversation, f"Conversation doesn't exist: {event.conversation_id}"
 
-    should_generate_title = all(
-        message.role != chat.MessageRole.ASSISTANT
-        for message in conversation.get_current_history()
-    )
+    if is_resample:
+        should_generate_title = False
+    elif conversation.title == chat.Conversation.default_title():
+        should_generate_title = True
+    else:
+        should_generate_title = all(
+            message.role != chat.MessageRole.ASSISTANT
+            for message in conversation.get_current_history()
+        )
 
     source = await conversation.maybe_override_openai_model_source(
         model=event.model,
@@ -136,6 +151,7 @@ async def regenerate_last_assistant_message(
             conversation_id=event.conversation_id,
             model=event.model,
         ),
+        is_resample=True,
     ):
         yield event_response
 
