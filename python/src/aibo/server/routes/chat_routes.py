@@ -1,6 +1,5 @@
 import datetime as dt
 import logging
-from typing import Optional
 from uuid import UUID, uuid4
 
 import sqlalchemy as sa
@@ -36,9 +35,9 @@ class GetRegisteredPackagesResponse(BaseModel):
 
 
 class SearchConversationsRequest(BaseModel):
-    after_date: Optional[dt.date] = None
-    before_date: Optional[dt.date] = None
-    query: Optional[str] = None
+    after_date: dt.date | None = None
+    before_date: dt.date | None = None
+    query: str | None = None
 
 
 class SearchConversationsResponse(BaseModel):
@@ -50,8 +49,8 @@ class CreateConversationRequest(BaseModel):
         protected_namespaces=tuple(),
     )
 
-    model: Optional[str] = None
-    temperature: Optional[float] = None
+    model: str | None = None
+    temperature: float | None = None
     enabled_package_names: list[str] = []
     messages: list[chat.CreateMessageInputs]
     shorthands: dict[str, str] = {}
@@ -81,7 +80,7 @@ class ConversationMessageSearchResponse(BaseModel):
 
 
 class EditConversationRequest(BaseModel):
-    title: Optional[str]
+    title: str | None
 
 
 class EditConversationResponse(BaseModel):
@@ -93,7 +92,7 @@ class GenerateConversationTitleRequest(BaseModel):
         protected_namespaces=tuple(),
     )
 
-    model: Optional[str] = None
+    model: str | None = None
 
 
 class GenerateConversationTitleResponse(BaseModel):
@@ -146,11 +145,11 @@ async def get_packages() -> GetRegisteredPackagesResponse:
 
 @router.post("/conversations/search")
 async def search_conversations(
-    request: Optional[SearchConversationsRequest] = None,
+    request: SearchConversationsRequest | None = None,
 ) -> SearchConversationsResponse:
     request = request or SearchConversationsRequest()
 
-    def maybe_to_datetime(maybe_date: Optional[dt.date]) -> Optional[dt.datetime]:
+    def maybe_to_datetime(maybe_date: dt.date | None) -> dt.datetime | None:
         if maybe_date:
             return dt.datetime.fromordinal(maybe_date.toordinal())
         return None

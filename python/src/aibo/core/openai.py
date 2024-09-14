@@ -102,15 +102,18 @@ async def _build_openai_args(
     )
 
     # o1 doesn't support stream or temperature yet
-    if args["model"].startswith("o1"):
+    is_reasoning_model = args["model"].startswith("o1")
+    if is_reasoning_model:
         args.pop("stream", None)
         args.pop("temperature", None)
 
-    # API expects functions to only be defined if it's a non-empty list
-    if functions:
-        args["functions"] = functions
-    if force_function:
-        args["function_call"] = {"name": force_function.qualified_name}
+    # o1 doesn't support function-calling yet
+    if not is_reasoning_model:
+        # API expects functions to only be defined if it's a non-empty list
+        if functions:
+            args["functions"] = functions
+        if force_function:
+            args["function_call"] = {"name": force_function.qualified_name}
 
     return args
 

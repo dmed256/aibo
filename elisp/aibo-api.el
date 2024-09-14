@@ -121,12 +121,13 @@
      :on-success on-success)))
 
 (defun aibo:api-create-conversation (&rest args)
-  (let* ((message-inputs (plist-get args :message-inputs))
+  (let* ((model (plist-get args :model))
+         (message-inputs (plist-get args :message-inputs))
          (on-success (plist-get args :on-success)))
     (aibo:--api-post
      :path "/chat/conversations"
      :data (ht ("messages"              message-inputs)
-               ("model"                 aibo:model)
+               ("model"                 (or model aibo:model))
                ("enabled_package_names" aibo:enabled-package-names)
                ("temperature"           aibo:temperature)
                ("shorthands"            (aibo:--conversation-shorthands)))
@@ -276,11 +277,12 @@
 
 (defun aibo:api-ws-stream-assistant-message (&rest args)
   (let* ((conversation-id (plist-get args :conversation-id))
+         (model (plist-get args :model))
          (message-callbacks (plist-get args :message-callbacks)))
     (aibo:--api-ws-send
      :event (ht ("kind"            "stream_assistant_message")
                 ("conversation_id" conversation-id)
-                ("model"           aibo:model)
+                ("model"           (or model aibo:model))
                 ("temperature"     aibo:temperature))
      :message-callbacks message-callbacks)))
 

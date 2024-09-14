@@ -308,9 +308,10 @@
                  'read-only t
                  'font-lock-face 'aibo:conversation-header-content-face)))))))
 
-(defun aibo:submit-user-message ()
+(defun aibo:submit-user-message (&rest args)
   (interactive)
-  (let* ((text (widget-value aibo:b-new-user-message-widget))
+  (let* ((model (plist-get args :model))
+         (text (widget-value aibo:b-new-user-message-widget))
          (conversation-id (ht-get aibo:b-conversation "id")))
     (widget-value-set aibo:b-new-user-message-widget "")
     (aibo:api-submit-user-message
@@ -322,13 +323,19 @@
        (aibo:stream-assistant-message
         :conversation-id conversation-id)))))
 
+(defun aibo:submit-user-message-with-reasoning ()
+  (interactive)
+  (aibo:submit-user-message :model "o1-preview"))
+
 (defun aibo:stream-assistant-message (&rest args)
   (interactive)
   (let* ((conversation-id (plist-get args :conversation-id))
+         (model (plist-get args :model))
          (on-success (plist-get args :on-success))
          (buffer (aibo:--get-conversation-buffer conversation-id)))
     (aibo:api-ws-stream-assistant-message
      :conversation-id conversation-id
+     :model model
      :message-callbacks
      (ht ("current_conversation"
           (lambda (ws-message)
@@ -593,6 +600,7 @@
 
 (defun aibo:--create-conversation-from-template (template)
   (let* ((action-type (oref template :action-type))
+         (model (or (oref template :model) aibo:model))
          (buffer (current-buffer))
          (current-point (point))
          (content-input (read-string (format "%s: " (oref template :name))))
@@ -602,8 +610,8 @@
          (message-inputs (aibo:get-conversation-template-message-inputs
                           :template template
                           :content content)))
-
     (aibo:api-create-conversation
+     :model model
      :message-inputs message-inputs
      :on-success
      (lambda (conversation)
@@ -613,11 +621,13 @@
            (aibo:go-to-conversation :conversation conversation)
            (with-current-buffer (current-buffer)
              (aibo:stream-assistant-message
+              :model model
               :conversation-id (ht-get conversation "id")))))
 
         ((eq action-type :buffer-stream-insert)
          (aibo:api-ws-stream-assistant-message-chunks
           :conversation-id (ht-get conversation "id")
+          :model model
           :message-callbacks
           (ht ("stream_assistant_message_chunk"
                (lambda (ws-message)

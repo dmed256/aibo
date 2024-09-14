@@ -21,11 +21,16 @@ def create_app() -> FastAPI:
 
     if env.AIBO_CUSTOM_PACKAGES_FILE:
         module_path = env.AIBO_CUSTOM_PACKAGES_FILE
-        module_name = os.path.splitext(os.path.basename(module_path))[0]
-
-        spec = importlib.util.spec_from_file_location(module_name, module_path)
-        aibo_module = importlib.util.module_from_spec(spec)
-        spec.loader.exec_module(aibo_module)
+        if os.path.exists(module_path):
+            module_name = os.path.splitext(os.path.basename(module_path))[0]
+            spec = importlib.util.spec_from_file_location(module_name, module_path)
+            aibo_module = spec and importlib.util.module_from_spec(spec)
+            if aibo_module:
+                spec.loader.exec_module(aibo_module)  # type: ignore
+            else:
+                print(f"Failed to load module: {module_name}")
+        else:
+            print(f"Failed to find custom package file: {env.AIBO_CUSTOM_PACKAGES_FILE=}")
 
     app = FastAPI()
 

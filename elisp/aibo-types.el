@@ -82,6 +82,10 @@
     :documentation "Short name for starting a conversation quickly"
     :initarg :short-name
     :type string)
+   (model
+    :documentation "The model to sample from"
+    :initarg :model
+    :initform nil)
    (action-type
     :documentation "Action taken on selection: :new-conversation or :buffer-insert"
     :initarg :action-type)

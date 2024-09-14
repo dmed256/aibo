@@ -21,6 +21,7 @@
     (define-key map (kbd "C-c C-c")     #'aibo:regenerate-current-conversation-last-assistant-message)
     (define-key map (kbd "C-c C-x C-t") #'aibo:generate-current-conversation-title)
     (define-key map (kbd "M-RET")       #'aibo:submit-user-message)
+    (define-key map (kbd "C-M-]")       #'aibo:submit-user-message-with-reasoning)
     map))
 
 ;; ---[ Modes ]-----------------------------------
