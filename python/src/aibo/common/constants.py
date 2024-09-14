@@ -27,7 +27,7 @@ class Env(BaseModel):
     OPENAI_IMAGE_DETAIL: Literal["auto", "low", "high"]
 
     # Packages
-    AIBO_CUSTOM_PACKAGES_MODULE: Optional[str]
+    AIBO_CUSTOM_PACKAGES_FILE: Optional[str]
 
     # Misc
     CURRENT_USER: str
@@ -78,7 +78,7 @@ class Env(BaseModel):
                 os.environ.get("OPENAI_IMAGE_DETAIL", "auto"),
             ),
             # Packages
-            AIBO_CUSTOM_PACKAGES_MODULE=os.environ.get("AIBO_CUSTOM_PACKAGES_MODULE"),
+            AIBO_CUSTOM_PACKAGES_FILE=os.environ.get("AIBO_CUSTOM_PACKAGES_FILE"),
             # Misc
             CURRENT_USER=os.environ.get("USER", "unknown"),
             MAX_AIBO_MESSAGES=int(os.environ.get("MAX_AIBO_MESSAGES", "15")),
@@ -104,7 +104,7 @@ class Env(BaseModel):
             OPENAI_TEMPERATURE=float(os.environ.get("OPENAI_TEMPERATURE", "0.3")),
             OPENAI_IMAGE_DETAIL="auto",
             # Packages
-            AIBO_CUSTOM_PACKAGES_MODULE=os.environ.get("AIBO_CUSTOM_PACKAGES_MODULE"),
+            AIBO_CUSTOM_PACKAGES_FILE=os.environ.get("AIBO_CUSTOM_PACKAGES_FILE"),
             # Misc
             CURRENT_USER="test",
             MAX_AIBO_MESSAGES=15,

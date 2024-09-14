@@ -1,4 +1,4 @@
-import importlib
+import importlib.util
 import os
 
 from fastapi import FastAPI
@@ -18,8 +18,14 @@ from aibo.server.routes import (
 def create_app() -> FastAPI:
     env = Env.get()
     # Import external packages if defined
-    if env.AIBO_CUSTOM_PACKAGES_MODULE:
-        importlib.import_module(env.AIBO_CUSTOM_PACKAGES_MODULE)
+
+    if env.AIBO_CUSTOM_PACKAGES_FILE:
+        module_path = env.AIBO_CUSTOM_PACKAGES_FILE
+        module_name = os.path.splitext(os.path.basename(module_path))[0]
+
+        spec = importlib.util.spec_from_file_location(module_name, module_path)
+        aibo_module = importlib.util.module_from_spec(spec)
+        spec.loader.exec_module(aibo_module)
 
     app = FastAPI()
 

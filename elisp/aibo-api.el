@@ -125,10 +125,11 @@
          (on-success (plist-get args :on-success)))
     (aibo:--api-post
      :path "/chat/conversations"
-     :data (ht ("messages"    message-inputs)
-               ("model"       aibo:model)
-               ("temperature" aibo:temperature)
-               ("shorthands"  (aibo:--conversation-shorthands)))
+     :data (ht ("messages"              message-inputs)
+               ("model"                 aibo:model)
+               ("enabled_package_names" aibo:enabled-package-names)
+               ("temperature"           aibo:temperature)
+               ("shorthands"            (aibo:--conversation-shorthands)))
      :response-transform (lambda (response) (ht-get response "conversation"))
      :on-success on-success)))
 

@@ -21,6 +21,11 @@
   :type 'string
   :group 'aibo)
 
+(defcustom aibo:enabled-package-names nil
+  "List of enabled package names when creating a conversation."
+  :type '(repeat string)
+  :group 'aibo)
+
 (defcustom aibo:enable-debug-logging t
   "If set to t, adds logging in *Aibo logs*"
   :type 'boolean
