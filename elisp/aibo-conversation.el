@@ -19,13 +19,14 @@
 
 (setq aibo:--new-user-message-keymap
       (let ((map (copy-keymap widget-keymap)))
-        (define-key map (kbd "C-c C-x C-r") #'aibo:refresh-current-conversation)
-        (define-key map (kbd "C-c C-t")     #'aibo:set-current-conversation-title)
-        (define-key map (kbd "C-c C-c")     #'aibo:regenerate-current-conversation-last-assistant-message)
-        (define-key map (kbd "C-c C-x C-t") #'aibo:generate-current-conversation-title)
-        (define-key map (kbd "TAB")         (lambda () (interactive) (insert "\t")))
-        (define-key map (kbd "RET")         (lambda () (interactive) (insert "\n")))
-        (define-key map (kbd "M-RET")       #'aibo:submit-user-message)
+        (define-key map (kbd "C-c C-x C-r")    #'aibo:refresh-current-conversation)
+        (define-key map (kbd "C-c C-t")        #'aibo:set-current-conversation-title)
+        (define-key map (kbd "C-c C-c")        #'aibo:regenerate-current-conversation-last-assistant-message)
+        (define-key map (kbd "C-c C-x C-t")    #'aibo:generate-current-conversation-title)
+        (define-key map (kbd "TAB")            (lambda () (interactive) (insert "\t")))
+        (define-key map (kbd "RET")            (lambda () (interactive) (insert "\n")))
+        (define-key map (kbd "M-RET")          #'aibo:submit-user-message)
+        (define-key map (kbd "C-c C-<return>") #'aibo:submit-user-message-with-reasoning)
         map))
 
 (defun aibo:--new-user-input-end-of-buffer-advice (&rest _)
@@ -321,6 +322,7 @@
      (lambda (conversation)
        (aibo:go-to-conversation :conversation conversation)
        (aibo:stream-assistant-message
+        :model model
         :conversation-id conversation-id)))))
 
 (defun aibo:submit-user-message-with-reasoning ()
