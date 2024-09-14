@@ -30,7 +30,9 @@ def create_app() -> FastAPI:
             else:
                 print(f"Failed to load module: {module_name}")
         else:
-            print(f"Failed to find custom package file: {env.AIBO_CUSTOM_PACKAGES_FILE=}")
+            print(
+                f"Failed to find custom package file: {env.AIBO_CUSTOM_PACKAGES_FILE=}"
+            )
 
     app = FastAPI()
 
