@@ -144,7 +144,7 @@ async def regenerate_last_assistant_message(
             id=event.id, conversation=api_models.Conversation.from_chat(conversation)
         )
 
-    async for event_response in stream_assistant_message(  # type: ignore[call-arg]
+    async for event_response in stream_assistant_message(
         websocket=websocket,
         event=StreamAssistantMessageEventRequest(
             id=event.id,
