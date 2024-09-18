@@ -155,7 +155,7 @@
      (lambda (buffer)
        (if sync
            (aibo:api-get-conversation
-            :id conversation-id
+            :conversation-id conversation-id
             :on-success (lambda (conversation)
                           (with-current-buffer buffer
                             (aibo:--dangerously-render-conversation conversation))))))
