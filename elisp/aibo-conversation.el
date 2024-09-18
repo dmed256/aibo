@@ -605,13 +605,8 @@
          (model (or (oref template :model) aibo:model))
          (buffer (current-buffer))
          (current-point (point))
-         (content-input (read-string (format "%s: " (oref template :name))))
-         (content (if (string= content-input "")
-                      (buffer-substring (region-beginning) (region-end))
-                    content-input))
          (message-inputs (aibo:get-conversation-template-message-inputs
-                          :template template
-                          :content content)))
+                          :template template)))
     (aibo:api-create-conversation
      :model model
      :message-inputs message-inputs
@@ -619,12 +614,17 @@
      (lambda (conversation)
        (cond
         ((eq action-type :new-conversation)
-         (progn
-           (aibo:go-to-conversation :conversation conversation)
-           (with-current-buffer (current-buffer)
-             (aibo:stream-assistant-message
-              :model model
-              :conversation-id (ht-get conversation "id")))))
+         (let* ((all-messages (ht-get conversation "all_messages"))
+                (current-message-id (ht-get conversation "current_message_id"))
+                (last-message (ht-get all-messages current-message-id))
+                (last-role (and last-message (ht-get last-message "role"))))
+           (progn
+             (aibo:go-to-conversation :conversation conversation)
+             (if (string= last-role "user")
+                 (with-current-buffer (current-buffer)
+                   (aibo:stream-assistant-message
+                    :model model
+                    :conversation-id (ht-get conversation "id")))))))
 
         ((eq action-type :buffer-stream-insert)
          (aibo:api-ws-stream-assistant-message-chunks

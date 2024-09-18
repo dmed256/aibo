@@ -40,6 +40,15 @@
                                       ("text" content))))))))
         ;; ---[ Command ]---------------------------
         ,(aibo:ConversationTemplate
+          :short-name "e"
+          :name "Empty"
+          :action-type :new-conversation
+          :message-inputs
+          `(,(ht ("role"     "system")
+                 ("contents" `(,(ht ("kind" "text")
+                                    ("text" aibo:--generic-system-message)))))))
+        ;; ---[ Command ]---------------------------
+        ,(aibo:ConversationTemplate
           :short-name "c"
           :name "Command find"
           :action-type :new-conversation
@@ -110,11 +119,16 @@
      (string= (oref it :short-name) short-name)
      (aibo:conversation-templates))))
 
-
 (defun aibo:get-conversation-template-message-inputs (&rest args)
   (let* ((template (plist-get args :template))
-         (content (plist-get args :content))
+         (message-inputs (oref template :message-inputs))
          (get-message-inputs (oref template :get-message-inputs)))
-    (funcall get-message-inputs content)))
+    (if message-inputs
+          message-inputs
+      (let* ((content-input (read-string (format "%s: " (oref template :name))))
+             (content (if (string= content-input "")
+                          (buffer-substring (region-beginning) (region-end))
+                        content-input)))
+        (funcall get-message-inputs content)))))
 
 (provide 'aibo-templates)

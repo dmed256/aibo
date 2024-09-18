@@ -91,6 +91,11 @@
     :initarg :action-type)
    (get-message-inputs
     :documentation "Function to generate message inputs based on the input"
-    :initarg :get-message-inputs)))
+    :initarg :get-message-inputs
+    :initform nil)
+   (message-inputs
+    :documentation "Static message inputs"
+    :initarg :message-inputs
+    :initform nil)))
 
 (provide 'aibo-types)
