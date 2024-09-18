@@ -51,7 +51,7 @@ class CreateConversationRequest(BaseModel):
 
     model: str | None = None
     temperature: float | None = None
-    enabled_package_names: list[str] = []
+    enabled_package_names: list[str] | None = None
     messages: list[chat.CreateMessageInputs]
     shorthands: dict[str, str] = {}
 
@@ -173,14 +173,15 @@ async def create_conversation(
 ) -> CreateConversationResponse:
     env = Env.get()
 
+    request_package_names = set(request.enabled_package_names or [])
     enabled_package_names = [
         package_name
-        for package_name in set(request.enabled_package_names)
+        for package_name in request_package_names
         if Package.get(package_name)
     ]
     missing_package_names = [
         package_name
-        for package_name in set(request.enabled_package_names)
+        for package_name in request_package_names
         if not Package.get(package_name)
     ]
     if missing_package_names:
