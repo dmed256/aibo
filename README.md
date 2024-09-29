@@ -124,3 +124,14 @@ Shorthands replace certain escaped text (e.g. `\b`) with other content dynamical
 For Elisp customizations, refer to [aibo-custom.el](https://github.com/dmed256/aibo/blob/main/elisp/aibo-custom.el).
 
 For Python environment customizations, refer to [constants.py](https://github.com/dmed256/aibo/blob/main/python/aibo/common/constants.py).
+
+## Deploy
+
+ˢᶦⁿᶜᵉ ᶦ ᶠᵒʳᵍᵉᵗ
+
+After updating the `pyproject.toml` version:
+
+```bash
+python -m build
+python -m twine upload dist/*
+```
