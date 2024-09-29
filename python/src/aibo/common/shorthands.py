@@ -243,7 +243,7 @@ def _maybe_expand_file(content: str) -> str:
             if start is not None and end is not None:
                 file_contents = "".join(lines[start - 1 : end])
             elif start is not None:
-                file_contents = lines[start - 1].strip()
+                file_contents = lines[start - 1]
             else:
                 file_contents = "".join(lines)
     except:
@@ -252,7 +252,7 @@ def _maybe_expand_file(content: str) -> str:
     if file_contents is None:
         return f"\\f[{content}]"
 
-    header = f"---[ {filename} ]"
+    header = f"---[ {content} ]"
     header += "-" * max(10, 50 - len(header))
     footer = "-" * len(header)
 
