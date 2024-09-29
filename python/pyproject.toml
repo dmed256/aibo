@@ -1,6 +1,6 @@
 [project]
 name = "aibo-server"
-version = "0.1.6"
+version = "0.1.7"
 authors = [
   { name="David Medina", email="dmed256@gmail.com" }
 ]
