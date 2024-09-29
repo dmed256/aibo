@@ -1,3 +1,5 @@
+import logging
+import os
 import re
 from functools import cache
 from uuid import UUID
@@ -11,13 +13,42 @@ __all__ = [
     "expand_contents_shorthands_inplace",
 ]
 
-IMAGE_SHORTHANDS_PATTERN = "(?:im|sc)"
+logger = logging.getLogger(__name__)
+
+IMAGE_SHORTHANDS_PATTERN_STR = "(?:im|sc)"
+IMAGE_SHORTHANDS_PATTERN = re.compile("(?:im|sc)")
+
+FILE_SHORTHAND_PATTERN_STR = r"\\f\[([^]]+)\]"
+FILE_SHORTHAND_PATTERN = re.compile(r"\\f\[([^]]+)\]")
+
+
+@cache
+def _shorthand_re_sub_pattern(shorthand: str) -> re.Pattern:
+    """
+    Match \{shorthand} in the beginning, middle, or end:
+    - "\r hello world"
+    - "hello \r world"
+    - "hello world \r"
+
+    Builtins:
+    - \im: Clipboard image
+    - \sc: Monitor screenshot
+    - \f: Inject the file contents
+        - \f[<filename>]: How to add the filename argument
+        - \f[<filename>:<lineno>]: Inject just that one line
+        - \f[<filename>:<start>:<end>]: Inject the line region
+
+    Common custom shorthands:
+    - \r: Emacs region
+    - \b: Emacs buffer
+    """
+    return re.compile(rf"((?:^|\s)\\{shorthand}(?:\s|$))")
 
 
 def message_content_expands_image(
     contents: list[chat.MessageContent],
 ) -> bool:
-    image_pattern = _shorthand_pattern(IMAGE_SHORTHANDS_PATTERN)
+    image_pattern = _shorthand_re_sub_pattern(IMAGE_SHORTHANDS_PATTERN_STR)
     return any(
         image_pattern.search(content.text)
         for content in contents
@@ -55,16 +86,49 @@ async def expand_contents_shorthands_inplace(
         if isinstance(content, chat.TextMessageContent)
     }
 
+    replace_custom_shorthands(
+        text_contents=text_contents,
+        shorthands=shorthands,
+    )
+    await replace_image_shorthands(
+        trace_id=trace_id,
+        message_contents=message_contents,
+        text_contents=text_contents,
+    )
+    replace_file_shorthands(
+        text_contents=text_contents,
+    )
+
+
+def replace_custom_shorthands(
+    *,
+    text_contents: dict[tuple[int, int], chat.TextMessageContent],
+    shorthands: dict[str, str],
+) -> None:
+    """
+    Common custom shorthands:
+    - \r: Emacs region
+    - \b: Emacs buffer
+    """
     for shorthand, replacement in shorthands.items():
         for text_content in text_contents.values():
-            text_content.text = _shorthand_replace(
-                content=text_content.text,
-                shorthand=shorthand,
-                replacement=replacement,
-            )
+            p = _shorthand_re_sub_pattern(shorthand)
+            text_content.text = p.sub(lambda m: replacement, text_content.text)
 
+
+async def replace_image_shorthands(
+    *,
+    trace_id: UUID,
+    message_contents: list[list[chat.MessageContent]],
+    text_contents: dict[tuple[int, int], chat.TextMessageContent],
+) -> None:
+    """
+    Builtins:
+    - \im: Clipboard image
+    - \sc: Monitor screenshot
+    """
     # Replace image shorthand (Requires vision model!)
-    image_pattern = _shorthand_pattern(IMAGE_SHORTHANDS_PATTERN)
+    image_pattern = _shorthand_re_sub_pattern(IMAGE_SHORTHANDS_PATTERN_STR)
     message_content_indices_with_image = {
         indices: {
             "is_im": r"\im" in re_match.group(),
@@ -126,25 +190,70 @@ async def expand_contents_shorthands_inplace(
         message_contents[message_index] = new_contents
 
 
-def _shorthand_replace(*, content: str, shorthand: str, replacement: str) -> str:
-    p = _shorthand_pattern(shorthand)
-    return p.sub(lambda m: replacement, content)  # type: ignore[no-any-return]
-
-
-@cache
-def _shorthand_pattern(shorthand: str) -> re.Pattern:
+def replace_file_shorthands(
+    *,
+    text_contents: dict[tuple[int, int], chat.TextMessageContent],
+) -> None:
     """
-    Match \{shorthand} in the beginning, middle, or end:
-    - "\r hello world"
-    - "hello \r world"
-    - "hello world \r"
-
     Builtins:
-    - \im: Clipboard image
-    - \sc: Monitor screenshot
-
-    Common:
-    - \r: Emacs region
-    - \b: Emacs buffer
+    - \f: Inject the file contents
+        - \f[<filename>]: How to add the filename argument
+        - \f[<filename>:<lineno>]: Inject just that one line
+        - \f[<filename>:<start>:<end>]: Inject the line region
     """
-    return re.compile(rf"((?:^|\s)\\{shorthand}(?:\s|$))")
+    for text_content in text_contents.values():
+        parts = re.split(FILE_SHORTHAND_PATTERN, text_content.text)
+        if len(parts) <= 1:
+            continue
+
+        text_content.text = "".join(
+            [
+                _maybe_expand_file(part) if part_index % 2 else part
+                for part_index, part in enumerate(parts)
+            ]
+        )
+
+
+def _maybe_expand_file(content: str) -> str:
+    """
+    Check for one of these formats:
+    - <filename>
+    - <filename>:<lineno>
+    - <filename>:<start>:<end>
+
+    If it doesn't exist, replace back with \f[{content}]
+    """
+    parts = content.split(":")
+    logger.error(f"{parts=}")
+
+    def maybe_int(index: int) -> int | None:
+        try:
+            return int(parts[index])
+        except:
+            return None
+
+    filename = parts[0]
+    start = maybe_int(1)
+    end = maybe_int(2)
+
+    file_contents: str | None = None
+    try:
+        with open(os.path.expanduser(filename), "r") as file:
+            lines = file.readlines()
+            if start is not None and end is not None:
+                file_contents = "".join(lines[start - 1 : end])
+            elif start is not None:
+                file_contents = lines[start - 1].strip()
+            else:
+                file_contents = "".join(lines)
+    except:
+        pass
+
+    if file_contents is None:
+        return f"\\f[{content}]"
+
+    header = f"---[ {filename} ]"
+    header += "-" * max(10, 50 - len(header))
+    footer = "-" * len(header)
+
+    return f"\n\n{header}\n{file_contents}\n{footer}\n\n"

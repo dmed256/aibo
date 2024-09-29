@@ -99,12 +99,25 @@ Access the conversation history using `aibo:homepage` (`C-M-h`), displaying conv
 | --------------- | --------------------------------------------------------------------------------- | ------------------------------------------------------------- |
 | `C-c C-x C-r`   | Refresh the conversation                                                          | `aibo:refresh-current-conversation`                           |
 | `C-c C-t`       | Set the conversation title                                                        | `aibo:set-current-conversation-title`                         |
+| `C-c f c`       | Inject a file shorthand using counsel                                             | `aibo:insert-counsel-find-file-shorthand`                     |
+| `C-c f p`       | Inject a file shorthand using projectile                                          | `aibo:insert-projectile-find-file-shorthand`                  |
 | `C-c C-k`       | Soft-delete the message at point                                                  | `aibo:remove-message-at-point`                                |
 | `C-c C-x C-k`   | Soft-delete all messages at point and after                                       | `aibo:remove-messages-after-point`                            |
 | `C-c C-c`       | Regenerate last message                                                           | `aibo:regenerate-current-conversation-last-assistant-message` |
 | `C-c C-x C-t`   | Regenerate the conversation title based on the conversation content               | `aibo:generate-current-conversation-title`                    |
 | `M-RET`         | If point is at the user input field, submit the message for an assistant response | `aibo:submit-user-message`                                    |
 
+## Shorthands
+
+Shorthands replace certain escaped text (e.g. `\b`) with other content dynamically before sampling the model
+
+| Shorthand | Description                                                                              |
+| --------- | ---------------------------------------------------------------------------------------- |
+| `\b`      | The current buffer                                                                       |
+| `\r`      | The current buffer's region                                                              |
+| `\f`      | Injects the given file with optional line/start/end args (`\f[<filename>:<start>:<end>]` |
+| `\im`     | The clipboard image content if the clipboard has an image                                |
+| `\sc`     | Similar to \im but takes a screenshot of your monitor                                    |
 
 ## Customization
 

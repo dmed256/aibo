@@ -1,6 +1,8 @@
 ;;; aibo-conversation.el --- Methods related to conversations and the conversation buffer view -*- lexical-binding: t -*-
+(require 'counsel)
 (require 'dash)
 (require 'ht)
+(require 'projectile)
 (require 'widget)
 
 (require 'aibo-api)
@@ -17,16 +19,26 @@
 (defun aibo:--get-conversation-buffer (id)
   (get-buffer (aibo:--get-conversation-buffer-name id)))
 
+(defun aibo:--set-conversation-keybindings (map)
+  (define-key map (kbd "C-c C-x C-r")    #'aibo:refresh-current-conversation)
+  (define-key map (kbd "C-c f c")        #'aibo:insert-counsel-find-file-shorthand)
+  (define-key map (kbd "C-c f p")        #'aibo:insert-projectile-find-file-shorthand)
+  (define-key map (kbd "C-c C-t")        #'aibo:set-current-conversation-title)
+  (define-key map (kbd "C-c C-k")        #'aibo:remove-message-at-point)
+  (define-key map (kbd "C-c C-x C-k")    #'aibo:remove-messages-after-point)
+  (define-key map (kbd "C-c C-e")        #'aibo:edit-message-at-point)
+  (define-key map (kbd "C-c C-w")        #'aibo:copy-message-contents-at-point)
+  (define-key map (kbd "C-c C-c")        #'aibo:regenerate-current-conversation-last-assistant-message)
+  (define-key map (kbd "C-c C-x C-t")    #'aibo:generate-current-conversation-title)
+  (define-key map (kbd "M-RET")          #'aibo:submit-user-message)
+  (define-key map (kbd "C-c C-<return>") #'aibo:submit-user-message-with-reasoning)
+  map)
+
 (setq aibo:--new-user-message-keymap
       (let ((map (copy-keymap widget-keymap)))
-        (define-key map (kbd "C-c C-x C-r")    #'aibo:refresh-current-conversation)
-        (define-key map (kbd "C-c C-t")        #'aibo:set-current-conversation-title)
-        (define-key map (kbd "C-c C-c")        #'aibo:regenerate-current-conversation-last-assistant-message)
-        (define-key map (kbd "C-c C-x C-t")    #'aibo:generate-current-conversation-title)
-        (define-key map (kbd "TAB")            (lambda () (interactive) (insert "\t")))
-        (define-key map (kbd "RET")            (lambda () (interactive) (insert "\n")))
-        (define-key map (kbd "M-RET")          #'aibo:submit-user-message)
-        (define-key map (kbd "C-c C-<return>") #'aibo:submit-user-message-with-reasoning)
+        (aibo:--set-conversation-keybindings map)
+        (define-key map (kbd "TAB") (lambda () (interactive) (insert "\t")))
+        (define-key map (kbd "RET") (lambda () (interactive) (insert "\n")))
         map))
 
 (defun aibo:--new-user-input-end-of-buffer-advice (&rest _)
@@ -573,6 +585,27 @@
   (interactive)
   (let* ((message (aibo:--message-at-point)))
     (kill-new (ht-get message "content_text") nil)))
+
+;; ---[ Shorthands ]------------------------------
+(defun aibo:insert-counsel-find-file-shorthand ()
+  (interactive)
+  (counsel--find-file-1 "Find file: " nil
+                        #'aibo:--insert-counsel-find-file-shorthand-action
+                        'aibo:insert-counsel-find-file-shorthand))
+
+(defun aibo:--insert-counsel-find-file-shorthand-action (file)
+  (aibo:--insert-file-shorthand (expand-file-name file ivy--directory)))
+
+(defun aibo:insert-projectile-find-file-shorthand ()
+  (interactive)
+  (let* ((project-root (projectile-acquire-root))
+         (file (projectile-completing-read "Find file: "
+                                           (projectile-project-files project-root))))
+    (when file
+      (aibo:--insert-file-shorthand (expand-file-name file project-root)))))
+
+(defun aibo:--insert-file-shorthand (filename)
+  (insert (concat "\\f[" (abbreviate-file-name filename) "]")))
 
 ;; ---[ Create a conversation ]-------------------
 (defvar aibo:--create-conversation-history nil

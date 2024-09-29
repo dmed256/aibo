@@ -665,7 +665,7 @@ class Conversation(ConversationSummary):
         env = Env.get()
 
         # Get the cheapest model to do the title generation
-        openai_model = get_openai_model(modalities=["text"])
+        openai_model = get_openai_model(modalities=["text"], name="gpt-4o-mini")
         title_conversation = await Conversation.create(
             title=f"Title for {self.id}",
             trace_id=self.trace_id,
