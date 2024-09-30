@@ -3,7 +3,7 @@ import os
 import subprocess
 import sys
 import typing
-from typing import Any, Optional, TypeVar
+from typing import Any, TypeVar
 
 from pydantic import TypeAdapter
 
@@ -35,16 +35,16 @@ class LspService:
         self.is_logging = log
         self.comms = PipeComms(log=log)
 
-        self.client_task: Optional[asyncio.Task] = None
+        self.client_task: asyncio.Task | None = None
 
         self.lsp_server: LspServer = maybe_lsp_server
 
-        self.server_process: Optional[subprocess.Popen] = None
-        self.server_capabilities: Optional[lsp_types.ServerCapabilities] = None
+        self.server_process: subprocess.Popen | None = None
+        self.server_capabilities: lsp_types.ServerCapabilities | None = None
         self.server_responses: dict[str, lsp_types.LspResponse] = {}
 
     @classmethod
-    def _get_args_uri(cls, *, uri: Optional[str], filepath: Optional[str]) -> str:
+    def _get_args_uri(cls, *, uri: str | None, filepath: str | None) -> str:
         if uri:
             return uri
 
@@ -123,7 +123,7 @@ class LspService:
 
     async def request(
         self, request: lsp_types.LspRequest
-    ) -> Optional[lsp_types.LspResponse]:
+    ) -> lsp_types.LspResponse | None:
         request.write(self.comms.client_write)
         for _ in range(200):
             await asyncio.sleep(0.05)
@@ -194,11 +194,11 @@ class LspService:
     async def get_definition(
         self,
         *,
-        uri: Optional[str] = None,
-        filepath: Optional[str] = None,
+        uri: str | None = None,
+        filepath: str | None = None,
         line: int,
         character: int,
-    ) -> Optional[lsp_types.DefinitionResult]:
+    ) -> lsp_types.DefinitionResult | None:
         uri = self._get_args_uri(uri=uri, filepath=filepath)
 
         response = await self.request(
@@ -225,11 +225,11 @@ class LspService:
     async def get_document_highlight(
         self,
         *,
-        uri: Optional[str] = None,
-        filepath: Optional[str] = None,
+        uri: str | None = None,
+        filepath: str | None = None,
         line: int,
         character: int,
-    ) -> Optional[lsp_types.DocumentHighlightResult]:
+    ) -> lsp_types.DocumentHighlightResult | None:
         uri = self._get_args_uri(uri=uri, filepath=filepath)
 
         response = await self.request(
@@ -256,9 +256,9 @@ class LspService:
     async def get_document_symbols(
         self,
         *,
-        uri: Optional[str] = None,
-        filepath: Optional[str] = None,
-    ) -> Optional[lsp_types.DocumentSymbolResult]:
+        uri: str | None = None,
+        filepath: str | None = None,
+    ) -> lsp_types.DocumentSymbolResult | None:
         uri = self._get_args_uri(uri=uri, filepath=filepath)
 
         response = await self.request(
@@ -281,12 +281,12 @@ class LspService:
     async def get_references(
         self,
         *,
-        uri: Optional[str] = None,
-        filepath: Optional[str] = None,
+        uri: str | None = None,
+        filepath: str | None = None,
         line: int,
         character: int,
         include_declaration: bool = True,
-    ) -> Optional[lsp_types.ReferencesResult]:
+    ) -> lsp_types.ReferencesResult | None:
         uri = self._get_args_uri(uri=uri, filepath=filepath)
 
         response = await self.request(
@@ -316,11 +316,11 @@ class LspService:
     async def get_type_definition(
         self,
         *,
-        uri: Optional[str] = None,
-        filepath: Optional[str] = None,
+        uri: str | None = None,
+        filepath: str | None = None,
         line: int,
         character: int,
-    ) -> Optional[lsp_types.TypeDefinitionResult]:
+    ) -> lsp_types.TypeDefinitionResult | None:
         uri = self._get_args_uri(uri=uri, filepath=filepath)
 
         response = await self.request(
@@ -348,7 +348,7 @@ class LspService:
         self,
         *,
         query: str,
-    ) -> Optional[lsp_types.WorkspaceSymbolResult]:
+    ) -> lsp_types.WorkspaceSymbolResult | None:
         response = await self.request(
             lsp_types.WorkspaceSymbolRequest(
                 params=lsp_types.WorkspaceSymbolParams(
@@ -367,11 +367,11 @@ class LspService:
     async def get_signature_help(
         self,
         *,
-        uri: Optional[str] = None,
-        filepath: Optional[str] = None,
+        uri: str | None = None,
+        filepath: str | None = None,
         line: int,
         character: int,
-    ) -> Optional[lsp_types.SignatureHelpResult]:
+    ) -> lsp_types.SignatureHelpResult | None:
         uri = self._get_args_uri(uri=uri, filepath=filepath)
 
         response = await self.request(
@@ -401,11 +401,11 @@ class LspService:
     async def get_completion(
         self,
         *,
-        uri: Optional[str] = None,
-        filepath: Optional[str] = None,
+        uri: str | None = None,
+        filepath: str | None = None,
         line: int,
         character: int,
-    ) -> Optional[lsp_types.CompletionResult]:
+    ) -> lsp_types.CompletionResult | None:
         uri = self._get_args_uri(uri=uri, filepath=filepath)
 
         response = await self.request(
@@ -436,7 +436,7 @@ class LspService:
         self,
         *,
         completion_item: lsp_types.CompletionItem,
-    ) -> Optional[lsp_types.CompletionItemResolveResult]:
+    ) -> lsp_types.CompletionItemResolveResult | None:
         response = await self.request(
             lsp_types.CompletionItemResolveRequest(
                 params=completion_item,
@@ -452,11 +452,11 @@ class LspService:
     async def get_hover(
         self,
         *,
-        uri: Optional[str] = None,
-        filepath: Optional[str] = None,
+        uri: str | None = None,
+        filepath: str | None = None,
         line: int,
         character: int,
-    ) -> Optional[lsp_types.HoverResult]:
+    ) -> lsp_types.HoverResult | None:
         uri = self._get_args_uri(uri=uri, filepath=filepath)
 
         response = await self.request(

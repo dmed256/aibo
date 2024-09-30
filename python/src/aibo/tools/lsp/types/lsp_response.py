@@ -2,7 +2,7 @@ import asyncio
 import json
 import os
 import typing
-from typing import Any, Optional
+from typing import Any, Union
 
 from pydantic import BaseModel, TypeAdapter
 
@@ -72,20 +72,20 @@ __all__ = [
 class LspError(BaseModel):
     code: int
     message: str
-    data: Optional[Any] = None
+    data: Any | None = None
 
 
 class LspResponse(JsonRpcMessage):
-    result: Optional[Any] = None
-    error: Optional[LspError] = None
+    result: Any | None = None
+    error: LspError | None = None
 
     @classmethod
-    async def read(cls, read_pipe: int) -> Optional["LspResponse"]:
+    async def read(cls, read_pipe: int) -> Union["LspResponse", None]:
         loop = asyncio.get_running_loop()
         return await loop.run_in_executor(None, cls._sync_read, read_pipe)
 
     @classmethod
-    def _sync_read(cls, read_pipe: int) -> Optional["LspResponse"]:
+    def _sync_read(cls, read_pipe: int) -> Union["LspResponse", None]:
         header = ""
         header_end = LSP_HEADER_DELIMITER + LSP_HEADER_DELIMITER
         while True:
@@ -119,12 +119,12 @@ LspResponse.model_json_schema()
 
 class ServerInfo(BaseLspModel):
     name: str
-    version: Optional[str] = None
+    version: str | None = None
 
 
 class InitializationResult(BaseLspModel):
     capabilities: ServerCapabilities
-    server_info: Optional[ServerInfo] = None
+    server_info: ServerInfo | None = None
 
 
 class CompletionItemEditRange(BaseLspModel):
@@ -133,22 +133,22 @@ class CompletionItemEditRange(BaseLspModel):
 
 
 class CompletionItemDefaults(BaseLspModel):
-    commitCharacters: Optional[str] = None
-    editRange: Optional[Range | CompletionItemEditRange] = None
-    insertTextFormat: Optional[InsertTextFormat] = None
-    insertTextMode: Optional[InsertTextMode] = None
-    data: Optional[Any] = None
+    commitCharacters: str | None = None
+    editRange: Range | CompletionItemEditRange | None = None
+    insertTextFormat: InsertTextFormat | None = None
+    insertTextMode: InsertTextMode | None = None
+    data: Any | None = None
 
 
 class CompletionList(BaseLspModel):
     is_incomplete: bool
-    item_defaults: Optional[CompletionItemDefaults] = None
+    item_defaults: CompletionItemDefaults | None = None
     items: list[CompletionItem]
 
 
 class DocumentHighlight(BaseLspModel):
     range: Range
-    kind: Optional[DocumentHighlightKind] = None
+    kind: DocumentHighlightKind | None = None
 
 
 class MarkedStringWithLanguage(BaseLspModel):
@@ -161,45 +161,45 @@ MarkedString = str | MarkedStringWithLanguage
 
 class Hover(BaseLspModel):
     contents: MarkedString | list[MarkedString] | MarkupContent
-    range: Optional[Range] = None
+    range: Range | None = None
 
 
 # TODO(dmed): Figure out why TypeAdapter is returning just UnionType
-CompletionResult = Optional[list[CompletionItem] | CompletionList]
+CompletionResult = list[CompletionItem | None | CompletionList]
 CompletionResultAdapter = TypeAdapter(CompletionResult)
 
 CompletionItemResolveResult = CompletionItem
 CompletionItemResolveResultAdapter = TypeAdapter(CompletionItemResolveResult)
 
-DeclarationResult = Optional[Location | list[Location]]
+DeclarationResult = Location | list[Location]
 DeclarationResultAdapter = TypeAdapter(DeclarationResult)
 
-DefinitionResult = Optional[Location | list[Location]]
+DefinitionResult = Location | list[Location]
 DefinitionResultAdapter = TypeAdapter(DefinitionResult)
 
-DocumentHighlightResult = Optional[list[DocumentHighlight]]
+DocumentHighlightResult = list[DocumentHighlight]
 DocumentHighlightResultAdapter = TypeAdapter(DocumentHighlightResult)
 
-DocumentSymbolResult = Optional[list[DocumentSymbol] | list[SymbolInformation]]
+DocumentSymbolResult = list[DocumentSymbol | list[SymbolInformation]]
 DocumentSymbolResultAdapter = TypeAdapter(DocumentSymbolResult)
 
-HoverResult = Optional[Hover]
+HoverResult = Hover | None
 HoverResultAdapter = TypeAdapter(HoverResult)
 
-ImplementationResult = Optional[Location | list[Location]]
+ImplementationResult = Location | list[Location]
 ImplementationResultAdapter = TypeAdapter(ImplementationResult)
 
-ReferencesResult = Optional[list[Location]]
+ReferencesResult = list[Location]
 ReferencesResultAdapter = TypeAdapter(ReferencesResult)
 
-SignatureHelpResult = Optional[SignatureHelp]
+SignatureHelpResult = SignatureHelp | None
 SignatureHelpResultAdapter = TypeAdapter(SignatureHelpResult)
 
-TypeDefinitionResult = Optional[Location | list[Location]]
+TypeDefinitionResult = Location | list[Location]
 TypeDefinitionResultAdapter = TypeAdapter(TypeDefinitionResult)
 
-WorkspaceFoldersResult = Optional[list[WorkspaceFolder]]
+WorkspaceFoldersResult = list[WorkspaceFolder]
 WorkspaceFoldersResultAdapter = TypeAdapter(WorkspaceFoldersResult)
 
-WorkspaceSymbolResult = Optional[list[WorkspaceSymbol] | list[SymbolInformation]]
+WorkspaceSymbolResult = list[WorkspaceSymbol | list[SymbolInformation]]
 WorkspaceSymbolResultAdapter = TypeAdapter(WorkspaceSymbolResult)
