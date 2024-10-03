@@ -24,11 +24,7 @@
              (start-process "aibo-server" buffer
                             aibo:server-python
                             "-m" "aibo.cli.start"
-                            "--port" (number-to-string aibo:server-port))))
-         :on-load
-         (lambda (buffer)
-           (aibo:--on-healthy-server
-            :on-success #'aibo:websocket))))))
+                            "--port" (number-to-string aibo:server-port))))))))
 
 (setq aibo:--on-healthy-server-max-checks 5)
 (setq aibo:--on-healthy-server-checks nil)
@@ -228,52 +224,29 @@
 
 
 ;; ---[ Websocket ]-------------------------------
-(setq aibo:--websocket-callbacks (ht-create))
-(setq aibo:--websocket nil)
-
-(defun aibo:websocket ()
-  (interactive)
-  (if (and aibo:--websocket (websocket-openp aibo:--websocket))
-      aibo:--websocket
-    (aibo:--connect-websocket)))
-
-(defun aibo:--connect-websocket ()
-  (interactive)
-  (setq aibo:--websocket
-        (websocket-open
-         (format "ws://localhost:%s/ws" aibo:server-port)
-         :on-message
-         (lambda (websocket frame)
-           (let* ((event (json-parse-string (websocket-frame-payload frame)
-                                            :object-type 'hash-table
-                                            :array-type 'list))
-                  (event-id (ht-get event "id"))
-                  (event-kind (ht-get event "kind"))
-                  (is-completed (string= event-kind "event_completed"))
-                  (callback (ht-get aibo:--websocket-callbacks event-id)))
-             (if callback
-                 (funcall callback event))
-             (if is-completed
-                 (ht-remove! aibo:--websocket-callbacks event-id))))
-         :on-close
-         (lambda (websocket)
-           (setq aibo:--websocket nil)
-           (setq aibo:--websocket-callbacks (ht-create)))))
-  aibo:--websocket)
-
 (defun aibo:--api-ws-send (&rest args)
   (let* ((event (plist-get args :event))
          (message-callbacks (plist-get args :message-callbacks))
          (event-id (uuidgen-4)))
     (ht-set! event "id" event-id)
-    (ht-set! aibo:--websocket-callbacks
-             event-id
-             (lambda (ws-message)
-               (let* ((event-kind (ht-get ws-message "kind"))
-                      (callback (ht-get message-callbacks event-kind)))
-                 (if callback
-                     (funcall callback ws-message)))))
-    (websocket-send-text (aibo:websocket) (json-encode event))))
+    (let ((websocket
+           (websocket-open
+            (format "ws://localhost:%s/ws" aibo:server-port)
+            :on-message
+            (lambda (_websocket frame)
+              (let* ((event (json-parse-string (websocket-frame-payload frame)
+                                               :object-type 'hash-table
+                                               :array-type 'list))
+                     (event-kind (ht-get event "kind"))
+                     (callback (ht-get message-callbacks event-kind)))
+                (when callback
+                  (funcall callback event))
+                (when (string= event-kind "event_completed")
+                  (websocket-close _websocket))))
+            :on-close
+            (lambda (_websocket)))))
+      (websocket-send-text websocket (json-encode event))
+      websocket)))
 
 (defun aibo:api-ws-stream-assistant-message (&rest args)
   (let* ((conversation-id (plist-get args :conversation-id))
