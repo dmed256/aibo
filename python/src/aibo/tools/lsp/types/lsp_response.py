@@ -98,9 +98,18 @@ class LspResponse(JsonRpcMessage):
             for header_content in header.split(LSP_HEADER_DELIMITER)
             if header_content.strip() and (kv := header_content.split(":"))
         }
-        content_length = int(headers["Content-Length"])
+        if (content_length_str := headers.get("Content-Length")) is None:
+            return None
 
-        response_json = os.read(read_pipe, content_length).decode("utf-8").strip()
+        content_length = int(content_length_str)
+
+        response_json = ""
+        while content_length:
+            content_to_read = min(content_length, 65536)
+            content_bytes = os.read(read_pipe, content_to_read)
+            response_json += content_bytes.decode("utf-8").strip()
+            content_length -= len(content_bytes)
+
         response_dict = json.loads(response_json)
 
         # Sometimes we are passed a request ... but let's ignore them for now

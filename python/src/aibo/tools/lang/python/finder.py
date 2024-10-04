@@ -9,7 +9,7 @@ from pydantic import BaseModel, ConfigDict
 import aibo.tools.lsp.types as lsp_types
 import aibo.tools.lsp.utils as lsp_utils
 from aibo.tools.lang.python import ast_types
-from aibo.tools.lang.python.source_finder import SourceFinder, SourceInfo
+from aibo.tools.lang.python.source_finder import SourceFinder
 from aibo.tools.lsp.lsp_service import LspService
 
 __all__ = ["Finder"]
@@ -18,7 +18,7 @@ __all__ = ["Finder"]
 class SymbolSourceInfo(BaseModel):
     model_config = ConfigDict(arbitrary_types_allowed=True)
 
-    symbol: lsp_types.WorkspaceSymbol
+    symbol: lsp_types.WorkspaceSymbol | lsp_types.DocumentSymbol
     source_location: lsp_types.Location
     source: str
 
@@ -156,7 +156,7 @@ class Finder(BaseModel):
         ]
 
     def get_source_info(
-        self, symbol: lsp_types.WorkspaceSymbol
+        self, symbol: lsp_types.WorkspaceSymbol | lsp_types.DocumentSymbol
     ) -> SymbolSourceInfo | None:
         source_finder = SourceFinder(
             filepath=lsp_utils.uri_to_filepath(symbol.location.uri),

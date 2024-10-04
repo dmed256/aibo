@@ -1,5 +1,6 @@
 from typing import Optional, Self
 
+import aibo.tools.lsp.utils as lsp_utils
 from aibo.tools.lsp.types.base_lsp_types import BaseLspModel
 
 __all__ = [
@@ -15,7 +16,7 @@ class Position(BaseLspModel):
     character: int
 
     def __le__(self, other: Self) -> bool:
-        return (self.line, self.character) < (other.line, other.character)
+        return (self.line, self.character) <= (other.line, other.character)
 
 
 class Range(BaseLspModel):
@@ -48,6 +49,10 @@ class Location(BaseLspModel):
                 lines[-1] = lines[-1][: self.range.end.character]
 
         return "".join(lines)
+
+    @property
+    def filepath(self) -> str:
+        return lsp_utils.uri_to_filepath(self.uri)
 
     def __contains__(self, other: Self) -> bool:
         return other.range in self.range
