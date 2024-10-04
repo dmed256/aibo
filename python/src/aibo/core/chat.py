@@ -334,7 +334,7 @@ class Conversation(ConversationSummary):
         cls,
         *,
         openai_model_source: OpenAIModelSource,
-        enabled_package_names: list[str | None] = None,
+        enabled_package_names: list[str] | None = None,
         system_message_inputs: CreateMessageInputs,
         trace_id: UUID | None = None,
         title: str | None = None,
@@ -644,7 +644,7 @@ class Conversation(ConversationSummary):
         *,
         message: Message | None = None,
         message_content: MessageContent | None = None,
-    ) -> tuple[Function | None, dict[str, Any | None]]:
+    ) -> tuple[Function | None, dict[str, Any] | None]:
         if not message_content and message:
             message_content = message.contents[0]
 
