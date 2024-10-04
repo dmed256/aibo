@@ -102,9 +102,11 @@
                  :timeout 0.1)))
 
 (defun aibo:api-get-conversations (&rest args)
-  (let* ((on-success (plist-get args :on-success)))
+  (let* ((limit (plist-get args :limit))
+         (on-success (plist-get args :on-success)))
     (aibo:--api-post
      :path "/chat/conversations/search"
+     :data (ht ("limit" limit))
      :response-transform (lambda (response) (ht-get response "conversations"))
      :on-success on-success)))
 

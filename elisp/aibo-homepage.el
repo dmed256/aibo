@@ -28,6 +28,7 @@
 (defun aibo:refresh-homepage (&rest args)
   (interactive)
   (aibo:api-get-conversations
+   :limit aibo:homepage-max-conversations
    :on-success
    (lambda (conversations)
      (with-current-buffer (get-buffer aibo:homepage-buffer-name)
@@ -76,13 +77,13 @@
     ;; Add conversation titles for the section
     (--each-indexed conversations
       (let* ((conversation it))
-
         (widget-insert "  ")
 
         ;; [DEL]
-        (widget-create
-         'link
-         :notify (lambda (&rest ignore)
+        (insert "[")
+        (insert-text-button
+         "DEL"
+         'action (lambda (&rest ignore)
                    (let* ((id (ht-get conversation "id"))
                           (title (ht-get conversation "title"))
                           (conversation-buffer (get-buffer
@@ -95,18 +96,19 @@
                         (if conversation-buffer
                             (kill-buffer conversation-buffer))
                         (aibo:refresh-homepage)))))
-         :button-prefix "["
-         :button-suffix "] "
-         :tag "DEL")
+         'follow-link t
+         'face '(:foreground "white" :underline nil))
+        (insert "] ")
 
         ;; [EDIT]
-        (widget-create
-         'link
-         :notify (lambda (&rest ignore)
+        (insert "[")
+        (insert-text-button
+         "EDIT"
+         'action (lambda (_)
                    (aibo:set-conversation-title conversation))
-         :button-prefix "["
-         :button-suffix "] "
-         :tag "EDIT")
+         'follow-link t
+         'face '(:foreground "white" :underline nil))
+        (insert "] ")
 
         ;; Conversation title
         (widget-create

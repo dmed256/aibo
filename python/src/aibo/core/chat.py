@@ -12,7 +12,6 @@ from typing import (
     Generator,
     Iterable,
     Literal,
-    Optional,
     Self,
     Sequence,
     Type,
@@ -116,13 +115,13 @@ class Message(BaseModel):
     status: Status
     trace_id: UUID
     conversation_id: UUID
-    parent_id: Optional[UUID] = None
-    original_parent_id: Optional[UUID] = None
+    parent_id: UUID | None = None
+    original_parent_id: UUID | None = None
     source: MessageSource
     role: MessageRole
     contents: list[MessageContent]
     created_at: dt.datetime
-    deleted_at: Optional[dt.datetime] = None
+    deleted_at: dt.datetime | None = None
 
     @classmethod
     def from_model(cls, model: MessageModel) -> "Message":
@@ -167,7 +166,7 @@ class Message(BaseModel):
     def content_text(self) -> str:
         return stringify_message_contents(self.contents)
 
-    async def to_openai(self, *, openai_model: OpenAIModel) -> Optional[OpenAIMessage]:
+    async def to_openai(self, *, openai_model: OpenAIModel) -> OpenAIMessage | None:
         maybe_contents = await asyncio.gather(
             *[content.to_openai(openai_model=openai_model) for content in self.contents]
         )
@@ -257,12 +256,15 @@ class ConversationSummary(BaseModel):
     async def search(
         cls,
         *,
-        after_date: Optional[dt.datetime],
-        before_date: Optional[dt.datetime],
-        query: Optional[str],
+        after_date: dt.datetime | None = None,
+        before_date: dt.datetime | None = None,
+        query: str | None = None,
+        limit: int | None = None,
         show_deleted: bool = False,
     ) -> list[Self]:
-        db_query = sa.select(ConversationModel)
+        db_query = sa.select(ConversationModel).order_by(
+            ConversationModel.created_at.desc()
+        )
 
         if after_date:
             db_query = db_query.where(ConversationModel.created_at >= after_date)
@@ -276,6 +278,9 @@ class ConversationSummary(BaseModel):
 
         if not show_deleted:
             db_query = db_query.where(ConversationModel.deleted_at == None)
+
+        if limit is not None:
+            db_query = db_query.limit(limit)
 
         async with get_session() as session:
             query_result = await session.execute(db_query)
@@ -329,10 +334,10 @@ class Conversation(ConversationSummary):
         cls,
         *,
         openai_model_source: OpenAIModelSource,
-        enabled_package_names: Optional[list[str]] = None,
+        enabled_package_names: list[str | None] = None,
         system_message_inputs: CreateMessageInputs,
-        trace_id: Optional[UUID] = None,
-        title: Optional[str] = None,
+        trace_id: UUID | None = None,
+        title: str | None = None,
     ) -> Self:
         trace_id = trace_id or uuid4()
         enabled_package_names = enabled_package_names or []
@@ -417,7 +422,7 @@ class Conversation(ConversationSummary):
         return conversation
 
     @classmethod
-    async def get(cls, id: UUID) -> Optional[Self]:
+    async def get(cls, id: UUID) -> Self | None:
         conversation_model = await ConversationModel.by_id(id)
         if not conversation_model:
             return None
@@ -448,7 +453,7 @@ class Conversation(ConversationSummary):
         source: MessageSource,
         role: MessageRole,
         contents: list[MessageContent],
-        parent_id: Optional[UUID] = None,
+        parent_id: UUID | None = None,
         set_to_current_message: bool = False,
     ) -> Message:
         parent_id = parent_id or self.current_message.id
@@ -512,7 +517,7 @@ class Conversation(ConversationSummary):
         return await self.generate_assistant_message()
 
     async def stream_assistant_messages(
-        self, *, source: Optional[OpenAIModelSource] = None
+        self, *, source: OpenAIModelSource | None = None
     ) -> AsyncGenerator[list[Message], None]:
         source = source or self.openai_model_source.copy()
 
@@ -580,7 +585,7 @@ class Conversation(ConversationSummary):
     async def stream_assistant_message_chunks(
         self,
         *,
-        source: Optional[OpenAIModelSource] = None,
+        source: OpenAIModelSource | None = None,
     ) -> AsyncGenerator[StreamingMessageResult, None]:
         source = source or self.openai_model_source.copy()
 
@@ -637,9 +642,9 @@ class Conversation(ConversationSummary):
     @staticmethod
     def get_function_info(
         *,
-        message: Optional[Message] = None,
-        message_content: Optional[MessageContent] = None,
-    ) -> tuple[Optional[Function], Optional[dict[str, Any]]]:
+        message: Message | None = None,
+        message_content: MessageContent | None = None,
+    ) -> tuple[Function | None, dict[str, Any | None]]:
         if not message_content and message:
             message_content = message.contents[0]
 
@@ -661,7 +666,7 @@ class Conversation(ConversationSummary):
             message_content.arguments,
         )
 
-    async def generate_title(self, *, model: Optional[str] = None) -> None:
+    async def generate_title(self, *, model: str | None = None) -> None:
         env = Env.get()
 
         # Get the cheapest model to do the title generation

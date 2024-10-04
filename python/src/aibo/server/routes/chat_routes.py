@@ -38,6 +38,7 @@ class SearchConversationsRequest(BaseModel):
     after_date: dt.date | None = None
     before_date: dt.date | None = None
     query: str | None = None
+    limit: int | None = None
 
 
 class SearchConversationsResponse(BaseModel):
@@ -158,6 +159,7 @@ async def search_conversations(
         before_date=maybe_to_datetime(request.before_date),
         after_date=maybe_to_datetime(request.after_date),
         query=request.query,
+        limit=request.limit,
     )
     return SearchConversationsResponse(
         conversations=[
@@ -263,6 +265,9 @@ async def conversation_message_search(
                     ON conversations.id = message_content_search.conversation_id
                 WHERE
                     message_content_search MATCH :query
+                    AND conversations.deleted_at is NULL
+                ORDER BY
+                    conversations.created_at DESC
                 LIMIT :limit
                 """
             ).params(

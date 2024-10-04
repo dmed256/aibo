@@ -136,4 +136,9 @@
   :type 'sexp
   :group 'aibo)
 
+(defcustom aibo:homepage-max-conversations nil
+  "If defined, how many conversations will be shown in the homescreen (useful for performance reasons)"
+  :type 'integer
+  :group 'aibo)
+
 (provide 'aibo-custom)
