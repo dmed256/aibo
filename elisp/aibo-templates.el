@@ -29,7 +29,7 @@
           :short-name "r"
           :name "Reasoning"
           :action-type :new-conversation
-          :model "o1-preview"
+          :model aibo:reasoning-model
           :get-message-inputs
           (lambda (content)
             `(,(ht ("role"     "system")

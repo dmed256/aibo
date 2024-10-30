@@ -3,7 +3,7 @@ from typing import Annotated, Literal, Optional, Self, Union
 from pydantic import BaseModel, Field, TypeAdapter
 
 from aibo.common.constants import Env
-from aibo.common.openai import OPENAI_MODELS_BY_MODEL, OpenAIModel
+from aibo.common.openai import is_reasoning_model
 
 __all__ = [
     "HumanSource",
@@ -49,15 +49,8 @@ class OpenAIModelSource(BaseModel):
         )
 
     @property
-    def openai_model(self) -> OpenAIModel:
-        if openai_model := OPENAI_MODELS_BY_MODEL.get(self.model):
-            return openai_model
-        return OpenAIModel(
-            name=self.model,
-            model=self.model,
-            model_family="gpt-4",
-            modalities={"text", "image"},
-        )
+    def is_reasoning_model(self) -> bool:
+        return is_reasoning_model(self.model)
 
     def __str__(self) -> str:
         return f"model:{self.model}"
@@ -83,4 +76,4 @@ MessageSource = Annotated[
     ],
     Field(discriminator="kind"),
 ]
-MessageSourceAdapter = TypeAdapter(MessageSource)
+MessageSourceAdapter = TypeAdapter(MessageSource)  # type: ignore

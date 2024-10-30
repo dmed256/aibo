@@ -4,6 +4,7 @@ from uuid import UUID
 
 from fastapi import APIRouter, WebSocket
 from pydantic import Field
+from starlette.websockets import WebSocketDisconnect
 
 from aibo.core import chat
 from aibo.server.routes import api_models
@@ -23,9 +24,9 @@ class StreamAssistantMessageEventRequest(BaseEvent):
 
 
 class RegenerateLastAssistantMessageEventRequest(BaseEvent):
-    kind: Literal[
+    kind: Literal["regenerate_last_assistant_message"] = (
         "regenerate_last_assistant_message"
-    ] = "regenerate_last_assistant_message"
+    )
     conversation_id: UUID
     model: str
 
@@ -180,4 +181,7 @@ async def stream_assistant_message_chunks(
 async def websocket_connection(websocket: WebSocket) -> None:
     await websocket.accept()
     while True:
-        await ws_router.process(websocket)
+        try:
+            await ws_router.process(websocket)
+        except WebSocketDisconnect:
+            break

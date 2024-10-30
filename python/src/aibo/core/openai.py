@@ -1,37 +1,27 @@
-import os
+from __future__ import annotations
+
+import traceback
 from functools import cache
-from typing import (
-    TYPE_CHECKING,
-    Annotated,
-    Any,
-    AsyncGenerator,
-    Literal,
-    Optional,
-    TypeVar,
-)
+from typing import TYPE_CHECKING, Any, AsyncGenerator, Optional
 from uuid import uuid4
 
-import numpy as np
 import openai
-from pydantic import BaseModel, Field
+from openai.types.chat import ChatCompletionMessageToolCall
 
-from aibo.common.chat.message_source import OpenAIModelSource, ProgrammaticSource
+from aibo.common.chat.message_source import OpenAIModelSource
 from aibo.common.constants import Env
 from aibo.common.openai import (
     CompletionError,
     Embeddings,
     ErrorMessageChunk,
-    FunctionCallStartChunk,
-    OpenAIFunction,
-    OpenAIMessage,
-    OpenAIRole,
+    FunctionCallChunk,
     StreamingMessageChunk,
     StreamingMessageResult,
     SuccessMessageChunk,
 )
 from aibo.common.time import now_utc
 from aibo.common.utils import chunk_sequence
-from aibo.core.package import Function, Package
+from aibo.core.package import Package
 
 if TYPE_CHECKING:
     from aibo.core.chat import Message
@@ -40,10 +30,7 @@ __all__ = [
     "CompletionError",
     "Embeddings",
     "ErrorMessageChunk",
-    "FunctionCallStartChunk",
-    "OpenAIFunction",
-    "OpenAIMessage",
-    "OpenAIRole",
+    "FunctionCallChunk",
     "StreamingMessageChunk",
     "StreamingMessageResult",
     "SuccessMessageChunk",
@@ -72,58 +59,55 @@ async def _build_openai_args(
     *,
     stream: bool,
     source: OpenAIModelSource,
-    messages: list["Message"],
+    messages: list[Message],
     packages: Optional[list[Package]] = None,
-    force_function: Optional[Function] = None,
 ) -> dict[str, Any]:
-    packages = packages or []
-    if force_function and force_function.package not in packages:
-        packages.append(force_function.package)
-
-    functions = [
-        function_schema
-        for package in packages
-        for function_schema in package.to_openai()
-    ]
     args: dict[str, Any] = dict(
         stream=stream,
         model=source.model,
         temperature=source.temperature,
         n=1,
         messages=[
-            openai_message.model_dump(exclude_none=True)
+            openai_message
             for message in messages
-            if (
-                openai_message := await message.to_openai(
-                    openai_model=source.openai_model
-                )
-            )
+            if (openai_message := await message.to_openai())
+        ],
+        tools=[
+            tool_schema
+            for package in (packages or [])
+            for tool_schema in package.to_openai()
         ],
     )
 
-    # o1 doesn't support stream or temperature yet
-    is_reasoning_model = args["model"].startswith("o1")
-    if is_reasoning_model:
+    # Don't stream reasoning responses (personal choice)
+    if source.is_reasoning_model:
         args.pop("stream", None)
         args.pop("temperature", None)
 
-    # o1 doesn't support function-calling yet
-    if not is_reasoning_model:
-        # API expects functions to only be defined if it's a non-empty list
-        if functions:
-            args["functions"] = functions
-        if force_function:
-            args["function_call"] = {"name": force_function.qualified_name}
-
     return args
+
+
+def _get_function_call_chunk(
+    tool_call: ChatCompletionMessageToolCall,
+) -> FunctionCallChunk:
+    maybe_function_name = Package.split_openai_function_name(tool_call.function.name)
+    if not maybe_function_name:
+        raise ValueError(f"Invalid package function name: {tool_call.function.name}")
+
+    package, function = maybe_function_name
+    return FunctionCallChunk(
+        tool_call_id=tool_call.id,
+        package=package,
+        function=function,
+        arguments_json=tool_call.function.arguments,
+    )
 
 
 async def stream_completion(
     *,
     source: OpenAIModelSource,
-    messages: list["Message"],
+    messages: list[Message],
     packages: Optional[list[Package]] = None,
-    force_function: Optional[Function] = None,
 ) -> AsyncGenerator[StreamingMessageResult, None]:
     _verify_openai_enabled()
 
@@ -133,16 +117,22 @@ async def stream_completion(
             source=source,
             messages=messages,
             packages=packages,
-            force_function=force_function,
         )
         completion_stream = await openai_client().chat.completions.create(
             **completion_args
         )
 
-        # Hack to support o1
-        if not completion_args.get("stream"):
+        is_streaming = completion_args.get("stream") is True
+        if not is_streaming:
             completion = completion_stream.choices[0]
-            yield StreamingMessageChunk(text=completion.message.content)
+            message = completion.message
+
+            if message.content is not None:
+                yield StreamingMessageChunk(text=message.content)
+
+            for tool_call in message.tool_calls or []:
+                yield _get_function_call_chunk(tool_call)
+
             yield SuccessMessageChunk()
             return
 
@@ -157,27 +147,8 @@ async def stream_completion(
             if text := delta.content:
                 yield StreamingMessageChunk(text=text)
 
-            if function_call := delta.function_call:
-                function_name = function_call.name
-                text = function_call.arguments
-                if text:
-                    yield StreamingMessageChunk(text=text)
-                elif function_name:
-                    maybe_function_name = Package.split_openai_function_name(
-                        function_name
-                    )
-                    if not maybe_function_name:
-                        raise ValueError(
-                            f"Invalid package function name: {function_name}"
-                        )
-
-                    package, function = maybe_function_name
-                    yield FunctionCallStartChunk(
-                        package=package,
-                        function=function,
-                    )
-                else:
-                    raise ValueError("Expected function_name or argument definition")
+            for tool_call in delta.tool_calls or []:
+                yield _get_function_call_chunk(tool_call)
 
         yield SuccessMessageChunk()
     except openai.OpenAIError as exc:
@@ -190,7 +161,7 @@ async def stream_completion(
             source="server_error",
             content=CompletionError(
                 error_type=CompletionError.ErrorType.AIBO_SERVER,
-                text=str(exc),
+                text=traceback.format_exc(),
             ),
         )
 
@@ -198,10 +169,9 @@ async def stream_completion(
 async def fetch_completion(
     *,
     source: OpenAIModelSource,
-    messages: list["Message"],
+    messages: list[Message],
     packages: Optional[list[Package]] = None,
-    force_function: Optional[Function] = None,
-) -> "Message":
+) -> Message:
     from aibo.core import chat
 
     _verify_openai_enabled()
@@ -213,7 +183,6 @@ async def fetch_completion(
                 source=source,
                 messages=messages,
                 packages=packages,
-                force_function=force_function,
             )
         )
         text = response["choices"]["message"]["content"]

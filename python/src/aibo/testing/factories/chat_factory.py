@@ -1,5 +1,5 @@
 import datetime as dt
-from typing import Any, Optional
+from typing import Any
 
 from aibo.common.chat import (
     CompletionErrorContent,
@@ -8,7 +8,6 @@ from aibo.common.chat import (
     FunctionResponseErrorType,
     FunctionResponseStatus,
     HumanSource,
-    MessageContent,
     MessageRole,
     MessageSource,
     OpenAIModelSource,
@@ -16,7 +15,6 @@ from aibo.common.chat import (
     TextMessageContent,
 )
 from aibo.common.openai import CompletionError
-from aibo.common.time import now_utc
 from aibo.core import chat
 from aibo.testing.factories.base_factory import BaseFactory, fake
 
@@ -31,7 +29,6 @@ __all__ = [
     "FunctionResponseContentFactory",
     "CreateMessageInputsFactory",
     "StreamingMessageChunkFactory",
-    "ErrorMessageChunkFactory",
     "MessageFactory",
     "ConversationFactory",
 ]
@@ -39,7 +36,7 @@ __all__ = [
 
 class HumanSourceFactory(BaseFactory[HumanSource]):
     @staticmethod
-    async def build(*, user: Optional[str] = None) -> HumanSource:
+    async def build(*, user: str | None = None) -> HumanSource:
         return HumanSource(
             user=user or fake.name(),
         )
@@ -49,8 +46,8 @@ class OpenAIModelSourceFactory(BaseFactory[OpenAIModelSource]):
     @staticmethod
     async def build(
         *,
-        model: Optional[str] = None,
-        temperature: Optional[float] = None,
+        model: str | None = None,
+        temperature: float | None = None,
     ) -> OpenAIModelSource:
         return OpenAIModelSource(
             model=model or "fake-model",
@@ -60,7 +57,7 @@ class OpenAIModelSourceFactory(BaseFactory[OpenAIModelSource]):
 
 class ProgrammaticSourceFactory(BaseFactory[ProgrammaticSource]):
     @staticmethod
-    async def build(*, source: Optional[str] = None) -> ProgrammaticSource:
+    async def build(*, source: str | None = None) -> ProgrammaticSource:
         return ProgrammaticSource(
             source=source or fake.word(),
         )
@@ -80,7 +77,7 @@ class MessageSourceFactory(BaseFactory[MessageSource]):
 
 class TextMessageContentFactory(BaseFactory[TextMessageContent]):
     @staticmethod
-    async def build(*, text: Optional[str] = None) -> TextMessageContent:
+    async def build(*, text: str | None = None) -> TextMessageContent:
         return TextMessageContent(
             text=text or fake.sentence(),
         )
@@ -90,8 +87,8 @@ class CompletionErrorContentFactory(BaseFactory[CompletionErrorContent]):
     @staticmethod
     async def build(
         *,
-        error_type: Optional[CompletionError.ErrorType] = None,
-        text: Optional[str] = None,
+        error_type: CompletionError.ErrorType | None = None,
+        text: str | None = None,
     ) -> CompletionErrorContent:
         return CompletionErrorContent(
             error_type=error_type or fake.enum(CompletionError.ErrorType),
@@ -103,14 +100,16 @@ class FunctionRequestContentFactory(BaseFactory[FunctionRequestContent]):
     @staticmethod
     async def build(
         *,
-        package: Optional[str] = None,
-        function: Optional[str] = None,
-        text: Optional[str] = None,
+        tool_call_id: str | None = None,
+        package: str | None = None,
+        function: str | None = None,
+        arguments_json: str | None = None,
     ) -> FunctionRequestContent:
         return FunctionRequestContent(
+            tool_call_id=tool_call_id or fake.word(),
             package=package or fake.word(),
             function=function or fake.word(),
-            text=text or "{}",
+            arguments_json=arguments_json or "{}",
         )
 
 
@@ -118,15 +117,17 @@ class FunctionResponseContentFactory(BaseFactory[FunctionResponseContent]):
     @staticmethod
     async def build(
         *,
-        package: Optional[str] = None,
-        function: Optional[str] = None,
-        status: Optional[FunctionResponseStatus] = None,
-        error_type: Optional[FunctionResponseErrorType] = None,
-        error_message: Optional[str] = None,
-        arguments: Optional[dict[str, Any]] = None,
-        response: Optional[dict[str, Any]] = None,
+        tool_call_id: str | None = None,
+        package: str | None = None,
+        function: str | None = None,
+        status: FunctionResponseStatus | None = None,
+        error_type: FunctionResponseErrorType | None = None,
+        error_message: str | None = None,
+        arguments: dict[str, Any] | None = None,
+        response: dict[str, Any] | None = None,
     ) -> FunctionResponseContent:
         return FunctionResponseContent(
+            tool_call_id=tool_call_id or fake.word(),
             package=package or fake.word(),
             function=function or fake.word(),
             status=status or fake.enum(FunctionResponseStatus),
@@ -141,8 +142,8 @@ class CreateMessageInputsFactory(BaseFactory[chat.CreateMessageInputs]):
     @staticmethod
     async def build(
         *,
-        role: Optional[chat.MessageRole] = None,
-        content: Optional[chat.MessageContent] = None,
+        role: chat.MessageRole | None = None,
+        content: chat.MessageContent | None = None,
     ) -> chat.CreateMessageInputs:
         return chat.CreateMessageInputs(
             role=role or fake.random_element(elements=chat.MessageRole),
@@ -152,35 +153,22 @@ class CreateMessageInputsFactory(BaseFactory[chat.CreateMessageInputs]):
 
 class StreamingMessageChunkFactory(BaseFactory[chat.StreamingMessageChunk]):
     @staticmethod
-    async def build(*, text: Optional[str] = None) -> chat.StreamingMessageChunk:
+    async def build(*, text: str | None = None) -> chat.StreamingMessageChunk:
         return chat.StreamingMessageChunk(text=text or fake.sentence())
-
-
-class ErrorMessageChunkFactory(BaseFactory[chat.ErrorMessageChunk]):
-    @staticmethod
-    async def build(
-        *,
-        source: Optional[str] = None,
-        content: Optional[chat.CompletionErrorContent] = None,
-    ) -> chat.ErrorMessageChunk:
-        return chat.ErrorMessageChunk(
-            source=source or fake.word(),
-            content=content or await CompletionErrorContentFactory.build(),
-        )
 
 
 class MessageFactory(BaseFactory[chat.Message]):
     @staticmethod
     async def build(
         *,
-        status: Optional[chat.Message.Status] = None,
-        conversation: Optional[chat.Conversation] = None,
-        parent: Optional[chat.Message] = None,
-        source: Optional[chat.MessageSource] = None,
-        role: Optional[chat.MessageRole] = None,
-        content: Optional[chat.MessageContent] = None,
-        created_at: Optional[dt.datetime] = None,
-        deleted_at: Optional[dt.datetime] = None,
+        status: chat.Message.Status | None = None,
+        conversation: chat.Conversation | None = None,
+        parent: chat.Message | None = None,
+        source: chat.MessageSource | None = None,
+        role: chat.MessageRole | None = None,
+        content: chat.MessageContent | None = None,
+        created_at: dt.datetime | None = None,
+        deleted_at: dt.datetime | None = None,
     ) -> chat.Message:
         from aibo.testing import factory
 
@@ -203,12 +191,12 @@ class ConversationFactory(BaseFactory[chat.Conversation]):
     @staticmethod
     async def build(
         *,
-        title: Optional[str] = None,
-        openai_model_source: Optional[chat.OpenAIModelSource] = None,
-        enabled_packages: Optional[list[Any]] = None,
-        conversation_depth: Optional[int] = None,
-        created_at: Optional[dt.datetime] = None,
-        deleted_at: Optional[dt.datetime] = None,
+        title: str | None = None,
+        openai_model_source: chat.OpenAIModelSource | None = None,
+        enabled_packages: list[Any] | None = None,
+        conversation_depth: int | None = None,
+        created_at: dt.datetime | None = None,
+        deleted_at: dt.datetime | None = None,
     ) -> chat.Conversation:
         from aibo.testing import factory
 

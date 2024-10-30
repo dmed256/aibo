@@ -37,7 +37,7 @@ async def run_shell_command(
 
     stdout, stderr = await proc.communicate()
     output = CommandOutput(
-        exit_code=proc.returncode,
+        exit_code=proc.returncode or 0,
         stdout=stdout.decode("utf-8"),
         stderr=stderr.decode("utf-8"),
     )

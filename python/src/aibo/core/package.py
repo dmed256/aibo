@@ -9,58 +9,53 @@ from typing import (
     Callable,
     Coroutine,
     Literal,
-    Optional,
     Self,
-    TypeVar,
     Union,
 )
 
-from pydantic import BaseModel, ConfigDict, Field
+from pydantic import BaseModel, Field
 from pydantic.fields import FieldInfo
 
 from aibo.common.types import JsonValue
 
 if TYPE_CHECKING:
-    from aibo.core.chat import (
-        Conversation,
-        FunctionResponseErrorType,
-        Message,
-        MessageContent,
-    )
+    from aibo.core.chat import Conversation, FunctionResponseErrorType, Message
 
 __all__ = ["FunctionContext", "Function", "Package"]
 
 TFunctionCallable = Callable[..., Coroutine]
 
-_PACKAGE_REGISTRY: dict[str, "Package"] = {}
+_PACKAGE_REGISTRY: dict[str, Package] = {}
 
 
 class FunctionContext(BaseModel):
-    conversation: "Conversation"
-    function: "Function"
+    conversation: Conversation
+    function: Function
+    tool_call_id: str
     arguments: JsonValue
 
     async def insert_message(
         self,
         *,
-        error_type: Optional["FunctionResponseErrorType"] = None,
-        error_message: Optional[str] = None,
+        error_type: FunctionResponseErrorType | None = None,
+        error_message: str | None = None,
         response: JsonValue,
-    ) -> "Message":
+    ) -> Message:
         from aibo.core import chat
 
         content = chat.FunctionResponseContent(
+            tool_call_id=self.tool_call_id,
             package=self.function.package.name,
             function=self.function.name,
             status=chat.FunctionResponseStatus.SUCCESS,
-            arguments=self.arguments,
+            arguments=self.arguments,  # type: ignore
             error_type=error_type,
             error_message=error_message,
             response=response,
         )
         return await self.conversation.insert_message(
             source=chat.ProgrammaticSource(source=self.function.qualified_name),
-            role=chat.MessageRole.FUNCTION,
+            role=chat.MessageRole.TOOL,
             contents=[content],
         )
 
@@ -70,18 +65,23 @@ class Function(BaseModel):
     Function the assistant is allowed to invoke
     """
 
-    package: "Package"
+    package: Package
     fn: Callable[..., Awaitable[JsonValue]] = Field(..., exclude=True)
     name: str
     description: str
     arguments_json_schema: dict[str, Any]
 
     async def __call__(
-        self, *, conversation: "Conversation", arguments: dict[str, Any]
-    ) -> "Message":
+        self,
+        *,
+        conversation: Conversation,
+        tool_call_id: str,
+        arguments: dict[str, Any],
+    ) -> Message:
         ctx = FunctionContext(
             conversation=conversation,
             function=self,
+            tool_call_id=tool_call_id,
             arguments=arguments,
         )
         response = await self.fn(ctx, **arguments)
@@ -96,9 +96,12 @@ class Function(BaseModel):
 
     def to_openai(self) -> dict[str, Any]:
         return {
-            "name": self.qualified_name,
-            "description": self.description,
-            "parameters": self.arguments_json_schema,
+            "type": "function",
+            "function": {
+                "name": self.qualified_name,
+                "description": self.description,
+                "parameters": self.arguments_json_schema,
+            },
         }
 
 
@@ -112,11 +115,11 @@ class Package(BaseModel):
     functions: dict[str, Function] = {}
 
     @staticmethod
-    def get(package_name: str) -> Optional["Package"]:
+    def get(package_name: str) -> Package | None:
         return _PACKAGE_REGISTRY.get(package_name)
 
     @staticmethod
-    def registered_packages() -> list["Package"]:
+    def registered_packages() -> list[Package]:
         global _PACKAGE_REGISTRY
         return list(_PACKAGE_REGISTRY.values())
 
@@ -157,7 +160,7 @@ class Package(BaseModel):
         return f"{package}__{function}"
 
     @staticmethod
-    def split_openai_function_name(function_name: str) -> Optional[tuple[str, str]]:
+    def split_openai_function_name(function_name: str) -> tuple[str, str] | None:
         parts = function_name.split("__")
         if len(parts) != 2:
             return None
@@ -220,7 +223,7 @@ def _typing_to_json_schema_type(
     arg_name: str,
     typing_type: Any,
     qualified_name: str,
-    description: Optional[str] = None,
+    description: str | None = None,
 ) -> dict[str, Any]:
     json_schema: dict[str, Any] = {}
     if description is not None:

@@ -9,6 +9,7 @@ Options:
     python -m aibo.cli.start --port [PORT]
 
 """
+
 import os
 
 import fire

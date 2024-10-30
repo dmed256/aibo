@@ -2,26 +2,14 @@ from __future__ import annotations
 
 import asyncio
 import datetime as dt
-import functools
 import re
 from enum import StrEnum
-from typing import (
-    Annotated,
-    Any,
-    AsyncGenerator,
-    Generator,
-    Iterable,
-    Literal,
-    Self,
-    Sequence,
-    Type,
-    Union,
-    cast,
-)
+from typing import Any, AsyncGenerator, Generator, Self, Union, cast
 from uuid import UUID, uuid4
 
 import sqlalchemy as sa
-from pydantic import BaseModel, Field, model_validator
+from openai.types import chat as openai_chat
+from pydantic import BaseModel
 from termcolor import colored
 
 from aibo.common.chat import (
@@ -41,20 +29,18 @@ from aibo.common.chat import (
     stringify_message_contents,
 )
 from aibo.common.constants import Env
-from aibo.common.openai import OpenAIModel, get_openai_model
+from aibo.common.openai import is_reasoning_model
 from aibo.common.result import Error, Result
 from aibo.common.time import now_utc
 from aibo.core.openai import (
     ErrorMessageChunk,
-    FunctionCallStartChunk,
-    OpenAIMessage,
-    OpenAIRole,
+    FunctionCallChunk,
     StreamingMessageChunk,
     StreamingMessageResult,
     SuccessMessageChunk,
     stream_completion,
 )
-from aibo.core.package import Function, FunctionContext, Package
+from aibo.core.package import FunctionContext, Package
 from aibo.db.client import get_session
 from aibo.db.models import ConversationModel, MessageModel
 
@@ -89,15 +75,15 @@ ROLE_COLORS: dict[MessageRole, str] = {
     MessageRole.SYSTEM: "green",
     MessageRole.USER: "yellow",
     MessageRole.ASSISTANT: "cyan",
-    MessageRole.FUNCTION: "magenta",
+    MessageRole.TOOL: "magenta",
     MessageRole.ERROR: "red",
 }
 
-OPENAI_ROLES: dict[MessageRole, OpenAIRole] = {
+OPENAI_ROLES: dict[MessageRole, str] = {
     MessageRole.SYSTEM: "system",
     MessageRole.USER: "user",
     MessageRole.ASSISTANT: "assistant",
-    MessageRole.FUNCTION: "function",
+    MessageRole.TOOL: "tool",
 }
 
 
@@ -129,11 +115,11 @@ class Message(BaseModel):
             id=model.id,
             status=cls.Status.COMPLETED,
             trace_id=model.trace_id,
-            conversation_id=model.conversation_id,
+            conversation_id=model.conversation_id,  # type: ignore
             parent_id=model.parent_id,
             original_parent_id=model.original_parent_id,
             source=model.source,
-            role=model.role,
+            role=model.role,  # type: ignore
             contents=model.contents,
             created_at=model.created_at,
             deleted_at=model.deleted_at,
@@ -166,33 +152,107 @@ class Message(BaseModel):
     def content_text(self) -> str:
         return stringify_message_contents(self.contents)
 
-    async def to_openai(self, *, openai_model: OpenAIModel) -> OpenAIMessage | None:
-        maybe_contents = await asyncio.gather(
-            *[content.to_openai(openai_model=openai_model) for content in self.contents]
+    @property
+    def is_reasoning_model(self) -> bool:
+        if isinstance(self.source, OpenAIModelSource):
+            return is_reasoning_model(self.source.model)
+        return False
+
+    async def get_openai_contents(
+        self,
+    ) -> list[openai_chat.ChatCompletionContentPartParam]:
+        maybe_openai_contents = await asyncio.gather(
+            *[
+                content.to_openai()
+                for content in self.contents
+                if not isinstance(
+                    content,
+                    (
+                        CompletionErrorContent,
+                        FunctionRequestContent,
+                        FunctionResponseContent,
+                    ),
+                )
+            ]
         )
-        content = [
-            maybe_content
-            for maybe_content in maybe_contents
-            if maybe_content is not None
+        return [
+            maybe_openai_content
+            for maybe_openai_content in maybe_openai_contents
+            if maybe_openai_content is not None
         ]
-        if not content:
-            return None
 
-        openai_role = OPENAI_ROLES[self.role]
+    async def to_openai(self) -> openai_chat.ChatCompletionMessageParam | None:
+        if self.role == MessageRole.SYSTEM:
+            return await self._to_system_openai_message()
+        elif self.role == MessageRole.USER:
+            return await self._to_user_openai_message()
+        elif self.role == MessageRole.ASSISTANT:
+            return await self._to_assistant_openai_message()
+        elif self.role == MessageRole.TOOL:
+            return await self._to_tool_openai_message()
 
-        message = OpenAIMessage(
-            role=openai_role,
-            content=content,
+        return None
+
+    async def _to_system_openai_message(self) -> openai_chat.ChatCompletionMessageParam:
+        openai_contents = await self.get_openai_contents()
+
+        if self.is_reasoning_model:
+            return openai_chat.ChatCompletionUserMessageParam(
+                role="user",
+                content=[
+                    openai_chat.ChatCompletionContentPartTextParam(
+                        type="text",
+                        text="# Custom instructions \n",
+                    ),
+                    *openai_contents,
+                ],
+            )
+        else:
+            return openai_chat.ChatCompletionSystemMessageParam(
+                role="system",
+                content=openai_contents,  # type: ignore
+            )
+
+    async def _to_user_openai_message(self) -> openai_chat.ChatCompletionMessageParam:
+        openai_contents = await self.get_openai_contents()
+
+        return openai_chat.ChatCompletionUserMessageParam(
+            role="user",
+            content=openai_contents,
         )
 
-        if len(self.contents) == 1:
-            message_content = self.contents[0]
-            if isinstance(message_content, FunctionRequestContent):
-                message.function_call = message_content.get_openai_function_call()
-            elif isinstance(message_content, FunctionResponseContent):
-                message.name = message_content.get_openai_function_name()
+    async def _to_assistant_openai_message(
+        self,
+    ) -> openai_chat.ChatCompletionMessageParam:
+        openai_contents = await self.get_openai_contents()
+        tool_calls = [
+            tool_call
+            for content in self.contents
+            if isinstance(content, FunctionRequestContent)
+            and (tool_call := content.to_openai_tool_call())
+        ]
+        return openai_chat.ChatCompletionAssistantMessageParam(
+            role="assistant",
+            content=openai_contents or None,  # type: ignore
+            tool_calls=tool_calls or None,  # type: ignore
+        )
 
-        return message
+    async def _to_tool_openai_message(self) -> openai_chat.ChatCompletionMessageParam:
+        response_contents = [
+            content
+            for content in self.contents
+            if isinstance(content, FunctionResponseContent)
+        ]
+        assert (
+            len(response_contents) == 1
+        ), f"Expected just 1 response content, found {len(response_contents)=}"
+
+        response_content = response_contents[0]
+        return openai_chat.ChatCompletionToolMessageParam(
+            role="tool",
+            tool_call_id=response_content.tool_call_id,
+            content=[await response_content.to_openai()],  # type: ignore
+        )
 
     async def get_children(self) -> list["Message"]:
         return [
@@ -499,7 +559,7 @@ class Conversation(ConversationSummary):
     async def delete_last_assistant_message(self) -> int:
         delete_count = 0
         for message in reversed(self.get_current_history()):
-            if message.role not in [MessageRole.ASSISTANT, MessageRole.FUNCTION]:
+            if message.role not in [MessageRole.ASSISTANT, MessageRole.TOOL]:
                 break
 
             await self.delete_message(message)
@@ -509,7 +569,7 @@ class Conversation(ConversationSummary):
 
     async def regenerate_last_assistant_message(self) -> list[Message]:
         for message in reversed(self.get_current_history()):
-            if message.role not in [MessageRole.ASSISTANT, MessageRole.FUNCTION]:
+            if message.role not in [MessageRole.ASSISTANT, MessageRole.TOOL]:
                 break
 
             await self.delete_message(message)
@@ -525,12 +585,15 @@ class Conversation(ConversationSummary):
         temp_created_at = now_utc()
 
         messages: list[Message] = []
-        content: Union[TextMessageContent, FunctionRequestContent] = TextMessageContent(
-            text=""
-        )
+        contents: list[MessageContent] = [TextMessageContent(text="")]
+
         async for chunk in self.stream_assistant_message_chunks(source=source):
             if isinstance(chunk, StreamingMessageChunk):
-                content.text += chunk.text
+                if isinstance(contents[-1], TextMessageContent):
+                    contents[-1].text += chunk.text
+                else:
+                    contents.append(TextMessageContent(text=chunk.text))
+
                 yield [
                     *messages,
                     Message(
@@ -541,22 +604,25 @@ class Conversation(ConversationSummary):
                         parent_id=self.current_message.id,
                         source=source,
                         role=MessageRole.ASSISTANT,
-                        contents=[content],
+                        contents=contents,
                         created_at=temp_created_at,
                     ),
                 ]
-            elif isinstance(chunk, FunctionCallStartChunk):
-                content = FunctionRequestContent(
-                    package=chunk.package,
-                    function=chunk.function,
-                    text="",
+            elif isinstance(chunk, FunctionCallChunk):
+                contents.append(
+                    FunctionRequestContent(
+                        package=chunk.package,
+                        function=chunk.function,
+                        tool_call_id=chunk.tool_call_id,
+                        arguments_json=chunk.arguments_json,
+                    )
                 )
             elif isinstance(chunk, SuccessMessageChunk):
                 messages.append(
                     await self.insert_message(
                         source=source,
                         role=MessageRole.ASSISTANT,
-                        contents=[content],
+                        contents=contents,
                     )
                 )
                 yield messages
@@ -570,14 +636,19 @@ class Conversation(ConversationSummary):
                 )
                 yield messages
 
-        maybe_function, maybe_arguments = self.get_function_info(
-            message_content=content
-        )
-        if maybe_function and maybe_arguments:
+        for content in contents:
+            if (
+                not isinstance(content, FunctionRequestContent)
+                or not (package := Package.get(content.package))
+                or not (function := package.functions.get(content.function))
+            ):
+                continue
+
             messages.append(
-                await maybe_function(
+                await function(
                     conversation=self,
-                    arguments=maybe_arguments,
+                    tool_call_id=content.tool_call_id,
+                    arguments=content.arguments,
                 )
             )
             yield messages
@@ -588,7 +659,6 @@ class Conversation(ConversationSummary):
         source: OpenAIModelSource | None = None,
     ) -> AsyncGenerator[StreamingMessageResult, None]:
         source = source or self.openai_model_source.copy()
-
         async for chunk in stream_completion(
             source=source,
             messages=self.get_current_history(),
@@ -602,29 +672,14 @@ class Conversation(ConversationSummary):
         model: str,
         temperature: float | None = None,
     ) -> OpenAIModelSource:
-        current_openai_model = self.openai_model_source.openai_model
-
-        new_modalities = set(current_openai_model.modalities)
-        if "image" not in new_modalities:
-            if any(
-                isinstance(content, ImageMessageContent)
-                for message in self.all_messages.values()
-                for content in message.contents
-            ):
-                new_modalities.add("image")
-
-        new_openai_model = get_openai_model(
-            modalities=new_modalities,
-            name=model,
-        )
+        if model == self.openai_model_source.model:
+            return self.openai_model_source
 
         source = OpenAIModelSource.build(
-            model=new_openai_model.model,
+            model=model,
             temperature=temperature,
         )
-        if new_openai_model.model != current_openai_model.model:
-            await self.set_openai_model_source(source)
-
+        await self.set_openai_model_source(source)
         return source
 
     async def set_openai_model_source(
@@ -639,42 +694,14 @@ class Conversation(ConversationSummary):
             )
             await session.commit()
 
-    @staticmethod
-    def get_function_info(
-        *,
-        message: Message | None = None,
-        message_content: MessageContent | None = None,
-    ) -> tuple[Function | None, dict[str, Any] | None]:
-        if not message_content and message:
-            message_content = message.contents[0]
-
-        if not message_content:
-            raise Result.error(  # type: ignore[misc]
-                "Missing message or message_content",
-                error_code=Error.Code.INVALID_ARGUMENT,
-            )
-
-        if not isinstance(message_content, FunctionRequestContent):
-            return None, None
-
-        package = Package.get(message_content.package)
-        if not package:
-            return None, None
-
-        return (
-            package.functions.get(message_content.function),
-            message_content.arguments,
-        )
-
     async def generate_title(self, *, model: str | None = None) -> None:
         env = Env.get()
 
         # Get the cheapest model to do the title generation
-        openai_model = get_openai_model(modalities=["text"], name="gpt-4o-mini")
         title_conversation = await Conversation.create(
             title=f"Title for {self.id}",
             trace_id=self.trace_id,
-            openai_model_source=OpenAIModelSource.build(model=openai_model.model),
+            openai_model_source=OpenAIModelSource.build(model="gpt-4o-mini"),
             system_message_inputs=CreateMessageInputs(
                 role=MessageRole.SYSTEM,
                 contents=[

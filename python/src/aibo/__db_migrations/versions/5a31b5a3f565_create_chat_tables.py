@@ -7,6 +7,7 @@ Migration information:
 - Created at: 2023-10-08 20:10:15.035337
 
 """
+
 from typing import Any, Optional
 
 import sqlalchemy as sa

@@ -60,9 +60,9 @@
      ((string= key "assistant-header")    'aibo:assistant-header-face)
      ((string= key "assistant-subheader") 'aibo:assistant-subheader-face)
 
-     ((string= key "function-content")    'aibo:function-content-face)
-     ((string= key "function-header")     'aibo:function-header-face)
-     ((string= key "function-subheader")  'aibo:function-subheader-face)
+     ((string= key "tool-content")    'aibo:tool-content-face)
+     ((string= key "tool-header")     'aibo:tool-header-face)
+     ((string= key "tool-subheader")  'aibo:tool-subheader-face)
 
      ((string= key "error-content")       'aibo:error-content-face)
      ((string= key "error-header")        'aibo:error-header-face))))
@@ -80,13 +80,13 @@
            ((string= role "system")    "System")
            ((string= role "user")      "User")
            ((string= role "assistant") "Assistant")
-           ((string= role "function")  "Function")
+           ((string= role "tool")      "Tool")
            ((string= role "error")     "Error")))
          (subheader-text
           (cond
            ((string= role "assistant")
             (aibo::--get-message-source message))
-           ((string= role "function")
+           ((string= role "tool")
             (replace-regexp-in-string "__" "." (aibo::--get-message-source message))))))
     (concat
      (propertize
@@ -339,7 +339,7 @@
 
 (defun aibo:submit-user-message-with-reasoning ()
   (interactive)
-  (aibo:submit-user-message :model "o1-preview"))
+  (aibo:submit-user-message :model aibo:reasoning-model))
 
 (defun aibo:stream-assistant-message (&rest args)
   (interactive)

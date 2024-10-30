@@ -7,7 +7,6 @@ from fastapi import APIRouter
 from pydantic import BaseModel, ConfigDict
 
 from aibo.common.constants import Env
-from aibo.common.openai import get_openai_model
 from aibo.common.shorthands import (
     expand_contents_shorthands_inplace,
     expand_messages_shorthands_inplace,
@@ -191,9 +190,8 @@ async def create_conversation(
 
     trace_id = uuid4()
 
-    openai_model = get_openai_model(model=request.model, modalities=["text"])
     openai_model_source = chat.OpenAIModelSource.build(
-        model=openai_model.model,
+        model=request.model,
         temperature=request.temperature,
     )
 

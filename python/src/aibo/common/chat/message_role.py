@@ -7,5 +7,5 @@ class MessageRole(StrEnum):
     SYSTEM = "system"
     USER = "user"
     ASSISTANT = "assistant"
-    FUNCTION = "function"
+    TOOL = "tool"
     ERROR = "error"
