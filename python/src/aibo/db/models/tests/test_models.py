@@ -3,6 +3,7 @@ import pytest
 from aibo.core import chat
 from aibo.testing import factory
 
+
 @pytest.mark.skip("async issues")
 async def test_non_model_factories() -> None:
     await factory.HumanSourceFactory.build()

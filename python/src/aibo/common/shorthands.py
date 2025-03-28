@@ -1,3 +1,4 @@
+import glob
 import logging
 import os
 import re
@@ -18,6 +19,9 @@ logger = logging.getLogger(__name__)
 IMAGE_SHORTHANDS_PATTERN_STR = "(?:im|sc)"
 IMAGE_SHORTHANDS_PATTERN = re.compile("(?:im|sc)")
 
+DIR_SHORTHAND_PATTERN_STR = r"\\d\[([^]]+)\]"
+DIR_SHORTHAND_PATTERN = re.compile(r"\\d\[([^]]+)\]")
+
 FILE_SHORTHAND_PATTERN_STR = r"\\f\[([^]]+)\]"
 FILE_SHORTHAND_PATTERN = re.compile(r"\\f\[([^]]+)\]")
 
@@ -37,6 +41,9 @@ def _shorthand_re_sub_pattern(shorthand: str) -> re.Pattern:
         - \f[<filename>]: How to add the filename argument
         - \f[<filename>:<lineno>]: Inject just that one line
         - \f[<filename>:<start>:<end>]: Inject the line region
+
+    - \d: Inject the directory contents
+        - \d[<directory-or-glob>]: Injects all non-binary files in the directory (or glob)
 
     Common custom shorthands:
     - \r: Emacs region
@@ -93,6 +100,9 @@ async def expand_contents_shorthands_inplace(
     await replace_image_shorthands(
         trace_id=trace_id,
         message_contents=message_contents,
+        text_contents=text_contents,
+    )
+    replace_directory_shorthands(
         text_contents=text_contents,
     )
     replace_file_shorthands(
@@ -190,6 +200,60 @@ async def replace_image_shorthands(
         message_contents[message_index] = new_contents
 
 
+def replace_directory_shorthands(
+    *,
+    text_contents: dict[tuple[int, int], chat.TextMessageContent],
+) -> None:
+    """
+    Builtins:
+    - \d: Inject the directory contents
+        - \d[<directory-or-glob>]: Injects all non-binary files in the directory (or glob)
+    """
+    for text_content in text_contents.values():
+        parts = re.split(DIR_SHORTHAND_PATTERN, text_content.text)
+        if len(parts) <= 1:
+            continue
+
+        text_content.text = "".join(
+            [
+                _maybe_expand_directory(part) if part_index % 2 else part
+                for part_index, part in enumerate(parts)
+            ]
+        )
+
+
+def _maybe_expand_directory(dir_glob: str) -> str:
+    """
+    Expand the directory expression into the aggregated contents of all matching
+    non-binary files. If nothing is found, returns the original shorthand.
+    """
+    dirpath = os.path.expanduser(dir_glob)
+    if "*" not in dirpath:
+        dirpath += "**/*"
+
+    files = sorted(glob.glob(dirpath, recursive=True))
+
+    if not files:
+        return f"(Missing directory contents: {dir_glob})"
+
+    merged_content = ""
+    for file_path in files:
+        if not os.path.isfile(file_path):
+            continue
+
+        try:
+            # Read a sample in binary to determine if the file contains null bytes.
+            with open(file_path, "rb") as f:
+                sample = f.read(1024)
+
+            if sample and b"\0" not in sample:
+                merged_content += _maybe_expand_file(file_path)
+        except Exception:
+            continue
+
+    return merged_content
+
+
 def replace_file_shorthands(
     *,
     text_contents: dict[tuple[int, int], chat.TextMessageContent],
@@ -224,7 +288,6 @@ def _maybe_expand_file(content: str) -> str:
     If it doesn't exist, replace back with \f[{content}]
     """
     parts = content.split(":")
-    logger.error(f"{parts=}")
 
     def maybe_int(index: int) -> int | None:
         try:
