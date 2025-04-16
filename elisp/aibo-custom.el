@@ -11,12 +11,12 @@
   :type 'integer
   :group 'aibo)
 
-(defcustom aibo:model "gpt-4o"
+(defcustom aibo:model "o4-mini"
   "The OpenAI model name used for completions"
   :type 'string
   :group 'aibo)
 
-(defcustom aibo:reasoning-model "o1"
+(defcustom aibo:reasoning-model "o3"
   "The OpenAI model name used for reasoning completions"
   :type 'string
   :group 'aibo)
