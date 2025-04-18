@@ -76,4 +76,4 @@ MessageSource = Annotated[
     ],
     Field(discriminator="kind"),
 ]
-MessageSourceAdapter = TypeAdapter(MessageSource)  # type: ignore
+MessageSourceAdapter = TypeAdapter(MessageSource)

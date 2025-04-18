@@ -242,7 +242,7 @@ MessageContent = Annotated[
     ],
     Field(discriminator="kind"),
 ]
-MessageContentAdapter = TypeAdapter(MessageContent)  # type: ignore
+MessageContentAdapter = TypeAdapter(MessageContent)
 
 MessageContents = list[MessageContent]
 MessageContentsAdapter = TypeAdapter(MessageContents)

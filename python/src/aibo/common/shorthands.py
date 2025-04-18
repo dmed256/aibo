@@ -76,7 +76,7 @@ async def expand_messages_shorthands_inplace(
         shorthands=shorthands,
     )
     for message, contents in zip(messages, message_contents):
-        message.contents = contents  # type: ignore
+        message.contents = contents
 
 
 async def expand_contents_shorthands_inplace(

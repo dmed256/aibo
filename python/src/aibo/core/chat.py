@@ -115,11 +115,11 @@ class Message(BaseModel):
             id=model.id,
             status=cls.Status.COMPLETED,
             trace_id=model.trace_id,
-            conversation_id=model.conversation_id,  # type: ignore
+            conversation_id=model.conversation_id,
             parent_id=model.parent_id,
             original_parent_id=model.original_parent_id,
             source=model.source,
-            role=model.role,  # type: ignore
+            role=model.role,
             contents=model.contents,
             created_at=model.created_at,
             deleted_at=model.deleted_at,

@@ -48,7 +48,7 @@ class FunctionContext(BaseModel):
             package=self.function.package.name,
             function=self.function.name,
             status=chat.FunctionResponseStatus.SUCCESS,
-            arguments=self.arguments,  # type: ignore
+            arguments=self.arguments,
             error_type=error_type,
             error_message=error_message,
             response=response,
