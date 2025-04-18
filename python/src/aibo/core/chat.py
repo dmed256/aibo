@@ -701,7 +701,7 @@ class Conversation(ConversationSummary):
         title_conversation = await Conversation.create(
             title=f"Title for {self.id}",
             trace_id=self.trace_id,
-            openai_model_source=OpenAIModelSource.build(model="gpt-4o-mini"),
+            openai_model_source=OpenAIModelSource.build(model="o4-mini"),
             system_message_inputs=CreateMessageInputs(
                 role=MessageRole.SYSTEM,
                 contents=[

@@ -366,7 +366,16 @@
                (ht-get ws-message "message"))
               (set-buffer-modified-p nil))))
 
-         ("event_completed" on-success)))))
+         ("event_completed"
+          (lambda (&rest _)
+            (when (buffer-live-p buffer)
+              (with-current-buffer buffer
+                ;; jump to end of the new‐message widget
+                (goto-char (widget-field-end aibo:b-new-user-message-widget))
+                (recenter-bottom)))
+            ;; if someone passed their own on-success, run it too
+            (when on-success
+              (funcall on-success))))))))
 
 (defun aibo:regenerate-current-conversation-last-assistant-message ()
   (interactive)
