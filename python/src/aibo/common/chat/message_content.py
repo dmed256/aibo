@@ -46,10 +46,12 @@ class BaseMessageContent(BaseModel, abc.ABC):
     kind: str
 
     @abc.abstractmethod
-    async def to_openai(self) -> openai_chat.ChatCompletionContentPartParam | None: ...
+    async def to_openai(self) -> openai_chat.ChatCompletionContentPartParam | None:
+        ...
 
     @abc.abstractmethod
-    def __str__(self) -> str: ...
+    def __str__(self) -> str:
+        ...
 
 
 class TextMessageContent(BaseMessageContent):
