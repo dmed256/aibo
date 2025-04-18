@@ -19,7 +19,7 @@ dependencies = [
   "fire==0.5.*",
   "greenlet==2.0.*",
   "numpy==1.24.*",
-  "openai==1.2.*",
+  "openai==1.*",
   "Pillow==10.1.*",
   "pydantic==2.2.*",
   "sqlalchemy[asyncio]==2.0.21",
