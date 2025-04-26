@@ -23,6 +23,7 @@
   (define-key map (kbd "C-c C-x C-r")    #'aibo:refresh-current-conversation)
   (define-key map (kbd "C-c f c")        #'aibo:insert-counsel-find-file-shorthand)
   (define-key map (kbd "C-c f p")        #'aibo:insert-projectile-find-file-shorthand)
+  (define-key map (kbd "C-c i")          #'aibo:insert-image-shorthand)
   (define-key map (kbd "C-c C-t")        #'aibo:set-current-conversation-title)
   (define-key map (kbd "C-c C-k")        #'aibo:remove-message-at-point)
   (define-key map (kbd "C-c C-x C-k")    #'aibo:remove-messages-after-point)
@@ -615,6 +616,12 @@
 
 (defun aibo:--insert-file-shorthand (filename)
   (insert (concat "\\f[" (abbreviate-file-name filename) "]")))
+
+(defun aibo:insert-image-shorthand ()
+  (interactive)
+  (aibo:api-create-image-from-clipboard
+   :on-success (lambda (image-id)
+                 (insert (format "\\i[%s]" image-id)))))
 
 ;; ---[ Create a conversation ]-------------------
 (defvar aibo:--create-conversation-history nil

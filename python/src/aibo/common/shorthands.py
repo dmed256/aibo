@@ -16,14 +16,17 @@ __all__ = [
 
 logger = logging.getLogger(__name__)
 
-IMAGE_SHORTHANDS_PATTERN_STR = "(?:im|sc)"
-IMAGE_SHORTHANDS_PATTERN = re.compile("(?:im|sc)")
+CLIPBOARD_IMAGE_SHORTHANDS_PATTERN_STR = "(?:im|sc)"
+CLIPBOARD_IMAGE_SHORTHANDS_PATTERN = re.compile(CLIPBOARD_IMAGE_SHORTHANDS_PATTERN_STR)
+
+IMAGE_SHORTHAND_PATTERN_STR = r"\\i\[([^]]+)\]"
+IMAGE_SHORTHAND_PATTERN = re.compile(IMAGE_SHORTHAND_PATTERN_STR)
 
 DIR_SHORTHAND_PATTERN_STR = r"\\d\[([^]]+)\]"
-DIR_SHORTHAND_PATTERN = re.compile(r"\\d\[([^]]+)\]")
+DIR_SHORTHAND_PATTERN = re.compile(DIR_SHORTHAND_PATTERN_STR)
 
 FILE_SHORTHAND_PATTERN_STR = r"\\f\[([^]]+)\]"
-FILE_SHORTHAND_PATTERN = re.compile(r"\\f\[([^]]+)\]")
+FILE_SHORTHAND_PATTERN = re.compile(FILE_SHORTHAND_PATTERN_STR)
 
 
 @cache
@@ -45,6 +48,8 @@ def _shorthand_re_sub_pattern(shorthand: str) -> re.Pattern:
     - \d: Inject the directory contents
         - \d[<directory-or-glob>]: Injects all non-binary files in the directory (or glob)
 
+    - \i[<uuid>]: Inject an image by its ID
+
     Common custom shorthands:
     - \r: Emacs region
     - \b: Emacs buffer
@@ -55,7 +60,7 @@ def _shorthand_re_sub_pattern(shorthand: str) -> re.Pattern:
 def message_content_expands_image(
     contents: list[chat.MessageContent],
 ) -> bool:
-    image_pattern = _shorthand_re_sub_pattern(IMAGE_SHORTHANDS_PATTERN_STR)
+    image_pattern = _shorthand_re_sub_pattern(CLIPBOARD_IMAGE_SHORTHANDS_PATTERN_STR)
     return any(
         image_pattern.search(content.text)
         for content in contents
@@ -97,8 +102,12 @@ async def expand_contents_shorthands_inplace(
         text_contents=text_contents,
         shorthands=shorthands,
     )
-    await replace_image_shorthands(
+    await replace_clipboard_image_shorthands(
         trace_id=trace_id,
+        message_contents=message_contents,
+        text_contents=text_contents,
+    )
+    replace_image_shorthands(
         message_contents=message_contents,
         text_contents=text_contents,
     )
@@ -126,7 +135,30 @@ def replace_custom_shorthands(
             text_content.text = p.sub(lambda m: replacement, text_content.text)
 
 
-async def replace_image_shorthands(
+def replace_image_shorthands(
+    *,
+    message_contents: list[list[chat.MessageContent]],
+    text_contents: dict[tuple[int, int], chat.TextMessageContent],
+) -> None:
+    """
+    Builtins:
+    - \i[<uuid>]: Inject an image by its ID
+    """
+    pattern = IMAGE_SHORTHAND_PATTERN
+    for (msg_idx, content_idx), text_content in list(text_contents.items()):
+        parts = re.split(pattern, text_content.text)
+        if len(parts) == 1:
+            continue
+        new_parts: list[chat.MessageContent] = []
+        for idx, part in enumerate(parts):
+            if idx % 2:
+                new_parts.append(chat.ImageMessageContent(image_id=UUID(part)))
+            elif part:
+                new_parts.append(chat.TextMessageContent(text=part))
+        message_contents[msg_idx][content_idx : content_idx + 1] = new_parts
+
+
+async def replace_clipboard_image_shorthands(
     *,
     trace_id: UUID,
     message_contents: list[list[chat.MessageContent]],
@@ -137,8 +169,8 @@ async def replace_image_shorthands(
     - \im: Clipboard image
     - \sc: Monitor screenshot
     """
-    # Replace image shorthand (Requires vision model!)
-    image_pattern = _shorthand_re_sub_pattern(IMAGE_SHORTHANDS_PATTERN_STR)
+    # Replace image shorthand
+    image_pattern = _shorthand_re_sub_pattern(CLIPBOARD_IMAGE_SHORTHANDS_PATTERN_STR)
     message_content_indices_with_image = {
         indices: {
             "is_im": r"\im" in re_match.group(),

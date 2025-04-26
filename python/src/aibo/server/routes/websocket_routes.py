@@ -24,9 +24,9 @@ class StreamAssistantMessageEventRequest(BaseEvent):
 
 
 class RegenerateLastAssistantMessageEventRequest(BaseEvent):
-    kind: Literal[
+    kind: Literal["regenerate_last_assistant_message"] = (
         "regenerate_last_assistant_message"
-    ] = "regenerate_last_assistant_message"
+    )
     conversation_id: UUID
     model: str
 

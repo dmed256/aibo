@@ -101,6 +101,7 @@ Access the conversation history using `aibo:homepage` (`C-M-h`), displaying conv
 | `C-c C-t`       | Set the conversation title                                                        | `aibo:set-current-conversation-title`                         |
 | `C-c f c`       | Inject a file shorthand using counsel                                             | `aibo:insert-counsel-find-file-shorthand`                     |
 | `C-c f p`       | Inject a file shorthand using projectile                                          | `aibo:insert-projectile-find-file-shorthand`                  |
+| `C-c i`         | Inject an image shorthand using the current image in the clipboard                | `aibo:aibo:insert-image-shorthand`                            |
 | `C-c C-k`       | Soft-delete the message at point                                                  | `aibo:remove-message-at-point`                                |
 | `C-c C-x C-k`   | Soft-delete all messages at point and after                                       | `aibo:remove-messages-after-point`                            |
 | `C-c C-c`       | Regenerate last message                                                           | `aibo:regenerate-current-conversation-last-assistant-message` |
@@ -111,13 +112,15 @@ Access the conversation history using `aibo:homepage` (`C-M-h`), displaying conv
 
 Shorthands replace certain escaped text (e.g. `\b`) with other content dynamically before sampling the model
 
-| Shorthand | Description                                                                              |
-| --------- | ---------------------------------------------------------------------------------------- |
-| `\b`      | The current buffer                                                                       |
-| `\r`      | The current buffer's region                                                              |
-| `\f`      | Injects the given file with optional line/start/end args (`\f[<filename>:<start>:<end>]` |
-| `\im`     | The clipboard image content if the clipboard has an image                                |
-| `\sc`     | Similar to \im but takes a screenshot of your monitor                                    |
+| Shorthand | Description                                                                                              |
+| --------- | -------------------------------------------------------------------------------------------------------- |
+| `\b`      | The current buffer                                                                                       |
+| `\r`      | The current buffer's region                                                                              |
+| `\f`      | Injects the given file with optional line/start/end args (`\f[<filename>:<start>:<end>]`                 |
+| `\d`      | Injects all the files in the directory or glob if passed (e.g. `\d[<dir>]` or `\d[<dir>/**/*.py]`)       |
+| `\i`      | Injects the image by its UUID, easier to use the shorthand that creates the image and passes back the ID |
+| `\im`     | The clipboard image content if the clipboard has an image                                                |
+| `\sc`     | Similar to \im but takes a screenshot of your monitor                                                    |
 
 ## Customization
 

@@ -225,6 +225,14 @@
      :on-success on-success)))
 
 
+(defun aibo:api-create-image-from-clipboard (&rest args)
+  (let ((on-success (plist-get args :on-success)))
+    (aibo:--api-post
+     :path "/images/clipboard"
+     :response-transform (lambda (resp) (ht-get resp "image_id"))
+     :on-success on-success)))
+
+
 ;; ---[ Websocket ]-------------------------------
 (defun aibo:--api-ws-send (&rest args)
   (let* ((event (plist-get args :event))
