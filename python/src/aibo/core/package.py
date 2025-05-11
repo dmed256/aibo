@@ -85,7 +85,10 @@ class Function(BaseModel):
             tool_call_id=tool_call_id,
             arguments=arguments,
         )
-        response = await self.fn(ctx, **arguments)
+        try:
+            response = await self.fn(ctx, **arguments)
+        except TypeError as e:
+            response = f"Error: {e}"
         return await ctx.insert_message(response=response)
 
     @property
