@@ -170,7 +170,7 @@ class FunctionRequestContent(BaseMessageContent):
         return None
 
     def __str__(self) -> str:
-        return f"{self.package}.{self.function}({self.arguments_json})"
+        return f"{self.package}.{self.function}({self.arguments_json})".strip()
 
 
 class FunctionResponseStatus(StrEnum):
@@ -206,6 +206,11 @@ class FunctionResponseContent(BaseMessageContent):
     arguments: dict[str, Any]
     response: JsonValue
 
+    def get_response_string(self) -> str:
+        if isinstance(self.response, str):
+            return self.response
+        return json.dumps(self.response, indent=2)
+
     def get_openai_function_name(self) -> str:
         from aibo.core.package import Package
 
@@ -217,15 +222,17 @@ class FunctionResponseContent(BaseMessageContent):
     async def to_openai(self) -> openai_chat.ChatCompletionContentPartParam | None:
         return openai_chat.ChatCompletionContentPartTextParam(
             type="text",
-            text=json.dumps(self.response, indent=2),
+            text=self.get_response_string(),
         )
 
     def __str__(self) -> str:
-        return json.dumps(self.response, indent=2)
+        return self.get_response_string()
 
 
 def stringify_message_contents(contents: list[MessageContent]) -> str:
-    return "\n\n".join(str(content) for content in contents)
+    return "\n\n".join(
+        [str_content for content in contents if (str_content := str(content))]
+    )
 
 
 FunctionResponseContent.model_rebuild()

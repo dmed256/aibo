@@ -111,18 +111,16 @@ async def stream_assistant_message(
         temperature=event.temperature,
     )
     async for messages in conversation.stream_assistant_messages(source=source):
-        # TODO(dmed):
-        #   Assumes we only stream 1 message at a time since we haven't added logic in elip
-        #   to handle multiple streaming messages
-        yield StreamAssistantMessageEventResponse(
-            id=event.id,
-            conversation_id=conversation.id,
-            message=api_models.Message.from_chat(messages[0]),
-        )
-
-    yield CurrentConversationEventResponse(
-        id=event.id, conversation=api_models.Conversation.from_chat(conversation)
-    )
+        for message in messages:
+            yield StreamAssistantMessageEventResponse(
+                id=event.id,
+                conversation_id=conversation.id,
+                message=api_models.Message.from_chat(message),
+            )
+            yield CurrentConversationEventResponse(
+                id=event.id,
+                conversation=api_models.Conversation.from_chat(conversation),
+            )
 
     if should_generate_title:
         await conversation.generate_title()

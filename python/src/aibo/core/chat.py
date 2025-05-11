@@ -581,77 +581,83 @@ class Conversation(ConversationSummary):
     ) -> AsyncGenerator[list[Message], None]:
         source = source or self.openai_model_source.copy()
 
-        temp_id = uuid4()
-        temp_created_at = now_utc()
+        # We sample again if we see a tool response
+        should_sample_again = True
+        while should_sample_again:
+            should_sample_again = False
 
-        messages: list[Message] = []
-        contents: list[MessageContent] = [TextMessageContent(text="")]
+            temp_id = uuid4()
+            temp_created_at = now_utc()
 
-        async for chunk in self.stream_assistant_message_chunks(source=source):
-            if isinstance(chunk, StreamingMessageChunk):
-                if isinstance(contents[-1], TextMessageContent):
-                    contents[-1].text += chunk.text
-                else:
-                    contents.append(TextMessageContent(text=chunk.text))
+            messages: list[Message] = []
+            contents: list[MessageContent] = [TextMessageContent(text="")]
 
-                yield [
-                    *messages,
-                    Message(
-                        id=temp_id,
-                        status=Message.Status.STREAMING,
-                        conversation_id=self.id,
-                        trace_id=self.trace_id,
-                        parent_id=self.current_message.id,
-                        source=source,
-                        role=MessageRole.ASSISTANT,
-                        contents=contents,
-                        created_at=temp_created_at,
-                    ),
-                ]
-            elif isinstance(chunk, FunctionCallChunk):
-                contents.append(
-                    FunctionRequestContent(
-                        package=chunk.package,
-                        function=chunk.function,
-                        tool_call_id=chunk.tool_call_id,
-                        arguments_json=chunk.arguments_json,
+            async for chunk in self.stream_assistant_message_chunks(source=source):
+                if isinstance(chunk, StreamingMessageChunk):
+                    if isinstance(contents[-1], TextMessageContent):
+                        contents[-1].text += chunk.text
+                    else:
+                        contents.append(TextMessageContent(text=chunk.text))
+
+                    yield [
+                        *messages,
+                        Message(
+                            id=temp_id,
+                            status=Message.Status.STREAMING,
+                            conversation_id=self.id,
+                            trace_id=self.trace_id,
+                            parent_id=self.current_message.id,
+                            source=source,
+                            role=MessageRole.ASSISTANT,
+                            contents=contents,
+                            created_at=temp_created_at,
+                        ),
+                    ]
+                elif isinstance(chunk, FunctionCallChunk):
+                    contents.append(
+                        FunctionRequestContent(
+                            package=chunk.package,
+                            function=chunk.function,
+                            tool_call_id=chunk.tool_call_id,
+                            arguments_json=chunk.arguments_json,
+                        )
                     )
-                )
-            elif isinstance(chunk, SuccessMessageChunk):
+                elif isinstance(chunk, SuccessMessageChunk):
+                    messages.append(
+                        await self.insert_message(
+                            source=source,
+                            role=MessageRole.ASSISTANT,
+                            contents=contents,
+                        )
+                    )
+                    yield messages
+                elif isinstance(chunk, ErrorMessageChunk):
+                    messages.append(
+                        await self.insert_message(
+                            source=ProgrammaticSource(source=chunk.source),
+                            role=MessageRole.ERROR,
+                            contents=[CompletionErrorContent.from_error(chunk.content)],
+                        )
+                    )
+                    yield messages
+
+            for content in contents:
+                if (
+                    not isinstance(content, FunctionRequestContent)
+                    or not (package := Package.get(content.package))
+                    or not (function := package.functions.get(content.function))
+                ):
+                    continue
+
+                should_sample_again = True
                 messages.append(
-                    await self.insert_message(
-                        source=source,
-                        role=MessageRole.ASSISTANT,
-                        contents=contents,
+                    await function(
+                        conversation=self,
+                        tool_call_id=content.tool_call_id,
+                        arguments=content.arguments,
                     )
                 )
                 yield messages
-            elif isinstance(chunk, ErrorMessageChunk):
-                messages.append(
-                    await self.insert_message(
-                        source=ProgrammaticSource(source=chunk.source),
-                        role=MessageRole.ERROR,
-                        contents=[CompletionErrorContent.from_error(chunk.content)],
-                    )
-                )
-                yield messages
-
-        for content in contents:
-            if (
-                not isinstance(content, FunctionRequestContent)
-                or not (package := Package.get(content.package))
-                or not (function := package.functions.get(content.function))
-            ):
-                continue
-
-            messages.append(
-                await function(
-                    conversation=self,
-                    tool_call_id=content.tool_call_id,
-                    arguments=content.arguments,
-                )
-            )
-            yield messages
 
     async def stream_assistant_message_chunks(
         self,

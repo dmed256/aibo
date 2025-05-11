@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import inspect
+import types
 import typing
 from typing import (
     TYPE_CHECKING,
@@ -277,7 +278,7 @@ def _typing_to_json_schema_type(
             "enum": list(typing.get_args(typing_type)),
         }
 
-    if type_origin is Union:
+    if type_origin is Union or type_origin is types.UnionType:
         return {
             **json_schema,
             "anyOf": [
