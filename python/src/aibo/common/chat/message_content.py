@@ -10,6 +10,7 @@ from uuid import UUID
 import openai
 from pydantic import BaseModel, Field, TypeAdapter
 
+from aibo.common.chat.message_role import MessageRole
 from aibo.common.constants import Env
 from aibo.common.openai import CompletionError
 from aibo.common.types import JsonValue
@@ -43,7 +44,7 @@ class BaseMessageContent(BaseModel, abc.ABC):
     kind: str
 
     @abc.abstractmethod
-    async def to_openai(self) -> OpenAIContent | None: ...
+    async def to_openai(self, *, role: MessageRole) -> OpenAIContent | None: ...
 
     @abc.abstractmethod
     def __str__(self) -> str: ...
@@ -57,9 +58,9 @@ class TextMessageContent(BaseMessageContent):
     kind: Literal["text"] = "text"
     text: str
 
-    async def to_openai(self) -> OpenAIContent | None:
+    async def to_openai(self, *, role: MessageRole) -> OpenAIContent | None:
         return openai.types.responses.ResponseInputTextParam(
-            type="input_text",
+            type="output_text" if role == MessageRole.ASSISTANT else "input_text",
             text=self.text,
         )
 
@@ -75,7 +76,7 @@ class ImageMessageContent(BaseMessageContent):
     kind: Literal["image"] = "image"
     image_id: UUID
 
-    async def to_openai(self) -> OpenAIContent | None:
+    async def to_openai(self, *, role: MessageRole) -> OpenAIContent | None:
         from aibo.db.models import ImageModel
 
         image = await ImageModel.by_id(self.image_id)
@@ -109,7 +110,7 @@ class CompletionErrorContent(BaseMessageContent):
     def from_openai(cls, error: openai.OpenAIError) -> Self:
         return cls.from_error(CompletionError.from_openai(error))
 
-    async def to_openai(self) -> OpenAIContent | None:
+    async def to_openai(self, *, role: MessageRole) -> OpenAIContent | None:
         return None
 
     def __str__(self) -> str:
@@ -158,7 +159,7 @@ class FunctionRequestContent(BaseMessageContent):
             arguments=self.arguments_json,
         )
 
-    async def to_openai(self) -> OpenAIContent | None:
+    async def to_openai(self, *, role: MessageRole) -> OpenAIContent | None:
         return None
 
     def __str__(self) -> str:
@@ -224,7 +225,7 @@ class FunctionResponseContent(BaseMessageContent):
             output=self.get_response_string(),
         )
 
-    async def to_openai(self) -> OpenAIContent | None:
+    async def to_openai(self, *, role: MessageRole) -> OpenAIContent | None:
         return None
 
     def __str__(self) -> str:
@@ -260,7 +261,7 @@ class ReasoningContent(BaseMessageContent):
             encrypted_content=self.encrypted_reasoning,
         )
 
-    async def to_openai(self) -> OpenAIContent | None:
+    async def to_openai(self, *, role: MessageRole) -> OpenAIContent | None:
         return None
 
     def __str__(self) -> str:

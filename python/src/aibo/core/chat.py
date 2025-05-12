@@ -165,7 +165,7 @@ class Message(BaseModel):
     ) -> list[openai.reasoning.types.ResponseInputItemParam]:
         maybe_openai_contents = await asyncio.gather(
             *[
-                content.to_openai()
+                content.to_openai(role=self.role)
                 for content in self.contents
                 if not isinstance(
                     content,
@@ -177,11 +177,8 @@ class Message(BaseModel):
                 )
             ]
         )
-        return [
-            maybe_openai_content
-            for maybe_openai_content in maybe_openai_contents
-            if maybe_openai_content is not None
-        ]
+
+        return [content for content in maybe_openai_contents if content is not None]
 
     async def to_openai(self) -> openai.types.responses.ResponseInputItemParam | None:
         # Check if the contents themselves are inputs (e.g. messages)
