@@ -63,7 +63,7 @@ def _get_streaming_message_chunk(
         elif isinstance(content, openai.types.responses.ResponseOutputRefusal):
             text += f"(Refusal: {content.refusal})"
 
-    return StreamingMessageChunk(text=text)
+    return StreamingMessageChunk(item_id=output.id, text=text)
 
 
 def _get_function_call_chunk(
@@ -130,7 +130,7 @@ async def stream_completion(
                 yield _get_function_call_chunk(item)
             elif isinstance(item, openai.types.responses.ResponseReasoningItem):
                 yield StreamingReasoningChunk(
-                    response_id=item.id,
+                    item_id=item.id,
                     summaries=[summary.text for summary in item.summary],
                     encrypted_reasoning=item.encrypted_content,
                 )

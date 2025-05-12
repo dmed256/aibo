@@ -181,18 +181,17 @@ class Message(BaseModel):
         return [content for content in maybe_openai_contents if content is not None]
 
     async def to_openai(self) -> openai.types.responses.ResponseInputItemParam | None:
+        if not self.contents:
+            return None
+
         # Check if the contents themselves are inputs (e.g. messages)
-        if len(self.contents) == 1:
-            content = self.contents[0]
-            if isinstance(
-                content,
-                FunctionRequestContent | FunctionResponseContent | ReasoningContent,
-            ):
-                return content.to_openai_input()
+        if (
+            openai_input := await self.contents[0].to_openai_input(role=self.role)
+        ) is not None:
+            return openai_input
 
         # Get the actual contents (not inputs / messages)
-        openai_contents = await self.get_openai_contents()
-        if not openai_contents:
+        if not (openai_contents := await self.get_openai_contents()):
             return None
 
         # Handle system messages a bit different for reasoning models
@@ -556,7 +555,12 @@ class Conversation(ConversationSummary):
                         await self.insert_message(
                             source=source,
                             role=MessageRole.ASSISTANT,
-                            contents=[TextMessageContent(text=chunk.text)],
+                            contents=[
+                                TextMessageContent(
+                                    item_id=chunk.item_id,
+                                    text=chunk.text,
+                                ),
+                            ],
                         )
                     )
                 elif isinstance(chunk, FunctionCallChunk):
@@ -594,7 +598,7 @@ class Conversation(ConversationSummary):
                             role=MessageRole.ASSISTANT,
                             contents=[
                                 ReasoningContent(
-                                    response_id=chunk.response_id,
+                                    item_id=chunk.item_id,
                                     summaries=chunk.summaries,
                                     encrypted_reasoning=chunk.encrypted_reasoning,
                                 )

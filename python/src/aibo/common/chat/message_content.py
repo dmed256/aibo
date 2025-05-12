@@ -33,6 +33,7 @@ __all__ = [
 
 
 OpenAIContent = str | openai.types.responses.ResponseInputMessageContentListParam
+OpenAIInput = openai.types.responses.ResponseInputItemParam
 
 
 class BaseMessageContent(BaseModel, abc.ABC):
@@ -42,6 +43,14 @@ class BaseMessageContent(BaseModel, abc.ABC):
 
     # Unique to each message content type
     kind: str
+    item_id: str | None = Field(
+        title="item_id",
+        description="The ID to the tool call 'item' (vs call itself?)",
+        default=None,
+    )
+
+    @abc.abstractmethod
+    async def to_openai_input(self, *, role: MessageRole) -> OpenAIInput | None: ...
 
     @abc.abstractmethod
     async def to_openai(self, *, role: MessageRole) -> OpenAIContent | None: ...
@@ -58,11 +67,32 @@ class TextMessageContent(BaseMessageContent):
     kind: Literal["text"] = "text"
     text: str
 
+    async def to_openai_input(self, *, role: MessageRole) -> OpenAIInput | None:
+        if role == MessageRole.ASSISTANT:
+            return openai.types.responses.ResponseOutputMessage(
+                type="message",
+                id=self.item_id,
+                role="assistant",
+                status="completed",
+                content=[
+                    openai.types.responses.ResponseOutputText(
+                        type="output_text",
+                        text=self.text,
+                        annotations=[],
+                    ),
+                ],
+            )
+        else:
+            return None
+
     async def to_openai(self, *, role: MessageRole) -> OpenAIContent | None:
-        return openai.types.responses.ResponseInputTextParam(
-            type="output_text" if role == MessageRole.ASSISTANT else "input_text",
-            text=self.text,
-        )
+        if role == MessageRole.ASSISTANT:
+            return None
+        else:
+            return openai.types.responses.ResponseInputTextParam(
+                type="input_text",
+                text=self.text,
+            )
 
     def __str__(self) -> str:
         return self.text
@@ -75,6 +105,9 @@ class ImageMessageContent(BaseMessageContent):
 
     kind: Literal["image"] = "image"
     image_id: UUID
+
+    async def to_openai_input(self, *, role: MessageRole) -> OpenAIInput | None:
+        return None
 
     async def to_openai(self, *, role: MessageRole) -> OpenAIContent | None:
         from aibo.db.models import ImageModel
@@ -110,6 +143,9 @@ class CompletionErrorContent(BaseMessageContent):
     def from_openai(cls, error: openai.OpenAIError) -> Self:
         return cls.from_error(CompletionError.from_openai(error))
 
+    async def to_openai_input(self, *, role: MessageRole) -> OpenAIInput | None:
+        return None
+
     async def to_openai(self, *, role: MessageRole) -> OpenAIContent | None:
         return None
 
@@ -123,9 +159,6 @@ class FunctionRequestContent(BaseMessageContent):
     """
 
     kind: Literal["function_request"] = "function_request"
-    item_id: str = Field(
-        title="itemg_id", description="The ID to the tool call 'item' (vs call itself?)"
-    )
     tool_call_id: str = Field(
         title="tool_call_id", description="The ID to the tool call"
     )
@@ -149,7 +182,7 @@ class FunctionRequestContent(BaseMessageContent):
             function=self.function,
         )
 
-    def to_openai_input(self) -> openai.types.responses.ResponseFunctionToolCallParam:
+    async def to_openai_input(self, *, role: MessageRole) -> OpenAIInput | None:
         return openai.types.responses.ResponseFunctionToolCallParam(
             type="function_call",
             id=self.item_id,
@@ -185,7 +218,6 @@ class FunctionResponseContent(BaseMessageContent):
     """
 
     kind: Literal["function_response"] = "function_response"
-    item_id: str
     tool_call_id: str
     package: str = Field(
         title="package", description="This is the function package name"
@@ -213,12 +245,10 @@ class FunctionResponseContent(BaseMessageContent):
             function=self.function,
         )
 
-    def to_openai_input(
-        self,
-    ) -> openai.types.responses.response_input_item_param.FunctionCallOutput:
+    async def to_openai_input(self, *, role: MessageRole) -> OpenAIInput | None:
         return openai.types.responses.response_input_item_param.FunctionCallOutput(
             type="function_call_output",
-            # This isn't populated by the API, but would be needed for builtin functions (e.g. Web)
+            # This is for returned content like web
             # id=self.item_id,
             call_id=self.tool_call_id,
             status="completed",
@@ -244,14 +274,14 @@ class ReasoningContent(BaseMessageContent):
     """
 
     kind: Literal["reasoning"] = "reasoning"
-    response_id: str
+    item_id: str
     summaries: list[str]
     encrypted_reasoning: str | None = None
 
-    def to_openai_input(self) -> openai.types.responses.ResponseReasoningItemParam:
+    async def to_openai_input(self, *, role: MessageRole) -> OpenAIInput | None:
         return openai.types.responses.ResponseReasoningItemParam(
             type="reasoning",
-            id=self.response_id,
+            id=self.item_id,
             summary=[
                 openai.types.responses.response_reasoning_item_param.Summary(
                     type="summary_text", text=summary

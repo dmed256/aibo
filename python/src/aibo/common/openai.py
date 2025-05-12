@@ -47,13 +47,14 @@ class FunctionCallChunk(BaseModel):
 class StreamingMessageChunk(BaseModel):
     kind: Literal["streaming_message"] = "streaming_message"
     status: Literal["streaming"] = "streaming"
+    item_id: str | None = None
     text: str
 
 
 class StreamingReasoningChunk(BaseModel):
     kind: Literal["streaming_reasoning"] = "streaming_reasoning"
     status: Literal["streaming"] = "streaming"
-    response_id: str
+    item_id: str | None = None
     summaries: list[str] = []
     encrypted_reasoning: str | None = None
 
