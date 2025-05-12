@@ -16,6 +16,7 @@ __all__ = [
     "Embeddings",
     "FunctionCallChunk",
     "StreamingMessageChunk",
+    "StreamingReasoningChunk",
     "SuccessMessageChunk",
     "ErrorMessageChunk",
     "is_reasoning_model",
@@ -36,6 +37,7 @@ class Embeddings(BaseModel):
 class FunctionCallChunk(BaseModel):
     kind: Literal["function_call"] = "function_call"
     status: Literal["streaming"] = "streaming"
+    item_id: str
     tool_call_id: str
     package: str
     function: str
@@ -46,6 +48,14 @@ class StreamingMessageChunk(BaseModel):
     kind: Literal["streaming_message"] = "streaming_message"
     status: Literal["streaming"] = "streaming"
     text: str
+
+
+class StreamingReasoningChunk(BaseModel):
+    kind: Literal["streaming_reasoning"] = "streaming_reasoning"
+    status: Literal["streaming"] = "streaming"
+    response_id: str
+    summaries: list[str] = []
+    encrypted_reasoning: str | None = None
 
 
 class SuccessMessageChunk(BaseModel):

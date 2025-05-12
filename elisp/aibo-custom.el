@@ -61,6 +61,21 @@
   "Conversation assistant text content face"
   :group 'aibo)
 
+(defface aibo:assistant-reasoning-header-face
+  '((t :foreground "#ffffff" :background "#63563e"))
+  "Conversation assistant reasoning header face"
+  :group 'aibo)
+
+(defface aibo:assistant-reasoning-subheader-face
+  '((t :foreground "#000000" :background "#fae2b9"))
+  "Conversation assistant reasoning sub-header face"
+  :group 'aibo)
+
+(defface aibo:assistant-reasoning-content-face
+  '((t :foreground "#806A46"))
+  "Conversation assistant reasoning text content face"
+  :group 'aibo)
+
 (defface aibo:user-header-face
   '((t :foreground "#000000" :background "#dce9fc"))
   "Conversation user header face"

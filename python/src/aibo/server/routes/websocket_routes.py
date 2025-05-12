@@ -110,17 +110,22 @@ async def stream_assistant_message(
         model=event.model,
         temperature=event.temperature,
     )
+
+    # TODO: Add streaming event mapping support, assumes each yield is a new message
+    prev_message_count = 0
     async for messages in conversation.stream_assistant_messages(source=source):
-        for message in messages:
+        new_messages = messages[prev_message_count:]
+        prev_message_count = len(messages)
+        for message in new_messages:
             yield StreamAssistantMessageEventResponse(
                 id=event.id,
                 conversation_id=conversation.id,
                 message=api_models.Message.from_chat(message),
             )
-            yield CurrentConversationEventResponse(
-                id=event.id,
-                conversation=api_models.Conversation.from_chat(conversation),
-            )
+        yield CurrentConversationEventResponse(
+            id=event.id,
+            conversation=api_models.Conversation.from_chat(conversation),
+        )
 
     if should_generate_title:
         await conversation.generate_title()

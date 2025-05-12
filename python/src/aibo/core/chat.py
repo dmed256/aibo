@@ -4,11 +4,11 @@ import asyncio
 import datetime as dt
 import re
 from enum import StrEnum
-from typing import Any, AsyncGenerator, Generator, Self, Union, cast
+from typing import AsyncGenerator, Generator, Self, cast
 from uuid import UUID, uuid4
 
+import openai
 import sqlalchemy as sa
-from openai.types import chat as openai_chat
 from pydantic import BaseModel
 from termcolor import colored
 
@@ -25,18 +25,19 @@ from aibo.common.chat import (
     MessageSource,
     OpenAIModelSource,
     ProgrammaticSource,
+    ReasoningContent,
     TextMessageContent,
     stringify_message_contents,
 )
 from aibo.common.constants import Env
 from aibo.common.openai import is_reasoning_model
 from aibo.common.result import Error, Result
-from aibo.common.time import now_utc
 from aibo.core.openai import (
     ErrorMessageChunk,
     FunctionCallChunk,
     StreamingMessageChunk,
     StreamingMessageResult,
+    StreamingReasoningChunk,
     SuccessMessageChunk,
     stream_completion,
 )
@@ -61,6 +62,7 @@ __all__ = [
     "ProgrammaticSource",
     "StreamingMessageChunk",
     "StreamingMessageResult",
+    "StreamingReasoningChunk",
     "SuccessMessageChunk",
     "TextMessageContent",
     "ImageMessageContent",
@@ -160,7 +162,7 @@ class Message(BaseModel):
 
     async def get_openai_contents(
         self,
-    ) -> list[openai_chat.ChatCompletionContentPartParam]:
+    ) -> list[openai.reasoning.types.ResponseInputItemParam]:
         maybe_openai_contents = await asyncio.gather(
             *[
                 content.to_openai()
@@ -181,77 +183,38 @@ class Message(BaseModel):
             if maybe_openai_content is not None
         ]
 
-    async def to_openai(self) -> openai_chat.ChatCompletionMessageParam | None:
-        if self.role == MessageRole.SYSTEM:
-            return await self._to_system_openai_message()
-        elif self.role == MessageRole.USER:
-            return await self._to_user_openai_message()
-        elif self.role == MessageRole.ASSISTANT:
-            return await self._to_assistant_openai_message()
-        elif self.role == MessageRole.TOOL:
-            return await self._to_tool_openai_message()
+    async def to_openai(self) -> openai.types.responses.ResponseInputItemParam | None:
+        # Check if the contents themselves are inputs (e.g. messages)
+        if len(self.contents) == 1:
+            content = self.contents[0]
+            if isinstance(
+                content,
+                FunctionRequestContent | FunctionResponseContent | ReasoningContent,
+            ):
+                return content.to_openai_input()
 
-        return None
-
-    async def _to_system_openai_message(self) -> openai_chat.ChatCompletionMessageParam:
+        # Get the actual contents (not inputs / messages)
         openai_contents = await self.get_openai_contents()
+        if not openai_contents:
+            return None
 
-        if self.is_reasoning_model:
-            return openai_chat.ChatCompletionUserMessageParam(
+        # Handle system messages a bit different for reasoning models
+        if self.role == MessageRole.SYSTEM and self.is_reasoning_model:
+            return openai.types.responses.EasyInputMessageParam(
+                type="message",
                 role="user",
                 content=[
-                    openai_chat.ChatCompletionContentPartTextParam(
-                        type="text",
-                        text="# Custom instructions \n",
+                    openai.types.responses.ResponseInputTextParam(
+                        type="input_text", text="# Custom instructions \n"
                     ),
                     *openai_contents,
                 ],
             )
-        else:
-            return openai_chat.ChatCompletionSystemMessageParam(
-                role="system",
-                content=openai_contents,  # type: ignore
-            )
 
-    async def _to_user_openai_message(self) -> openai_chat.ChatCompletionMessageParam:
-        openai_contents = await self.get_openai_contents()
-
-        return openai_chat.ChatCompletionUserMessageParam(
-            role="user",
+        return openai.types.responses.EasyInputMessageParam(
+            type="message",
+            role=self.role,
             content=openai_contents,
-        )
-
-    async def _to_assistant_openai_message(
-        self,
-    ) -> openai_chat.ChatCompletionMessageParam:
-        openai_contents = await self.get_openai_contents()
-        tool_calls = [
-            tool_call
-            for content in self.contents
-            if isinstance(content, FunctionRequestContent)
-            and (tool_call := content.to_openai_tool_call())
-        ]
-        return openai_chat.ChatCompletionAssistantMessageParam(
-            role="assistant",
-            content=openai_contents or None,  # type: ignore
-            tool_calls=tool_calls or None,  # type: ignore
-        )
-
-    async def _to_tool_openai_message(self) -> openai_chat.ChatCompletionMessageParam:
-        response_contents = [
-            content
-            for content in self.contents
-            if isinstance(content, FunctionResponseContent)
-        ]
-        assert (
-            len(response_contents) == 1
-        ), f"Expected just 1 response content, found {len(response_contents)=}"
-
-        response_content = response_contents[0]
-        return openai_chat.ChatCompletionToolMessageParam(
-            role="tool",
-            tool_call_id=response_content.tool_call_id,
-            content=[await response_content.to_openai()],  # type: ignore
         )
 
     async def get_children(self) -> list["Message"]:
@@ -583,54 +546,64 @@ class Conversation(ConversationSummary):
 
         # We sample again if we see a tool response
         should_sample_again = True
+        messages: list[Message] = []
+
         while should_sample_again:
             should_sample_again = False
 
-            temp_id = uuid4()
-            temp_created_at = now_utc()
-
-            messages: list[Message] = []
-            contents: list[MessageContent] = [TextMessageContent(text="")]
-
+            # TODO: Add streaming event mapping support, assumes `StreamingMessageChunk`
+            #       is the full text
             async for chunk in self.stream_assistant_message_chunks(source=source):
                 if isinstance(chunk, StreamingMessageChunk):
-                    if isinstance(contents[-1], TextMessageContent):
-                        contents[-1].text += chunk.text
-                    else:
-                        contents.append(TextMessageContent(text=chunk.text))
-
-                    yield [
-                        *messages,
-                        Message(
-                            id=temp_id,
-                            status=Message.Status.STREAMING,
-                            conversation_id=self.id,
-                            trace_id=self.trace_id,
-                            parent_id=self.current_message.id,
-                            source=source,
-                            role=MessageRole.ASSISTANT,
-                            contents=contents,
-                            created_at=temp_created_at,
-                        ),
-                    ]
-                elif isinstance(chunk, FunctionCallChunk):
-                    contents.append(
-                        FunctionRequestContent(
-                            package=chunk.package,
-                            function=chunk.function,
-                            tool_call_id=chunk.tool_call_id,
-                            arguments_json=chunk.arguments_json,
-                        )
-                    )
-                elif isinstance(chunk, SuccessMessageChunk):
                     messages.append(
                         await self.insert_message(
                             source=source,
                             role=MessageRole.ASSISTANT,
-                            contents=contents,
+                            contents=[TextMessageContent(text=chunk.text)],
                         )
                     )
-                    yield messages
+                elif isinstance(chunk, FunctionCallChunk):
+                    function_request_content = FunctionRequestContent(
+                        item_id=chunk.item_id,
+                        tool_call_id=chunk.tool_call_id,
+                        package=chunk.package,
+                        function=chunk.function,
+                        arguments_json=chunk.arguments_json,
+                    )
+                    messages.append(
+                        await self.insert_message(
+                            source=source,
+                            role=MessageRole.ASSISTANT,
+                            contents=[function_request_content],
+                        )
+                    )
+                    if (package := Package.get(chunk.package)) and (
+                        function := package.functions.get(chunk.function)
+                    ):
+                        should_sample_again = True
+                        yield messages
+                        messages.append(
+                            await function(
+                                conversation=self,
+                                item_id=function_request_content.item_id,
+                                tool_call_id=function_request_content.tool_call_id,
+                                arguments=function_request_content.arguments,
+                            )
+                        )
+                elif isinstance(chunk, StreamingReasoningChunk):
+                    messages.append(
+                        await self.insert_message(
+                            source=source,
+                            role=MessageRole.ASSISTANT,
+                            contents=[
+                                ReasoningContent(
+                                    response_id=chunk.response_id,
+                                    summaries=chunk.summaries,
+                                    encrypted_reasoning=chunk.encrypted_reasoning,
+                                )
+                            ],
+                        )
+                    )
                 elif isinstance(chunk, ErrorMessageChunk):
                     messages.append(
                         await self.insert_message(
@@ -639,24 +612,7 @@ class Conversation(ConversationSummary):
                             contents=[CompletionErrorContent.from_error(chunk.content)],
                         )
                     )
-                    yield messages
 
-            for content in contents:
-                if (
-                    not isinstance(content, FunctionRequestContent)
-                    or not (package := Package.get(content.package))
-                    or not (function := package.functions.get(content.function))
-                ):
-                    continue
-
-                should_sample_again = True
-                messages.append(
-                    await function(
-                        conversation=self,
-                        tool_call_id=content.tool_call_id,
-                        arguments=content.arguments,
-                    )
-                )
                 yield messages
 
     async def stream_assistant_message_chunks(

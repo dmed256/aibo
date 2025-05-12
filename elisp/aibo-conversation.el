@@ -50,29 +50,40 @@
 (defun aibo::--get-role-face (role location)
   (let* ((key (concat role "-" location)))
     (cond
-     ((string= key "system-content")      'aibo:system-content-face)
-     ((string= key "system-header")       'aibo:system-header-face)
+     ((string= key "system-content")                'aibo:system-content-face)
+     ((string= key "system-header")                 'aibo:system-header-face)
 
-     ((string= key "user-content")        'aibo:user-content-face)
-     ((string= key "user-header")         'aibo:user-header-face)
-     ((string= key "user-subheader")      'aibo:user-subheader-face)
+     ((string= key "user-content")                  'aibo:user-content-face)
+     ((string= key "user-header")                   'aibo:user-header-face)
+     ((string= key "user-subheader")                'aibo:user-subheader-face)
 
-     ((string= key "assistant-content")   'aibo:assistant-content-face)
-     ((string= key "assistant-header")    'aibo:assistant-header-face)
-     ((string= key "assistant-subheader") 'aibo:assistant-subheader-face)
+     ((string= key "assistant-content")             'aibo:assistant-content-face)
+     ((string= key "assistant-header")              'aibo:assistant-header-face)
+     ((string= key "assistant-subheader")           'aibo:assistant-subheader-face)
 
-     ((string= key "tool-content")    'aibo:tool-content-face)
-     ((string= key "tool-header")     'aibo:tool-header-face)
-     ((string= key "tool-subheader")  'aibo:tool-subheader-face)
+     ((string= key "assistant-reasoning-content")   'aibo:assistant-reasoning-content-face)
+     ((string= key "assistant-reasoning-header")    'aibo:assistant-reasoning-header-face)
+     ((string= key "assistant-reasoning-subheader") 'aibo:assistant-reasoning-subheader-face)
 
-     ((string= key "error-content")       'aibo:error-content-face)
-     ((string= key "error-header")        'aibo:error-header-face))))
+     ((string= key "tool-content")                  'aibo:tool-content-face)
+     ((string= key "tool-header")                   'aibo:tool-header-face)
+     ((string= key "tool-subheader")                'aibo:tool-subheader-face)
+
+     ((string= key "error-content")                 'aibo:error-content-face)
+     ((string= key "error-header")                  'aibo:error-header-face))))
 
 (defun aibo::--get-message-face (message location)
-  (aibo::--get-role-face (ht-get message "role") location))
+  (let* ((role (ht-get message "role"))
+         (extended-role (if (and (string= role "assistant")
+                                 (aibo::--message-is-reasoning message))
+                            "assistant-reasoning"
+                          role)))
+    (aibo::--get-role-face extended-role location)))
 
 (defun aibo::--get-message-header (message)
   (let* ((role (ht-get message "role"))
+         (is-reasoning (and (string= role "assistant")
+                            (aibo::--message-is-reasoning message)))
          (message-header-face (aibo::--get-message-face message "header"))
          (message-subheader-face (aibo::--get-message-face message "subheader"))
          (message-content-face (aibo::--get-message-face message "content"))
@@ -80,7 +91,7 @@
           (cond
            ((string= role "system")    "System")
            ((string= role "user")      "User")
-           ((string= role "assistant") "Assistant")
+           ((string= role "assistant") (if is-reasoning "Reasoning" "Assistant"))
            ((string= role "tool")      "Tool")
            ((string= role "error")     "Error")))
          (subheader-text
@@ -110,6 +121,12 @@
      ((string= source-kind "human")        (ht-get source "user"))
      ((string= source-kind "openai_model") (ht-get source "model"))
      ((string= source-kind "programmatic") (ht-get source "source")))))
+
+(defun aibo::--message-is-reasoning (message)
+  "Return t when the message is an assistant reasoning message."
+  (let ((contents (ht-get message "contents")))
+    (and contents
+         (--any? (string= (ht-get it "kind") "reasoning") contents))))
 
 (defun aibo:--refresh-cached-packages (&rest args)
   "Returns a list of package info: name + is-enabled"

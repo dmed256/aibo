@@ -14,6 +14,7 @@ from typing import (
     Union,
 )
 
+import openai
 from pydantic import BaseModel, Field
 from pydantic.fields import FieldInfo
 
@@ -32,6 +33,7 @@ _PACKAGE_REGISTRY: dict[str, Package] = {}
 class FunctionContext(BaseModel):
     conversation: Conversation
     function: Function
+    item_id: str
     tool_call_id: str
     arguments: JsonValue
 
@@ -45,6 +47,7 @@ class FunctionContext(BaseModel):
         from aibo.core import chat
 
         content = chat.FunctionResponseContent(
+            item_id=self.item_id,
             tool_call_id=self.tool_call_id,
             package=self.function.package.name,
             function=self.function.name,
@@ -76,12 +79,14 @@ class Function(BaseModel):
         self,
         *,
         conversation: Conversation,
+        item_id: str,
         tool_call_id: str,
         arguments: dict[str, Any],
     ) -> Message:
         ctx = FunctionContext(
             conversation=conversation,
             function=self,
+            item_id=item_id,
             tool_call_id=tool_call_id,
             arguments=arguments,
         )
@@ -98,15 +103,14 @@ class Function(BaseModel):
             function=self.name,
         )
 
-    def to_openai(self) -> dict[str, Any]:
-        return {
-            "type": "function",
-            "function": {
-                "name": self.qualified_name,
-                "description": self.description,
-                "parameters": self.arguments_json_schema,
-            },
-        }
+    def to_openai(self) -> openai.types.responses.ToolParam:
+        return openai.types.responses.FunctionToolParam(
+            type="function",
+            name=self.qualified_name,
+            description=self.description,
+            parameters=self.arguments_json_schema,
+            strict=False,
+        )
 
 
 class Package(BaseModel):

@@ -8,13 +8,6 @@ from typing import Annotated, Any, Literal, Self, Union
 from uuid import UUID
 
 import openai
-from openai.types import chat as openai_chat
-from openai.types.chat.chat_completion_content_part_image_param import (
-    ImageURL as OpenAIImageURL,
-)
-from openai.types.chat.chat_completion_message_tool_call_param import (
-    Function as OpenAIToolCallFunction,
-)
 from pydantic import BaseModel, Field, TypeAdapter
 
 from aibo.common.constants import Env
@@ -34,7 +27,11 @@ __all__ = [
     "MessageContentAdapter",
     "MessageContents",
     "MessageContentsAdapter",
+    "ReasoningContent",
 ]
+
+
+OpenAIContent = str | openai.types.responses.ResponseInputMessageContentListParam
 
 
 class BaseMessageContent(BaseModel, abc.ABC):
@@ -46,7 +43,7 @@ class BaseMessageContent(BaseModel, abc.ABC):
     kind: str
 
     @abc.abstractmethod
-    async def to_openai(self) -> openai_chat.ChatCompletionContentPartParam | None: ...
+    async def to_openai(self) -> OpenAIContent | None: ...
 
     @abc.abstractmethod
     def __str__(self) -> str: ...
@@ -60,9 +57,9 @@ class TextMessageContent(BaseMessageContent):
     kind: Literal["text"] = "text"
     text: str
 
-    async def to_openai(self) -> openai_chat.ChatCompletionContentPartParam | None:
-        return openai_chat.ChatCompletionContentPartTextParam(
-            type="text",
+    async def to_openai(self) -> OpenAIContent | None:
+        return openai.types.responses.ResponseInputTextParam(
+            type="input_text",
             text=self.text,
         )
 
@@ -78,23 +75,15 @@ class ImageMessageContent(BaseMessageContent):
     kind: Literal["image"] = "image"
     image_id: UUID
 
-    async def to_openai(self) -> openai_chat.ChatCompletionContentPartParam | None:
+    async def to_openai(self) -> OpenAIContent | None:
         from aibo.db.models import ImageModel
 
         image = await ImageModel.by_id(self.image_id)
         if not image:
-            return openai_chat.ChatCompletionContentPartTextParam(
-                type="text",
-                text="[Image missing]",
-            )
-
-        return openai_chat.ChatCompletionContentPartImageParam(
-            type="image_url",
-            image_url=OpenAIImageURL(
-                url=f"data:image/{image.format};base64,{image.contents_b64}",
+            return openai.types.responses.ResponseInputImageParam(
                 detail=Env.get().OPENAI_IMAGE_DETAIL,
-            ),
-        )
+                image_url=f"data:image/{image.format};base64,{image.contents_b64}",
+            )
 
     def __str__(self) -> str:
         return f"[Image:{self.image_id}]"
@@ -120,7 +109,7 @@ class CompletionErrorContent(BaseMessageContent):
     def from_openai(cls, error: openai.OpenAIError) -> Self:
         return cls.from_error(CompletionError.from_openai(error))
 
-    async def to_openai(self) -> openai_chat.ChatCompletionContentPartParam | None:
+    async def to_openai(self) -> OpenAIContent | None:
         return None
 
     def __str__(self) -> str:
@@ -133,6 +122,9 @@ class FunctionRequestContent(BaseMessageContent):
     """
 
     kind: Literal["function_request"] = "function_request"
+    item_id: str = Field(
+        title="itemg_id", description="The ID to the tool call 'item' (vs call itself?)"
+    )
     tool_call_id: str = Field(
         title="tool_call_id", description="The ID to the tool call"
     )
@@ -156,17 +148,17 @@ class FunctionRequestContent(BaseMessageContent):
             function=self.function,
         )
 
-    def to_openai_tool_call(self) -> openai_chat.ChatCompletionMessageToolCallParam:
-        return openai_chat.ChatCompletionMessageToolCallParam(
-            type="function",
-            id=self.tool_call_id,
-            function=OpenAIToolCallFunction(
-                name=self.get_openai_function_name(),
-                arguments=self.arguments_json,
-            ),
+    def to_openai_input(self) -> openai.types.responses.ResponseFunctionToolCallParam:
+        return openai.types.responses.ResponseFunctionToolCallParam(
+            type="function_call",
+            id=self.item_id,
+            call_id=self.tool_call_id,
+            status="completed",
+            name=self.get_openai_function_name(),
+            arguments=self.arguments_json,
         )
 
-    async def to_openai(self) -> openai_chat.ChatCompletionContentPartParam | None:
+    async def to_openai(self) -> OpenAIContent | None:
         return None
 
     def __str__(self) -> str:
@@ -192,6 +184,7 @@ class FunctionResponseContent(BaseMessageContent):
     """
 
     kind: Literal["function_response"] = "function_response"
+    item_id: str
     tool_call_id: str
     package: str = Field(
         title="package", description="This is the function package name"
@@ -219,11 +212,20 @@ class FunctionResponseContent(BaseMessageContent):
             function=self.function,
         )
 
-    async def to_openai(self) -> openai_chat.ChatCompletionContentPartParam | None:
-        return openai_chat.ChatCompletionContentPartTextParam(
-            type="text",
-            text=self.get_response_string(),
+    def to_openai_input(
+        self,
+    ) -> openai.types.responses.response_input_item_param.FunctionCallOutput:
+        return openai.types.responses.response_input_item_param.FunctionCallOutput(
+            type="function_call_output",
+            # This isn't populated by the API, but would be needed for builtin functions (e.g. Web)
+            # id=self.item_id,
+            call_id=self.tool_call_id,
+            status="completed",
+            output=self.get_response_string(),
         )
+
+    async def to_openai(self) -> OpenAIContent | None:
+        return None
 
     def __str__(self) -> str:
         return self.get_response_string()
@@ -235,6 +237,40 @@ def stringify_message_contents(contents: list[MessageContent]) -> str:
     )
 
 
+class ReasoningContent(BaseMessageContent):
+    """
+    Message request to a function
+    """
+
+    kind: Literal["reasoning"] = "reasoning"
+    response_id: str
+    summaries: list[str]
+    encrypted_reasoning: str | None = None
+
+    def to_openai_input(self) -> openai.types.responses.ResponseReasoningItemParam:
+        return openai.types.responses.ResponseReasoningItemParam(
+            type="reasoning",
+            id=self.response_id,
+            summary=[
+                openai.types.responses.response_reasoning_item_param.Summary(
+                    type="summary_text", text=summary
+                )
+                for summary in self.summaries
+            ],
+            encrypted_content=self.encrypted_reasoning,
+        )
+
+    async def to_openai(self) -> OpenAIContent | None:
+        return None
+
+    def __str__(self) -> str:
+        summary_str = ". ".join(summary for summary in self.summaries)
+        encrypted_reasoning_size = (
+            len(self.encrypted_reasoning) if self.encrypted_reasoning else 0
+        )
+        return f"[encrypt_size={encrypted_reasoning_size}]\n{summary_str or '[No summaries found]'}"
+
+
 FunctionResponseContent.model_rebuild()
 
 MessageContent = Annotated[
@@ -244,6 +280,7 @@ MessageContent = Annotated[
         FunctionResponseContent,
         TextMessageContent,
         ImageMessageContent,
+        ReasoningContent,
     ],
     Field(discriminator="kind"),
 ]
