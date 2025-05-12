@@ -265,11 +265,8 @@ class ReasoningContent(BaseMessageContent):
         return None
 
     def __str__(self) -> str:
-        summary_str = ". ".join(summary for summary in self.summaries)
-        encrypted_reasoning_size = (
-            len(self.encrypted_reasoning) if self.encrypted_reasoning else 0
-        )
-        return f"[encrypt_size={encrypted_reasoning_size}]\n{summary_str or '[No summaries found]'}"
+        summary_str = (". ".join(summary for summary in self.summaries)).strip()
+        return summary_str or "[No summaries found]"
 
 
 FunctionResponseContent.model_rebuild()
