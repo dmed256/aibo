@@ -265,6 +265,22 @@ def _typing_to_json_schema_type(
             ),
         }
 
+    if type_origin is dict:
+        typing_args = typing.get_args(typing_type)
+        if len(typing_args) >= 2:
+            value_type = typing_args[1]
+        else:
+            value_type = Any
+        return {
+            **json_schema,
+            "type": "object",
+            "additionalProperties": _typing_to_json_schema_type(
+                arg_name=arg_name,
+                qualified_name=qualified_name,
+                typing_type=value_type,
+            ),
+        }
+
     if type_origin is tuple:
         return {
             **json_schema,

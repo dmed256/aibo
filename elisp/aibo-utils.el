@@ -65,4 +65,7 @@
       (buffer-substring-no-properties (region-beginning) (region-end))
     nil))
 
+(defun aibo:--pad-right (s w)
+    (concat s (make-string (max 0 (- w (string-width s))) ? )))
+
 (provide 'aibo-utils)

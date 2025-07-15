@@ -22,3 +22,8 @@ class BaseDBModel(orm.DeclarativeBase):
             await session.commit()
 
         return self
+
+    async def update(self) -> Self:
+        async with get_session() as session:
+            session.add(self)
+            await session.commit()

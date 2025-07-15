@@ -161,4 +161,9 @@
   :type 'integer
   :group 'aibo)
 
+(defcustom aibo:default-cwd nil
+  "If defined, where conversations will set their cwd"
+  :type 'string
+  :group 'aibo)
+
 (provide 'aibo-custom)

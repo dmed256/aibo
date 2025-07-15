@@ -36,19 +36,19 @@
               (sections (aibo:--get-conversation-sections conversations)))
 
          (let ((inhibit-read-only t))
-           (erase-buffer))
-         (remove-overlays)
+           (erase-buffer)
+           (remove-overlays)
 
-         (aibo:--render-sync-header)
+           (aibo:--render-sync-header)
 
-         (if sections
-             (--each-indexed sections
-               (aibo:--render-conversation-section it))
-           (widget-insert (propertize
-                           "No conversations"
-                           'font-lock-face 'aibo:homepage-header-face)))
+           (if sections
+               (--each-indexed sections
+                 (aibo:--render-conversation-section it))
+             (widget-insert (propertize
+                             "No conversations"
+                             'font-lock-face 'aibo:homepage-header-face)))
 
-         (widget-setup)
+           (widget-setup))
 
          (set-buffer-modified-p nil)
          (goto-char current-point))))))

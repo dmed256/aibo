@@ -8,6 +8,7 @@
 (require 'aibo-api)
 (require 'aibo-custom)
 (require 'aibo-types)
+(require 'aibo-utils)
 
 ;; ---[ Utils ]-----------------------------------
 (setq aibo:--has-cached-packages nil)
@@ -33,6 +34,8 @@
   (define-key map (kbd "C-c C-x C-t")    #'aibo:generate-current-conversation-title)
   (define-key map (kbd "M-RET")          #'aibo:submit-user-message)
   (define-key map (kbd "C-c C-<return>") #'aibo:submit-user-message-with-reasoning)
+  (define-key map (kbd "C-c C-z")        #'aibo:stop-streaming-message)
+  (define-key map (kbd "C-c C-d")        #'aibo:set-cwd)
   map)
 
 (setq aibo:--new-user-message-keymap
@@ -191,6 +194,7 @@
                             (aibo:--dangerously-render-conversation conversation))))))
      :on-create
      (lambda (buffer)
+       (defvar-local aibo:b-streaming-websocket nil)
        (aibo:api-get-conversation
         :conversation-id conversation-id
         :on-success (lambda (conversation)
@@ -217,10 +221,11 @@
 
     ;; Kill all the widget local variables but
     ;; remember to keep our own local varibles
-    (kill-all-local-variables)
-    (remove-overlays)
-    (let ((inhibit-read-only t))
-      (erase-buffer))
+    (let ((ws aibo:b-streaming-websocket))
+      (kill-all-local-variables)
+      (remove-overlays)
+      (let ((inhibit-read-only t))
+        (erase-buffer))
 
     (aibo:conversation-mode)
 
@@ -258,6 +263,8 @@
     ;; Clean up buffer state
     (if set-not-modified
         (set-buffer-modified-p nil))
+
+      (when ws (setq-local aibo:b-streaming-websocket ws)))
 
     (widget-setup)
 
@@ -304,40 +311,53 @@
   )
 
 (defun aibo:--render-conversation-header (conversation)
-  (let* ((id (ht-get conversation "id"))
-         (packages (aibo:get-packages conversation)))
-    (widget-insert (propertize
-                    " Conversation "
-                    'font-lock-face 'aibo:conversation-header-face))
-    (widget-insert (propertize
-                    (format " %s " id)
-                    'font-lock-face 'aibo:conversation-subheader-face))
-    (widget-insert "\n")
-    (if packages
-        (widget-insert
-         (propertize
-          "Packages\n"
-          'font-lock-face 'aibo:conversation-header-content-face)))
-    (-each packages
-      (lambda (package)
-        (let* ((name (ht-get package "name"))
-               (is-enabled (ht-get package "is-enabled"))
-               (link-text (format "- [%s] %s\n" (if is-enabled "X" " ") name)))
-          (widget-create
-           'link
-           :notify (lambda (&rest _)
-                     (aibo:api-set-package-enabled
-                      :conversation-id (ht-get conversation "id")
-                      :package-name name
-                      :is-enabled (not is-enabled)
-                      :on-success (lambda (conversation)
-                                    (aibo:go-to-conversation :conversation conversation))))
-           :button-prefix ""
-           :button-suffix ""
-           :tag (propertize
-                 link-text
-                 'read-only t
-                 'font-lock-face 'aibo:conversation-header-content-face)))))))
+    (let* ((id (ht-get conversation "id"))
+           (cwd (ht-get conversation "cwd"))
+           (packages (aibo:get-packages conversation))
+           (header1 " Conversation ")
+           (subheader1 (format " %s " id))
+           (header2 " CWD ")
+           (subheader2 (format " %s " cwd))
+           (header-width (max (string-width header1) (string-width header2)))
+           (subheader-width (max (string-width subheader1) (string-width subheader2))))
+
+      ;; Conversation
+      (widget-insert (propertize (aibo:--pad-right header1 header-width) 'font-lock-face 'aibo:conversation-header-face))
+      (widget-insert (propertize (aibo:--pad-right subheader1 subheader-width) 'font-lock-face 'aibo:conversation-subheader-face))
+      (widget-insert "\n")
+
+      ;; CWD (optional)
+      (when cwd
+        (widget-insert (propertize (aibo:--pad-right header2 header-width) 'font-lock-face 'aibo:conversation-header-face))
+        (widget-create
+         'link
+         :notify (lambda (&rest _)
+                   (aibo:set-cwd))
+         :button-prefix ""
+         :button-suffix ""
+         :tag (propertize (aibo:--pad-right subheader2 subheader-width) 'font-lock-face 'aibo:conversation-subheader-face))
+        (widget-insert "\n"))
+
+      ;; Packages
+      (when packages
+        (widget-insert (propertize "Packages\n" 'font-lock-face 'aibo:conversation-header-content-face))
+        (-each packages
+          (lambda (pkg)
+            (let* ((name (ht-get pkg "name"))
+                   (enabled (ht-get pkg "is-enabled"))
+                   (text (format "- [%s] %s\n" (if enabled "X" " ") name)))
+              (widget-create
+               'link
+               :notify (lambda (&rest _)
+                         (aibo:api-set-package-enabled
+                          :conversation-id id
+                          :package-name name
+                          :is-enabled (not enabled)
+                          :on-success (lambda (conv)
+                                        (aibo:go-to-conversation :conversation conv))))
+               :button-prefix ""
+               :button-suffix ""
+               :tag (propertize text 'read-only t 'font-lock-face 'aibo:conversation-header-content-face))))))))
 
 (defun aibo:submit-user-message (&rest args)
   (interactive)
@@ -365,9 +385,10 @@
          (model (plist-get args :model))
          (on-success (plist-get args :on-success))
          (buffer (aibo:--get-conversation-buffer conversation-id)))
-    (aibo:api-ws-stream-assistant-message
-     :conversation-id conversation-id
-     :model model
+    (with-current-buffer buffer
+      (aibo:api-ws-stream-assistant-message
+       :conversation-id conversation-id
+       :model model
      :message-callbacks
      (ht ("current_conversation"
           (lambda (ws-message)
@@ -393,7 +414,7 @@
                 (recenter-bottom)))
             ;; if someone passed their own on-success, run it too
             (when on-success
-              (funcall on-success))))))))
+              (funcall on-success)))))))))
 
 (defun aibo:regenerate-current-conversation-last-assistant-message ()
   (interactive)
@@ -713,6 +734,30 @@
                (lambda ()
                  (aibo:api-delete-conversation
                   :conversation-id (ht-get conversation "id"))))))))))))
+
+;; ---[ Update conversation ]---------------------
+(defun aibo:set-cwd ()
+  (interactive)
+  (counsel--find-file-1 "Find directory: " ivy--directory
+                        #'aibo:--set-cwd-counsel-find-file-action
+                        'aibo:set-cwd))
+
+(defun aibo:--set-cwd-counsel-find-file-action (filepath)
+  (let* ((conversation-id (ht-get aibo:b-conversation "id"))
+         (cwd (if (file-directory-p filepath) filepath (file-name-directory filepath))))
+    (aibo:api-set-cwd
+     :conversation-id conversation-id
+     :cwd cwd
+     :on-success (lambda (conversation)
+                   (aibo:go-to-conversation :conversation conversation)))))
+
+(defun aibo:insert-projectile-find-file-shorthand ()
+  (interactive)
+  (let* ((project-root (projectile-acquire-root))
+         (file (projectile-completing-read "Find directory: "
+                                           (projectile-project-files project-root))))
+    (when file
+      (aibo:--insert-file-shorthand (expand-file-name file project-root)))))
 
 ;; ---[ Search conversations ]--------------------
 (defvar aibo:--conversation-message-search-history nil

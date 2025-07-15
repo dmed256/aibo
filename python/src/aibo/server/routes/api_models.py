@@ -59,6 +59,7 @@ class ConversationSummary(BaseModel):
 
 
 class Conversation(ConversationSummary):
+    cwd: str | None
     root_message_id: UUID
     current_message_id: UUID
     all_messages: dict[UUID, Message]
@@ -67,6 +68,7 @@ class Conversation(ConversationSummary):
     def from_chat(cls, conversation: chat.Conversation) -> Self:  # type: ignore[override]
         return cls(
             **dict(ConversationSummary.from_chat(conversation)),
+            cwd=conversation.cwd,
             root_message_id=conversation.root_message.id,
             current_message_id=conversation.current_message.id,
             all_messages={

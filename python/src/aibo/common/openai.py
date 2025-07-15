@@ -119,4 +119,4 @@ StreamingMessageResult = Annotated[
 
 
 def is_reasoning_model(model: str) -> bool:
-    return model.lower().startswith("o")
+    return model.lower().startswith("o") or model.startswith("gpt-5")

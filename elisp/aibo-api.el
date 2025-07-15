@@ -64,7 +64,7 @@
                      :parser #'aibo:--request-json-parser
                      :encoding 'utf-8
                      :sync sync
-                     :timeout (or timeout 1)
+                     :timeout (or timeout 10)
                      :data (if data (json-encode data) nil)
                      :success (lambda (&rest args)
                                 (if on-success
@@ -126,6 +126,7 @@
      :path "/chat/conversations"
      :data (ht ("messages"              message-inputs)
                ("model"                 (or model aibo:model))
+               ("cwd"                   aibo:default-cwd)
                ("enabled_package_names" aibo:enabled-package-names)
                ("temperature"           aibo:temperature)
                ("shorthands"            (aibo:--conversation-shorthands)))
@@ -224,6 +225,16 @@
      :response-transform (lambda (response) (ht-get response "conversation"))
      :on-success on-success)))
 
+(defun aibo:api-set-cwd (&rest args)
+  (let* ((conversation-id (plist-get args :conversation-id))
+         (cwd (plist-get args :cwd))
+         (on-success (plist-get args :on-success)))
+    (aibo:--api-patch
+     :path (format "/chat/conversations/%s/cwd" conversation-id)
+     :data (ht ("cwd" cwd))
+     :response-transform (lambda (response) (ht-get response "conversation"))
+     :on-success on-success)))
+
 
 (defun aibo:api-create-image-from-clipboard (&rest args)
   (let ((on-success (plist-get args :on-success)))
@@ -237,7 +248,8 @@
 (defun aibo:--api-ws-send (&rest args)
   (let* ((event (plist-get args :event))
          (message-callbacks (plist-get args :message-callbacks))
-         (event-id (uuidgen-4)))
+         (event-id (uuidgen-4))
+         (websocket-callback-buffer (current-buffer)))
     (ht-set! event "id" event-id)
     (let ((websocket
            (websocket-open
@@ -254,39 +266,51 @@
                 (when (string= event-kind "event_completed")
                   (websocket-close _websocket))))
             :on-close
-            (lambda (_websocket)))))
+            (lambda (_ws)
+              (with-current-buffer websocket-callback-buffer
+                (setq-local aibo:b-streaming-websocket nil))))))
       (websocket-send-text websocket (json-encode event))
       websocket)))
+
+(defun aibo:stop-streaming-message ()
+  (interactive)
+  (when (and (boundp 'aibo:b-streaming-websocket)
+             aibo:b-streaming-websocket)
+    (websocket-close aibo:b-streaming-websocket)
+    (setq-local aibo:b-streaming-websocket nil)))
 
 (defun aibo:api-ws-stream-assistant-message (&rest args)
   (let* ((conversation-id (plist-get args :conversation-id))
          (model (plist-get args :model))
          (message-callbacks (plist-get args :message-callbacks)))
-    (aibo:--api-ws-send
-     :event (ht ("kind"            "stream_assistant_message")
-                ("conversation_id" conversation-id)
-                ("model"           (or model aibo:model))
-                ("temperature"     aibo:temperature))
-     :message-callbacks message-callbacks)))
+    (setq-local aibo:b-streaming-websocket
+                (aibo:--api-ws-send
+                 :event (ht ("kind"            "stream_assistant_message")
+                            ("conversation_id" conversation-id)
+                            ("model"           (or model aibo:model))
+                            ("temperature"     aibo:temperature))
+                 :message-callbacks message-callbacks))))
 
 (defun aibo:api-ws-regenerate-last-assistant-message (&rest args)
   (let* ((conversation-id (plist-get args :conversation-id))
          (message-callbacks (plist-get args :message-callbacks)))
-    (aibo:--api-ws-send
-     :event (ht ("kind"            "regenerate_last_assistant_message")
-                ("conversation_id" conversation-id)
-                ("model"           aibo:model))
-     :message-callbacks message-callbacks)))
+    (setq-local aibo:b-streaming-websocket
+                (aibo:--api-ws-send
+                 :event (ht ("kind"            "regenerate_last_assistant_message")
+                            ("conversation_id" conversation-id)
+                            ("model"           aibo:model))
+                 :message-callbacks message-callbacks))))
 
 (defun aibo:api-ws-stream-assistant-message-chunks (&rest args)
   (let* ((conversation-id (plist-get args :conversation-id))
          (message-callbacks (plist-get args :message-callbacks)))
-    (aibo:--api-ws-send
-     :event (ht ("kind"            "stream_assistant_message_chunks")
-                ("conversation_id" conversation-id)
-                ("model"           aibo:model)
-                ("temperature"     aibo:temperature))
-     :message-callbacks message-callbacks)))
+    (setq-local aibo:b-streaming-websocket
+                (aibo:--api-ws-send
+                 :event (ht ("kind"            "stream_assistant_message_chunks")
+                            ("conversation_id" conversation-id)
+                            ("model"           aibo:model)
+                            ("temperature"     aibo:temperature))
+                 :message-callbacks message-callbacks))))
 
 
 ;; ---[ Utils ]-----------------------------------

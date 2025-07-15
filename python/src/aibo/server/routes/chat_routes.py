@@ -13,6 +13,7 @@ from aibo.common.shorthands import (
 )
 from aibo.core import chat
 from aibo.core.package import Package
+from aibo.db import models
 from aibo.db.client import get_session
 from aibo.server.routes import api_models
 
@@ -50,6 +51,7 @@ class CreateConversationRequest(BaseModel):
     )
 
     model: str | None = None
+    cwd: str | None = None
     temperature: float | None = None
     enabled_package_names: list[str] | None = None
     messages: list[chat.CreateMessageInputs]
@@ -131,6 +133,14 @@ class UpdateConversationPackagesResponse(BaseModel):
     conversation: api_models.Conversation
 
 
+class UpdateConversationCwdRequest(BaseModel):
+    cwd: str
+
+
+class UpdateConversationCwdResponse(BaseModel):
+    conversation: api_models.Conversation
+
+
 @router.get("/models")
 async def get_models() -> GetModelsResponse:
     return GetModelsResponse(models=["gpt-3.5-turbo"])
@@ -208,6 +218,7 @@ async def create_conversation(
         openai_model_source=openai_model_source,
         enabled_package_names=enabled_package_names,
         system_message_inputs=system_message_inputs,
+        cwd=request.cwd,
     )
 
     for message_input in other_message_inputs:
@@ -463,5 +474,21 @@ async def update_conversation_packages(
     await conversation.set_enabled_packages(list(enabled_package_names))
 
     return UpdateConversationPackagesResponse(
+        conversation=api_models.Conversation.from_chat(conversation),
+    )
+
+
+@router.patch("/conversations/{conversation_id}/cwd")
+async def update_conversation_cwd(
+    conversation_id: UUID,
+    request: UpdateConversationCwdRequest,
+) -> UpdateConversationCwdResponse:
+    conversation_model = await models.ConversationModel.by_id(conversation_id)
+    assert conversation_model, "Conversation not found"
+
+    await conversation_model.set_cwd(request.cwd)
+    conversation = await chat.Conversation.from_model(conversation_model)
+
+    return UpdateConversationCwdResponse(
         conversation=api_models.Conversation.from_chat(conversation),
     )

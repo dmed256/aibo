@@ -34,6 +34,8 @@ class ConversationModel(BaseDBModel):
     )
     enabled_package_names: orm.Mapped[list[str]] = orm.mapped_column(StrListColumn)
 
+    cwd: orm.Mapped[str | None]
+
     # The columns below are only optional since we need to first create the
     # conversation, and then the messages below
     #
@@ -64,10 +66,13 @@ class ConversationModel(BaseDBModel):
     async def soft_delete(self) -> Self:
         if self.deleted_at is None:
             self.deleted_at = now_utc()
-            async with get_session() as session:
-                session.add(self)
-                await session.commit()
+            await self.update()
+        return self
 
+    async def set_cwd(self, cwd: str | None) -> Self:
+        if cwd != self.cwd:
+            self.cwd = cwd
+            await self.update()
         return self
 
     @staticmethod

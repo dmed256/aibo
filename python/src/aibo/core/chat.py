@@ -2,7 +2,10 @@ from __future__ import annotations
 
 import asyncio
 import datetime as dt
+import multiprocessing as mp
+import os
 import re
+from concurrent.futures import ProcessPoolExecutor
 from enum import StrEnum
 from typing import AsyncGenerator, Generator, Self, cast
 from uuid import UUID, uuid4
@@ -41,7 +44,7 @@ from aibo.core.openai import (
     SuccessMessageChunk,
     stream_completion,
 )
-from aibo.core.package import FunctionContext, Package
+from aibo.core.package import Function, FunctionContext, Package
 from aibo.db.client import get_session
 from aibo.db.models import ConversationModel, MessageModel
 
@@ -340,6 +343,7 @@ class ConversationSummary(BaseModel):
 
 
 class Conversation(ConversationSummary):
+    cwd: str | None
     root_message: Message
     current_message: Message
     all_messages: dict[UUID, Message]
@@ -357,6 +361,7 @@ class Conversation(ConversationSummary):
         system_message_inputs: CreateMessageInputs,
         trace_id: UUID | None = None,
         title: str | None = None,
+        cwd: str | None = None,
     ) -> Self:
         trace_id = trace_id or uuid4()
         enabled_package_names = enabled_package_names or []
@@ -373,6 +378,7 @@ class Conversation(ConversationSummary):
                 }
             ),
             origin_message_id=None,
+            cwd=cwd,
         ).insert()
 
         system_source = HumanSource(user="dmed")
@@ -432,6 +438,7 @@ class Conversation(ConversationSummary):
 
         conversation = cls(
             **dict(ConversationSummary.from_model(model)),
+            cwd=model.cwd,
             root_message=root_message,
             current_message=current_message,
             all_messages={},
@@ -583,14 +590,22 @@ class Conversation(ConversationSummary):
                     ):
                         should_sample_again = True
                         yield messages
-                        messages.append(
-                            await function(
-                                conversation=self,
-                                item_id=function_request_content.item_id,
-                                tool_call_id=function_request_content.tool_call_id,
-                                arguments=function_request_content.arguments,
-                            )
+
+                        conversation_model = await ConversationModel.by_id(self.id)
+
+                        message, new_cwd = await self.call_function(
+                            conversation=self,
+                            function=function,
+                            item_id=function_request_content.item_id,
+                            tool_call_id=function_request_content.tool_call_id,
+                            arguments=function_request_content.arguments,
+                            conversation_cwd=conversation_model.cwd,
                         )
+                        messages.append(message)
+                        # Update cwd if it changed
+                        if new_cwd:
+                            await conversation_model.set_cwd(new_cwd)
+
                 elif isinstance(chunk, StreamingReasoningChunk):
                     messages.append(
                         await self.insert_message(
@@ -802,6 +817,70 @@ Create a small 3-6 word tweet that captures the intent of the above within three
 
     async def pretty_print_current_history(self) -> None:
         print(await self.stringify_conversation(enable_colors=True))
+
+    @classmethod
+    async def call_function(
+        cls,
+        *,
+        conversation: Conversation,
+        function: Function,
+        item_id: str,
+        tool_call_id: str,
+        arguments: dict,
+        conversation_cwd: str | None,
+    ) -> tuple[Message, str | None]:
+        """
+        Call a function in a separate process to avoid cwd safety issues.
+        Returns tuple of (message, new_cwd)
+        """
+        loop = asyncio.get_event_loop()
+
+        # Run in process pool executor
+        with ProcessPoolExecutor(max_workers=1) as executor:
+            future = loop.run_in_executor(
+                executor,
+                cls._call_function_sync,
+                conversation,
+                function,
+                item_id,
+                tool_call_id,
+                arguments,
+                conversation_cwd,
+            )
+            response_message, conversation_cwd = await future
+
+        await conversation.sync_messages()
+        await conversation.set_current_message(response_message)
+        return response_message, conversation_cwd
+
+    @staticmethod
+    def _call_function_sync(
+        conversation: Conversation,
+        function: Function,
+        item_id: str,
+        tool_call_id: str,
+        arguments: dict,
+        conversation_cwd: str | None,
+    ):
+        try:
+            if conversation_cwd:
+                os.chdir(conversation_cwd)
+
+            # Call the function
+            response_message = asyncio.run(
+                function(
+                    conversation=conversation,
+                    item_id=item_id,
+                    tool_call_id=tool_call_id,
+                    arguments=arguments,
+                )
+            )
+            return response_message, os.getcwd()
+        except:
+            import traceback
+
+            traceback.print_exc()
+            traceback.print_exception()
 
 
 FunctionContext.model_rebuild()
