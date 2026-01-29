@@ -52,6 +52,16 @@ class OpenAIModelSource(BaseModel):
     def is_reasoning_model(self) -> bool:
         return is_reasoning_model(self.model)
 
+    @property
+    def is_codex_model(self) -> bool:
+        return self.model == "codex" or self.model.startswith("codex:")
+
+    @property
+    def codex_model(self) -> str | None:
+        if self.model.startswith("codex:"):
+            return self.model[len("codex:") :]
+        return None
+
     def __str__(self) -> str:
         return f"model:{self.model}"
 

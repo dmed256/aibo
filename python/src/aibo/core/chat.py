@@ -637,10 +637,12 @@ class Conversation(ConversationSummary):
         source: OpenAIModelSource | None = None,
     ) -> AsyncGenerator[StreamingMessageResult, None]:
         source = source or self.openai_model_source.copy()
+        conversation_model = await self.get_model()
         async for chunk in stream_completion(
             source=source,
             messages=self.get_current_history(),
             packages=self.packages,
+            cwd=conversation_model.cwd,
         ):
             yield chunk
 
@@ -674,12 +676,13 @@ class Conversation(ConversationSummary):
 
     async def generate_title(self, *, model: str | None = None) -> None:
         env = Env.get()
+        title_model = model if model is not None else env.OPENAI_TITLE_MODEL
 
         # Get the cheapest model to do the title generation
         title_conversation = await Conversation.create(
             title=f"Title for {self.id}",
             trace_id=self.trace_id,
-            openai_model_source=OpenAIModelSource.build(model="o4-mini"),
+            openai_model_source=OpenAIModelSource.build(model=title_model),
             system_message_inputs=CreateMessageInputs(
                 role=MessageRole.SYSTEM,
                 contents=[

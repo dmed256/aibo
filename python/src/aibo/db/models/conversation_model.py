@@ -35,6 +35,7 @@ class ConversationModel(BaseDBModel):
     enabled_package_names: orm.Mapped[list[str]] = orm.mapped_column(StrListColumn)
 
     cwd: orm.Mapped[str | None]
+    codex_thread_id: orm.Mapped[str | None]
 
     # The columns below are only optional since we need to first create the
     # conversation, and then the messages below
@@ -72,6 +73,12 @@ class ConversationModel(BaseDBModel):
     async def set_cwd(self, cwd: str | None) -> Self:
         if cwd != self.cwd:
             self.cwd = cwd
+            await self.update()
+        return self
+
+    async def set_codex_thread_id(self, codex_thread_id: str | None) -> Self:
+        if codex_thread_id != self.codex_thread_id:
+            self.codex_thread_id = codex_thread_id
             await self.update()
         return self
 

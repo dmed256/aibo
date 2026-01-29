@@ -11,7 +11,7 @@
   :type 'integer
   :group 'aibo)
 
-(defcustom aibo:model "o4-mini"
+(defcustom aibo:model "codex"
   "The OpenAI model name used for completions"
   :type 'string
   :group 'aibo)

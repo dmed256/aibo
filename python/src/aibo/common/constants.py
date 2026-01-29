@@ -22,8 +22,12 @@ class Env(BaseModel):
 
     # OpenAI
     OPENAI_MODEL: str
+    OPENAI_TITLE_MODEL: str
     OPENAI_TEMPERATURE: float
     OPENAI_IMAGE_DETAIL: Literal["auto", "low", "high"]
+
+    # Codex
+    CODEX_APPROVAL_POLICY: str
 
     # Packages
     AIBO_CUSTOM_PACKAGES_FILE: Optional[str]
@@ -68,11 +72,14 @@ class Env(BaseModel):
             DB_NAME=os.environ.get("AIBO_DB_NAME", "database.db"),
             # OpenAI
             OPENAI_MODEL=os.environ.get("OPENAI_MODEL", "gpt-3.5-turbo-16k"),
+            OPENAI_TITLE_MODEL=os.environ.get("OPENAI_TITLE_MODEL", "gpt-5-nano"),
             OPENAI_TEMPERATURE=float(os.environ.get("OPENAI_TEMPERATURE", "0.3")),
             OPENAI_IMAGE_DETAIL=typing.cast(
                 Literal["auto", "low", "high"],
                 os.environ.get("OPENAI_IMAGE_DETAIL", "auto"),
             ),
+            # Codex
+            CODEX_APPROVAL_POLICY=os.environ.get("AIBO_CODEX_APPROVAL_POLICY", ""),
             # Packages
             AIBO_CUSTOM_PACKAGES_FILE=os.environ.get("AIBO_CUSTOM_PACKAGES_FILE"),
             # Misc
@@ -96,8 +103,11 @@ class Env(BaseModel):
             DB_NAME=os.environ.get("AIBO_DB_NAME", "test_database.db"),
             # OpenAI
             OPENAI_MODEL="fake-model",
+            OPENAI_TITLE_MODEL="gpt-5-nano",
             OPENAI_TEMPERATURE=float(os.environ.get("OPENAI_TEMPERATURE", "0.3")),
             OPENAI_IMAGE_DETAIL="auto",
+            # Codex
+            CODEX_APPROVAL_POLICY=os.environ.get("AIBO_CODEX_APPROVAL_POLICY", ""),
             # Packages
             AIBO_CUSTOM_PACKAGES_FILE=os.environ.get("AIBO_CUSTOM_PACKAGES_FILE"),
             # Misc

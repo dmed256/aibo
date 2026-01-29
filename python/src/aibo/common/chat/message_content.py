@@ -112,8 +112,7 @@ class ImageMessageContent(BaseMessageContent):
     async def to_openai(self, *, role: MessageRole) -> OpenAIContent | None:
         from aibo.db.models import ImageModel
 
-        image = await ImageModel.by_id(self.image_id)
-        if not image:
+        if image := await ImageModel.by_id(self.image_id):
             return openai.types.responses.ResponseInputImageParam(
                 detail=Env.get().OPENAI_IMAGE_DETAIL,
                 image_url=f"data:image/{image.format};base64,{image.contents_b64}",

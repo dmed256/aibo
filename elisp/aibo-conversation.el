@@ -194,7 +194,6 @@
                             (aibo:--dangerously-render-conversation conversation))))))
      :on-create
      (lambda (buffer)
-       (defvar-local aibo:b-streaming-websocket nil)
        (aibo:api-get-conversation
         :conversation-id conversation-id
         :on-success (lambda (conversation)
@@ -221,7 +220,8 @@
 
     ;; Kill all the widget local variables but
     ;; remember to keep our own local varibles
-    (let ((ws aibo:b-streaming-websocket))
+    (let ((ws (and (boundp 'aibo:b-streaming-websocket)
+                   aibo:b-streaming-websocket)))
       (kill-all-local-variables)
       (remove-overlays)
       (let ((inhibit-read-only t))
@@ -311,53 +311,41 @@
   )
 
 (defun aibo:--render-conversation-header (conversation)
-    (let* ((id (ht-get conversation "id"))
-           (cwd (ht-get conversation "cwd"))
-           (packages (aibo:get-packages conversation))
-           (header1 " Conversation ")
-           (subheader1 (format " %s " id))
-           (header2 " CWD ")
-           (subheader2 (format " %s " cwd))
-           (header-width (max (string-width header1) (string-width header2)))
-           (subheader-width (max (string-width subheader1) (string-width subheader2))))
+  (let* ((id (ht-get conversation "id"))
+         (cwd (ht-get conversation "cwd"))
+         (header-width (max (string-width " Conversation ")
+                            (string-width " CWD ")))
+         (subheader-width (max (string-width (format " %s " id))
+                               (if cwd (string-width (format " %s " cwd)) 0))))
 
-      ;; Conversation
-      (widget-insert (propertize (aibo:--pad-right header1 header-width) 'font-lock-face 'aibo:conversation-header-face))
-      (widget-insert (propertize (aibo:--pad-right subheader1 subheader-width) 'font-lock-face 'aibo:conversation-subheader-face))
-      (widget-insert "\n")
+    ;; Conversation
+    (widget-insert
+     (propertize
+      (aibo:--pad-right " Conversation " header-width)
+      'font-lock-face 'aibo:conversation-header-face))
+    (widget-insert
+     (propertize
+      (aibo:--pad-right (format " %s " id) subheader-width)
+      'font-lock-face 'aibo:conversation-subheader-face))
+    (widget-insert "\n")
 
-      ;; CWD (optional)
-      (when cwd
-        (widget-insert (propertize (aibo:--pad-right header2 header-width) 'font-lock-face 'aibo:conversation-header-face))
-        (widget-create
-         'link
-         :notify (lambda (&rest _)
-                   (aibo:set-cwd))
-         :button-prefix ""
-         :button-suffix ""
-         :tag (propertize (aibo:--pad-right subheader2 subheader-width) 'font-lock-face 'aibo:conversation-subheader-face))
-        (widget-insert "\n"))
-
-      ;; Packages
-      (when packages
-        (widget-insert (propertize "Packages\n" 'font-lock-face 'aibo:conversation-header-content-face))
-        (-each packages
-          (lambda (pkg)
-            (let* ((name (ht-get pkg "name"))
-                   (enabled (ht-get pkg "is-enabled"))
-                   (text (format "- [%s] %s\n" (if enabled "X" " ") name)))
-              (widget-create
-               'link
-               :notify (lambda (&rest _)
-                         (aibo:api-set-package-enabled
-                          :conversation-id id
-                          :package-name name
-                          :is-enabled (not enabled)
-                          :on-success (lambda (conv)
-                                        (aibo:go-to-conversation :conversation conv))))
-               :button-prefix ""
-               :button-suffix ""
-               :tag (propertize text 'read-only t 'font-lock-face 'aibo:conversation-header-content-face))))))))
+    ;; CWD (optional)
+    (when cwd
+      (widget-insert
+       (propertize
+        (aibo:--pad-right " CWD " header-width)
+        'font-lock-face 'aibo:conversation-header-face))
+      (widget-create
+       'link
+       :notify (lambda (&rest _)
+                 (aibo:set-cwd))
+       :button-prefix ""
+       :button-suffix ""
+       :tag (propertize
+             (aibo:--pad-right (format " %s " cwd) subheader-width)
+             'read-only t
+             'font-lock-face 'aibo:conversation-subheader-face))
+      (widget-insert "\n"))))
 
 (defun aibo:submit-user-message (&rest args)
   (interactive)
@@ -738,9 +726,18 @@
 ;; ---[ Update conversation ]---------------------
 (defun aibo:set-cwd ()
   (interactive)
-  (counsel--find-file-1 "Find directory: " ivy--directory
-                        #'aibo:--set-cwd-counsel-find-file-action
-                        'aibo:set-cwd))
+  (if (fboundp 'counsel--find-file-1)
+      (counsel--find-file-1 "Find directory: " ivy--directory
+                            #'aibo:--set-cwd-counsel-find-file-action
+                            'aibo:set-cwd)
+    (aibo:--set-cwd-projectile)))
+
+(defun aibo:--set-cwd-projectile ()
+  (let* ((project-root (projectile-acquire-root))
+         (file (projectile-completing-read "Find directory: "
+                                           (projectile-project-files project-root))))
+    (when file
+      (aibo:--set-cwd-counsel-find-file-action (expand-file-name file project-root)))))
 
 (defun aibo:--set-cwd-counsel-find-file-action (filepath)
   (let* ((conversation-id (ht-get aibo:b-conversation "id"))
