@@ -17,7 +17,6 @@ dependencies = [
   "cachetools>=5.3",
   "fastapi>=0",
   "fire>=0.5",
-  "numpy>=1.24",
   "openai>=1",
   "Pillow>=10.1",
   "pydantic==2.2",
@@ -46,7 +45,6 @@ profile = "black"
 [tool.mypy]
 plugins = [
   "pydantic.mypy",
-  "numpy.typing.mypy_plugin",
   "sqlalchemy.ext.mypy.plugin",
 ]
 warn_redundant_casts = true

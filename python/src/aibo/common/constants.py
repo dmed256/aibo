@@ -22,7 +22,6 @@ class Env(BaseModel):
 
     # OpenAI
     OPENAI_MODEL: str
-    OPENAI_EMBEDDING_MODEL: str
     OPENAI_TEMPERATURE: float
     OPENAI_IMAGE_DETAIL: Literal["auto", "low", "high"]
 
@@ -69,9 +68,6 @@ class Env(BaseModel):
             DB_NAME=os.environ.get("AIBO_DB_NAME", "database.db"),
             # OpenAI
             OPENAI_MODEL=os.environ.get("OPENAI_MODEL", "gpt-3.5-turbo-16k"),
-            OPENAI_EMBEDDING_MODEL=os.environ.get(
-                "OPENAI_EMBEDDING_MODEL", "text-embedding-ada-002"
-            ),
             OPENAI_TEMPERATURE=float(os.environ.get("OPENAI_TEMPERATURE", "0.3")),
             OPENAI_IMAGE_DETAIL=typing.cast(
                 Literal["auto", "low", "high"],
@@ -100,7 +96,6 @@ class Env(BaseModel):
             DB_NAME=os.environ.get("AIBO_DB_NAME", "test_database.db"),
             # OpenAI
             OPENAI_MODEL="fake-model",
-            OPENAI_EMBEDDING_MODEL="fake-embedding-model",
             OPENAI_TEMPERATURE=float(os.environ.get("OPENAI_TEMPERATURE", "0.3")),
             OPENAI_IMAGE_DETAIL="auto",
             # Packages

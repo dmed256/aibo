@@ -10,7 +10,6 @@ from aibo.common.chat.message_source import OpenAIModelSource
 from aibo.common.constants import Env
 from aibo.common.openai import (
     CompletionError,
-    Embeddings,
     ErrorMessageChunk,
     FunctionCallChunk,
     StreamingMessageChunk,
@@ -18,7 +17,6 @@ from aibo.common.openai import (
     StreamingReasoningChunk,
     SuccessMessageChunk,
 )
-from aibo.common.utils import chunk_sequence
 from aibo.core.package import Package
 
 if TYPE_CHECKING:
@@ -26,18 +24,15 @@ if TYPE_CHECKING:
 
 __all__ = [
     "CompletionError",
-    "Embeddings",
     "ErrorMessageChunk",
     "FunctionCallChunk",
     "StreamingMessageChunk",
     "StreamingMessageResult",
     "SuccessMessageChunk",
-    "get_string_embeddings",
     "stream_completion",
 ]
 
 ENABLED_ENVIRONMENTS = ["dev"]
-EMBEDDING_BATCH_SIZE = 100
 
 
 @cache
@@ -157,33 +152,3 @@ async def stream_completion(
             ),
         )
 
-
-async def get_string_embeddings(
-    contents: list[str], *, model: Optional[str] = None
-) -> Embeddings:
-    _verify_openai_enabled()
-
-    model = model or Env.get().OPENAI_EMBEDDING_MODEL
-
-    all_embeddings = Embeddings(model=model, embeddings=[])
-    for batch_contents in chunk_sequence(contents, EMBEDDING_BATCH_SIZE):
-        batch_embeddings = await _get_string_embedding_batch(
-            contents=batch_contents, model=model
-        )
-        all_embeddings.embeddings.extend(batch_embeddings.embeddings)
-
-    return all_embeddings
-
-
-async def _get_string_embedding_batch(
-    *,
-    contents: list[str],
-    model: str,
-) -> Embeddings:
-    response = await openai_client().embeddings.create(input=contents, model=model)
-    return Embeddings(
-        model=model,
-        embeddings=[
-            embedding_response.embedding for embedding_response in response.data
-        ],
-    )

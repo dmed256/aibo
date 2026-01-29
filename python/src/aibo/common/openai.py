@@ -1,19 +1,13 @@
 from __future__ import annotations
 
 from enum import StrEnum
-from functools import cache
-from typing import Annotated, Any, Iterable, Literal, Self, Union
+from typing import Annotated, Literal, Self, Union
 
-import numpy as np
 import openai
-from pydantic import BaseModel, ConfigDict, Field
-from typing_extensions import TypedDict
+from pydantic import BaseModel, Field
 
 __all__ = [
-    "EMBEDDING_SUGGESTED_MAX_STRING_LENGTH",
-    "EMBEDDING_LENGTH",
     "CompletionError",
-    "Embeddings",
     "FunctionCallChunk",
     "StreamingMessageChunk",
     "StreamingReasoningChunk",
@@ -21,17 +15,6 @@ __all__ = [
     "ErrorMessageChunk",
     "is_reasoning_model",
 ]
-
-EMBEDDING_SUGGESTED_MAX_STRING_LENGTH = 400
-EMBEDDING_LENGTH = 1536
-
-
-class Embeddings(BaseModel):
-    model: str
-    embeddings: list[list[float]]
-
-    def average_embedding(self) -> Any:
-        return np.mean(np.array(self.embeddings, dtype=np.float32), 0)
 
 
 class FunctionCallChunk(BaseModel):
