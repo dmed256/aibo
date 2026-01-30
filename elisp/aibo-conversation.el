@@ -165,8 +165,8 @@
   (interactive)
   (let* ((conversation (plist-get args :conversation))
          (buffer-open-style (or (plist-get args :buffer-open-style) :current-window)))
-    (aibo:--get-or-create-buffer
-     :name (aibo:--get-conversation-buffer-name (ht-get conversation "id"))
+    (aibo:buffers-get-or-create-conversation-buffer
+     :conversation-id (ht-get conversation "id")
      :open-style buffer-open-style
      :on-load
      (lambda (buffer)
@@ -179,8 +179,8 @@
   (let* ((conversation-id (plist-get args :conversation-id))
          (buffer-open-style (or (plist-get args :buffer-open-style) :current-window))
          (sync (plist-get args :sync)))
-    (aibo:--get-or-create-buffer
-     :name (aibo:--get-conversation-buffer-name conversation-id)
+    (aibo:buffers-get-or-create-conversation-buffer
+     :conversation-id conversation-id
      :open-style buffer-open-style
      :on-load
      (lambda (buffer)
@@ -305,7 +305,7 @@
           (format "[%s] %s"
                   aibo:model
                   title))
-    (setq-local list-buffers-directory title))
+    (aibo:buffers-apply-conversation-title conversation))
   ;; Locks down emacs for a while
   ;; (save-window-excursion (aibo:homepage))
   )

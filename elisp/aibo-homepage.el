@@ -6,6 +6,7 @@
 (require 'widget)
 
 (require 'aibo-api)
+(require 'aibo-buffers)
 (require 'aibo-custom)
 (require 'aibo-utils)
 (require 'aibo-templates)
@@ -86,8 +87,7 @@
          'action (lambda (&rest ignore)
                    (let* ((id (ht-get conversation "id"))
                           (title (ht-get conversation "title"))
-                          (conversation-buffer (get-buffer
-                                                (aibo:--get-conversation-buffer-name id))))
+                          (conversation-buffer (aibo:buffers-get-conversation-buffer id)))
 
                      (aibo:api-delete-conversation
                       :conversation-id id
