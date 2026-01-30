@@ -20,6 +20,7 @@ from aibo.common.openai import (
 from aibo.core.codex_exec import (
     CodexAgentMessageItem,
     CodexCommandExecutionItem,
+    CodexErrorEvent,
     CodexFileChangeItem,
     CodexItemCompletedEvent,
     CodexReasoningItem,
@@ -105,39 +106,59 @@ async def _stream_codex_completion(
         raise ValueError(f"Conversation not found: {conversation_id}")
 
     prompt, image_paths = await build_codex_prompt(messages)
-    async for event in stream_codex_events(
-        prompt=prompt,
-        model_name=model_name,
-        cwd=cwd,
-        image_paths=image_paths,
-        session_id=conversation_model.codex_thread_id,
-    ):
-        if isinstance(event, CodexThreadStartedEvent):
-            await conversation_model.set_codex_thread_id(event.thread_id)
-        elif isinstance(event, CodexItemCompletedEvent):
-            item = event.item
-            if isinstance(item, CodexAgentMessageItem):
-                yield StreamingMessageChunk(
-                    item_id=item.id,
-                    text=item.text,
+    try:
+        async for event in stream_codex_events(
+            prompt=prompt,
+            model_name=model_name,
+            cwd=cwd,
+            image_paths=image_paths,
+            session_id=conversation_model.codex_thread_id,
+        ):
+            if isinstance(event, CodexThreadStartedEvent):
+                await conversation_model.set_codex_thread_id(event.thread_id)
+            elif isinstance(event, CodexErrorEvent):
+                yield ErrorMessageChunk(
+                    source="server_error",
+                    content=CompletionError(
+                        error_type=CompletionError.ErrorType.AIBO_SERVER,
+                        text=event.message,
+                    ),
                 )
-            elif isinstance(item, CodexReasoningItem):
-                yield StreamingReasoningChunk(
-                    item_id=item.id,
-                    summaries=[item.text],
-                    encrypted_reasoning=None,
-                )
-            elif isinstance(item, CodexCommandExecutionItem):
-                summary_lines = [f"$ {item.command}"]
-                if item.aggregated_output.strip():
-                    summary_lines.append(item.aggregated_output.rstrip())
-                if item.exit_code is not None:
-                    summary_lines.append(f"[exit_code={item.exit_code}]")
-                yield StreamingReasoningChunk(
-                    item_id=item.id,
-                    summaries=["\n".join(summary_lines).strip()],
-                    encrypted_reasoning=None,
-                )
+                return
+            elif isinstance(event, CodexItemCompletedEvent):
+                item = event.item
+                if isinstance(item, CodexAgentMessageItem):
+                    yield StreamingMessageChunk(
+                        item_id=item.id,
+                        text=item.text,
+                    )
+                elif isinstance(item, CodexReasoningItem):
+                    yield StreamingReasoningChunk(
+                        item_id=item.id,
+                        summaries=[item.text],
+                        encrypted_reasoning=None,
+                    )
+                elif isinstance(item, CodexCommandExecutionItem):
+                    summary_lines = [f"$ {item.command}"]
+                    if item.aggregated_output.strip():
+                        summary_lines.append(item.aggregated_output.rstrip())
+                    if item.exit_code is not None:
+                        summary_lines.append(f"[exit_code={item.exit_code}]")
+                    yield StreamingReasoningChunk(
+                        item_id=item.id,
+                        summaries=["\n".join(summary_lines).strip()],
+                        encrypted_reasoning=None,
+                    )
+    except Exception as exception:
+        error_text = f"{type(exception).__name__}: {exception}"
+        yield ErrorMessageChunk(
+            source="server_error",
+            content=CompletionError(
+                error_type=CompletionError.ErrorType.AIBO_SERVER,
+                text=error_text,
+            ),
+        )
+        return
 
 
 async def _stream_responses_completion(
