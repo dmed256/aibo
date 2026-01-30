@@ -6,6 +6,7 @@
 (require 'widget)
 
 (require 'aibo-api)
+(require 'aibo-buffers)
 (require 'aibo-custom)
 (require 'aibo-types)
 (require 'aibo-utils)
@@ -14,11 +15,8 @@
 (setq aibo:--has-cached-packages nil)
 (setq aibo:--cached-packages nil)
 
-(defun aibo:--get-conversation-buffer-name (id)
-  (format "*Aibo [%s]*" id))
-
 (defun aibo:--get-conversation-buffer (id)
-  (get-buffer (aibo:--get-conversation-buffer-name id)))
+  (aibo:buffers-get-conversation-buffer id))
 
 (defun aibo:--set-conversation-keybindings (map)
   (define-key map (kbd "C-c C-x C-r")    #'aibo:refresh-current-conversation)
@@ -302,10 +300,12 @@
      :on-success #'aibo:--on-conversation-title-change)))
 
 (defun aibo:--on-conversation-title-change (conversation)
-  (setq header-line-format
+  (let* ((title (ht-get conversation "title")))
+    (setq header-line-format
           (format "[%s] %s"
                   aibo:model
-                  (ht-get conversation "title")))
+                  title))
+    (setq-local list-buffers-directory title))
   ;; Locks down emacs for a while
   ;; (save-window-excursion (aibo:homepage))
   )
