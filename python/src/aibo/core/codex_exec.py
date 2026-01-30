@@ -5,11 +5,14 @@ import base64
 import os
 from typing import TYPE_CHECKING, Annotated, AsyncGenerator, Literal, Union
 
-from pydantic import BaseModel, Field, TypeAdapter, ValidationError
+from pydantic import BaseModel, Field, TypeAdapter
 
 from aibo.common.chat import ImageMessageContent, MessageRole
 from aibo.common.constants import Env
 from aibo.db.models import ImageModel
+
+if TYPE_CHECKING:
+    from aibo.core.chat import Message
 
 __all__ = [
     "CodexAgentMessageItem",
@@ -30,9 +33,6 @@ __all__ = [
 ]
 
 IMAGE_CACHE_DIR = os.path.expanduser("~/.cache/aibo/images")
-
-if TYPE_CHECKING:
-    from aibo.core.chat import Message
 
 
 class CodexUsage(BaseModel):
@@ -126,7 +126,7 @@ CodexEvent = Annotated[
     Field(discriminator="type"),
 ]
 
-CODEX_EVENT_ADAPTER: TypeAdapter[CodexEvent] = TypeAdapter(CodexEvent)
+CodexEventAdapter: TypeAdapter[CodexEvent] = TypeAdapter(CodexEvent)
 
 
 async def build_codex_prompt(messages: list["Message"]) -> tuple[str, list[str]]:
@@ -167,6 +167,45 @@ async def stream_codex_events(
     image_paths: list[str] | None = None,
     session_id: str | None = None,
 ) -> AsyncGenerator[CodexEvent, None]:
+    process, stderr_task = await _spawn_codex_process(
+        prompt=prompt,
+        model_name=model_name,
+        cwd=cwd,
+        image_paths=image_paths,
+        session_id=session_id,
+    )
+    try:
+        assert process.stdout is not None
+        async for line in _iter_stream_lines(process.stdout):
+            text = line.decode("utf-8").strip()
+            if not text:
+                continue
+        yield CodexEventAdapter.validate_json(text)
+
+        return_code = await process.wait()
+        stderr_output = b""
+        if stderr_task is not None:
+            stderr_output = await stderr_task
+
+        if return_code != 0:
+            stderr_text = stderr_output.decode("utf-8")
+            raise RuntimeError(
+                f"codex exec failed with code {return_code}: {stderr_text}".strip()
+            )
+    except asyncio.CancelledError:
+        return
+    finally:
+        await asyncio.shield(_shutdown_process(process, stderr_task))
+
+
+async def _spawn_codex_process(
+    *,
+    prompt: str,
+    model_name: str | None,
+    cwd: str | None = None,
+    image_paths: list[str] | None = None,
+    session_id: str | None = None,
+) -> tuple[asyncio.subprocess.Process, asyncio.Task[bytes] | None]:
     if session_id:
         command = ["codex", "exec", "resume", "--json"]
     else:
@@ -200,30 +239,11 @@ async def stream_codex_events(
     await process.stdin.drain()
     process.stdin.close()
 
-    assert process.stdout is not None
     stderr_task: asyncio.Task[bytes] | None = None
     if process.stderr is not None:
         stderr_task = asyncio.create_task(_collect_stream(process.stderr))
 
-    async for line in _iter_stream_lines(process.stdout):
-        text = line.decode("utf-8").strip()
-        if not text:
-            continue
-        try:
-            yield CODEX_EVENT_ADAPTER.validate_json(text)
-        except ValidationError as exc:
-            raise ValueError(f"Invalid codex event: {text}") from exc
-
-    return_code = await process.wait()
-    stderr_output = b""
-    if stderr_task is not None:
-        stderr_output = await stderr_task
-
-    if return_code != 0:
-        stderr_text = stderr_output.decode("utf-8")
-        raise RuntimeError(
-            f"codex exec failed with code {return_code}: {stderr_text}".strip()
-        )
+    return process, stderr_task
 
 
 async def _collect_stream(stream: asyncio.StreamReader) -> bytes:
@@ -260,6 +280,22 @@ async def _iter_stream_lines(
             line = unyielded_buffer[: newline_index + 1]
             del unyielded_buffer[: newline_index + 1]
             yield bytes(line)
+
+
+async def _shutdown_process(
+    process: asyncio.subprocess.Process,
+    stderr_task: asyncio.Task[bytes] | None,
+) -> None:
+    if process.returncode is None:
+        process.terminate()
+        await asyncio.sleep(0.2)
+        if process.returncode is None:
+            process.kill()
+        await process.wait()
+
+    if stderr_task is not None and not stderr_task.done():
+        stderr_task.cancel()
+        await asyncio.gather(stderr_task, return_exceptions=True)
 
 
 def _write_cached_image(image: ImageModel) -> str:
