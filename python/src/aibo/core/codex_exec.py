@@ -15,6 +15,7 @@ __all__ = [
     "CodexAgentMessageItem",
     "CodexCommandExecutionItem",
     "CodexEvent",
+    "CodexErrorEvent",
     "CodexFileChangeItem",
     "CodexItem",
     "CodexItemCompletedEvent",
@@ -108,6 +109,11 @@ class CodexTurnCompletedEvent(BaseModel):
     usage: CodexUsage
 
 
+class CodexErrorEvent(BaseModel):
+    type: Literal["error"] = "error"
+    message: str
+
+
 CodexEvent = Annotated[
     Union[
         CodexThreadStartedEvent,
@@ -115,30 +121,12 @@ CodexEvent = Annotated[
         CodexItemStartedEvent,
         CodexItemCompletedEvent,
         CodexTurnCompletedEvent,
+        CodexErrorEvent,
     ],
     Field(discriminator="type"),
 ]
 
 CODEX_EVENT_ADAPTER = TypeAdapter(CodexEvent)
-
-
-async def _collect_stream(stream: asyncio.StreamReader) -> bytes:
-    chunks: list[bytes] = []
-    while True:
-        chunk = await stream.read(4096)
-        if not chunk:
-            break
-        chunks.append(chunk)
-    return b"".join(chunks)
-
-
-def _write_cached_image(image: ImageModel) -> str:
-    os.makedirs(IMAGE_CACHE_DIR, exist_ok=True)
-    image_path = os.path.join(IMAGE_CACHE_DIR, f"{image.id}.{image.format}")
-    image_bytes = base64.b64decode(image.contents_b64)
-    with open(image_path, "wb") as image_file:
-        image_file.write(image_bytes)
-    return image_path
 
 
 async def build_codex_prompt(messages: list["Message"]) -> tuple[str, list[str]]:
@@ -217,10 +205,7 @@ async def stream_codex_events(
     if process.stderr is not None:
         stderr_task = asyncio.create_task(_collect_stream(process.stderr))
 
-    while True:
-        line = await process.stdout.readline()
-        if not line:
-            break
+    async for line in _iter_stream_lines(process.stdout):
         text = line.decode("utf-8").strip()
         if not text:
             continue
@@ -239,3 +224,48 @@ async def stream_codex_events(
         raise RuntimeError(
             f"codex exec failed with code {return_code}: {stderr_text}".strip()
         )
+
+
+async def _collect_stream(stream: asyncio.StreamReader) -> bytes:
+    chunks: list[bytes] = []
+    while True:
+        chunk = await stream.read(4096)
+        if not chunk:
+            break
+        chunks.append(chunk)
+    return b"".join(chunks)
+
+
+async def _iter_stream_lines(
+    stream: asyncio.StreamReader,
+    *,
+    chunk_size: int = 4096,
+) -> AsyncGenerator[bytes, None]:
+    unyielded_buffer = bytearray()
+    while True:
+        chunk = await stream.read(chunk_size)
+
+        # We're done iterating
+        if not chunk:
+            if unyielded_buffer:
+                yield bytes(unyielded_buffer)
+            break
+
+        # Iterate line-by-line
+        unyielded_buffer.extend(chunk)
+        while True:
+            newline_index = unyielded_buffer.find(b"\n")
+            if newline_index == -1:
+                break
+            line = unyielded_buffer[: newline_index + 1]
+            del unyielded_buffer[: newline_index + 1]
+            yield bytes(line)
+
+
+def _write_cached_image(image: ImageModel) -> str:
+    os.makedirs(IMAGE_CACHE_DIR, exist_ok=True)
+    image_path = os.path.join(IMAGE_CACHE_DIR, f"{image.id}.{image.format}")
+    image_bytes = base64.b64decode(image.contents_b64)
+    with open(image_path, "wb") as image_file:
+        image_file.write(image_bytes)
+    return image_path
