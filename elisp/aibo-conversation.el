@@ -300,12 +300,19 @@
      :on-success #'aibo:--on-conversation-title-change)))
 
 (defun aibo:--on-conversation-title-change (conversation)
-  (let* ((title (ht-get conversation "title")))
-    (setq header-line-format
-          (format "[%s] %s"
-                  aibo:model
-                  title))
-    (aibo:buffers-apply-conversation-title conversation))
+  (let* ((conversation-id (ht-get conversation "id"))
+         (title (ht-get conversation "title"))
+         (conversation-buffer (aibo:buffers-get-conversation-buffer conversation-id)))
+    (when conversation-buffer
+      (with-current-buffer conversation-buffer
+        (setq header-line-format
+              (format "[%s] %s"
+                      aibo:model
+                      title))
+        (aibo:buffers-apply-conversation-title conversation)))
+    (when (and (boundp 'aibo:homepage-buffer-name)
+               (get-buffer aibo:homepage-buffer-name))
+      (aibo:refresh-homepage)))
   ;; Locks down emacs for a while
   ;; (save-window-excursion (aibo:homepage))
   )

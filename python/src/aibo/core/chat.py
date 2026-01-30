@@ -696,9 +696,7 @@ class Conversation(ConversationSummary):
         conversation_text = await self.stringify_conversation()
         if len(conversation_text) > 2000:
             conversation_text = (
-                conversation_text[:1000]
-                + "..."
-                + conversation_text[-1000:]
+                conversation_text[:1000] + "..." + conversation_text[-1000:]
             )
 
         user_content = TextMessageContent(
