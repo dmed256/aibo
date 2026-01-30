@@ -693,10 +693,18 @@ class Conversation(ConversationSummary):
             ),
         )
 
+        conversation_text = await self.stringify_conversation()
+        if len(conversation_text) > 2000:
+            conversation_text = (
+                conversation_text[:1000]
+                + "..."
+                + conversation_text[-1000:]
+            )
+
         user_content = TextMessageContent(
             text=f"""
 --------------------
-{await self.stringify_conversation()}
+{conversation_text}
 --------------------
 
 Create a small 3-6 word tweet that captures the intent of the above within three to six words and 2 lowercase twitter-like tags. Do not use newlines or quotes. Here are some examples of good correct tweets:
