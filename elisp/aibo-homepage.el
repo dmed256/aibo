@@ -11,7 +11,7 @@
 (require 'aibo-utils)
 (require 'aibo-templates)
 
-(setq aibo:homepage-buffer-name "*Aibo homepage*")
+(setq aibo:homepage-buffer-name "*aibo homepage*")
 
 (defun aibo:--ansi-buffer (beg end len)
   (interactive)

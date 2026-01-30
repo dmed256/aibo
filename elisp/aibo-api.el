@@ -16,7 +16,7 @@
   (if (not (aibo:api-is-healthy))
       (let* ((on-success (plist-get args :on-success)))
         (aibo:--get-or-create-buffer
-         :name "*Aibo server*"
+         :name "*aibo server*"
          :on-create
          (lambda (buffer)
            (with-current-buffer buffer

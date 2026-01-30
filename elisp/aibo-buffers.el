@@ -77,10 +77,10 @@
       (replace-regexp-in-string "[[:space:]]+$" "" trim-left))))
 
 (defun aibo:buffers--conversation-default-buffer-name (conversation-id)
-  (format "*Aibo [%s]*" conversation-id))
+  (format "*aibo [%s]*" conversation-id))
 
 (defun aibo:buffers--conversation-titled-buffer-name (conversation-id title)
-  (format "Aibo \"%s\" [%s]" title conversation-id))
+  (format "*aibo - %s [%s]*" title conversation-id))
 
 (defun aibo:buffers--rename-conversation-buffer (conversation-id title)
   (let* ((target-name (if (and title (> (length title) 0))
