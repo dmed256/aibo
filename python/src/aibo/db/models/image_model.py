@@ -50,7 +50,8 @@ class ImageModel(BaseDBModel):
 
     @classmethod
     async def from_clipboard(cls, *, trace_id: UUID) -> Optional[Self]:
-        if clipboard_image := ImageGrab.grabclipboard():
+        clipboard_image = ImageGrab.grabclipboard()
+        if isinstance(clipboard_image, ImageType):
             return await cls.from_image(
                 image=clipboard_image,
                 trace_id=trace_id,

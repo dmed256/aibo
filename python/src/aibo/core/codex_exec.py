@@ -126,7 +126,7 @@ CodexEvent = Annotated[
     Field(discriminator="type"),
 ]
 
-CODEX_EVENT_ADAPTER = TypeAdapter(CodexEvent)
+CODEX_EVENT_ADAPTER: TypeAdapter[CodexEvent] = TypeAdapter(CodexEvent)
 
 
 async def build_codex_prompt(messages: list["Message"]) -> tuple[str, list[str]]:

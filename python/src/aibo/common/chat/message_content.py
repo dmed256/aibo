@@ -32,7 +32,7 @@ __all__ = [
 ]
 
 
-OpenAIContent = str | openai.types.responses.ResponseInputMessageContentListParam
+OpenAIContent = openai.types.responses.ResponseInputMessageContentListParam
 OpenAIInput = openai.types.responses.ResponseInputItemParam
 
 
@@ -69,17 +69,19 @@ class TextMessageContent(BaseMessageContent):
 
     async def to_openai_input(self, *, role: MessageRole) -> OpenAIInput | None:
         if role == MessageRole.ASSISTANT:
-            return openai.types.responses.ResponseOutputMessage(
+            if self.item_id is None:
+                raise ValueError("TextMessageContent requires item_id for assistant")
+            return openai.types.responses.ResponseOutputMessageParam(
                 type="message",
                 id=self.item_id,
                 role="assistant",
                 status="completed",
                 content=[
-                    openai.types.responses.ResponseOutputText(
+                    openai.types.responses.ResponseOutputTextParam(
                         type="output_text",
                         text=self.text,
                         annotations=[],
-                    ),
+                    )
                 ],
             )
         else:
@@ -89,10 +91,12 @@ class TextMessageContent(BaseMessageContent):
         if role == MessageRole.ASSISTANT:
             return None
         else:
-            return openai.types.responses.ResponseInputTextParam(
-                type="input_text",
-                text=self.text,
-            )
+            return [
+                openai.types.responses.ResponseInputTextParam(
+                    type="input_text",
+                    text=self.text,
+                )
+            ]
 
     def __str__(self) -> str:
         return self.text
@@ -113,10 +117,14 @@ class ImageMessageContent(BaseMessageContent):
         from aibo.db.models import ImageModel
 
         if image := await ImageModel.by_id(self.image_id):
-            return openai.types.responses.ResponseInputImageParam(
-                detail=Env.get().OPENAI_IMAGE_DETAIL,
-                image_url=f"data:image/{image.format};base64,{image.contents_b64}",
-            )
+            return [
+                openai.types.responses.ResponseInputImageParam(
+                    type="input_image",
+                    detail=Env.get().OPENAI_IMAGE_DETAIL,
+                    image_url=f"data:image/{image.format};base64,{image.contents_b64}",
+                )
+            ]
+        return None
 
     def __str__(self) -> str:
         return f"[Image:{self.image_id}]"
@@ -158,6 +166,7 @@ class FunctionRequestContent(BaseMessageContent):
     """
 
     kind: Literal["function_request"] = "function_request"
+    item_id: str
     tool_call_id: str = Field(
         title="tool_call_id", description="The ID to the tool call"
     )
@@ -311,7 +320,7 @@ MessageContent = Annotated[
     ],
     Field(discriminator="kind"),
 ]
-MessageContentAdapter = TypeAdapter(MessageContent)
+MessageContentAdapter: TypeAdapter[MessageContent] = TypeAdapter(MessageContent)
 
 MessageContents = list[MessageContent]
-MessageContentsAdapter = TypeAdapter(MessageContents)
+MessageContentsAdapter: TypeAdapter[MessageContents] = TypeAdapter(MessageContents)

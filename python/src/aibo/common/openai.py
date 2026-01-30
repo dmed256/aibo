@@ -94,6 +94,7 @@ StreamingMessageResult = Annotated[
     Union[
         FunctionCallChunk,
         StreamingMessageChunk,
+        StreamingReasoningChunk,
         SuccessMessageChunk,
         ErrorMessageChunk,
     ],

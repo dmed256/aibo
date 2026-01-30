@@ -176,7 +176,7 @@ class Package(BaseModel):
         package, function = parts
         return package, function
 
-    def to_openai(self) -> list[dict[str, Any]]:
+    def to_openai(self) -> list[openai.types.responses.ToolParam]:
         return [
             self.functions[function_name].to_openai()
             for function_name in sorted(self.functions.keys())

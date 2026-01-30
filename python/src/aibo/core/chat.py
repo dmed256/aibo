@@ -5,9 +5,10 @@ import datetime as dt
 import multiprocessing as mp
 import os
 import re
+import traceback
 from concurrent.futures import ProcessPoolExecutor
 from enum import StrEnum
-from typing import AsyncGenerator, Generator, Self, cast
+from typing import AsyncGenerator, Generator, Literal, Self, cast
 from uuid import UUID, uuid4
 
 import openai
@@ -165,7 +166,7 @@ class Message(BaseModel):
 
     async def get_openai_contents(
         self,
-    ) -> list[openai.reasoning.types.ResponseInputItemParam]:
+    ) -> openai.types.responses.ResponseInputMessageContentListParam:
         maybe_openai_contents = await asyncio.gather(
             *[
                 content.to_openai(role=self.role)
@@ -181,7 +182,14 @@ class Message(BaseModel):
             ]
         )
 
-        return [content for content in maybe_openai_contents if content is not None]
+        openai_contents: openai.types.responses.ResponseInputMessageContentListParam = (
+            []
+        )
+        for content in maybe_openai_contents:
+            if content is None:
+                continue
+            openai_contents.extend(content)
+        return openai_contents
 
     async def to_openai(self) -> openai.types.responses.ResponseInputItemParam | None:
         if not self.contents:
@@ -210,9 +218,18 @@ class Message(BaseModel):
                 ],
             )
 
+        if self.role not in OPENAI_ROLES:
+            raise ValueError(f"Unknown message role: {self.role}")
+        openai_role = OPENAI_ROLES[self.role]
+        if openai_role == "tool":
+            raise ValueError("Tool messages must be handled as input items")
+        role_value = cast(
+            Literal["user", "assistant", "system", "developer"],
+            openai_role,
+        )
         return openai.types.responses.EasyInputMessageParam(
             type="message",
-            role=self.role,
+            role=role_value,
             content=openai_contents,
         )
 
@@ -592,6 +609,10 @@ class Conversation(ConversationSummary):
                         yield messages
 
                         conversation_model = await ConversationModel.by_id(self.id)
+                        if conversation_model is None:
+                            raise ValueError(
+                                f"Conversation not found: {self.id}"
+                            )
 
                         message, new_cwd = await self.call_function(
                             conversation=self,
@@ -870,7 +891,7 @@ Create a small 3-6 word tweet that captures the intent of the above within three
         tool_call_id: str,
         arguments: dict,
         conversation_cwd: str | None,
-    ):
+    ) -> tuple[Message, str | None]:
         try:
             if conversation_cwd:
                 os.chdir(conversation_cwd)
@@ -885,11 +906,9 @@ Create a small 3-6 word tweet that captures the intent of the above within three
                 )
             )
             return response_message, os.getcwd()
-        except:
-            import traceback
-
+        except Exception:
             traceback.print_exc()
-            traceback.print_exception()
+            raise
 
 
 FunctionContext.model_rebuild()

@@ -11,6 +11,7 @@ Options:
 """
 
 import os
+from typing import Any
 
 import fire
 import uvicorn
@@ -24,7 +25,7 @@ def main(
 ) -> None:
     os.chdir(PACKAGE_DIR)
 
-    mode_kwargs = {}
+    mode_kwargs: dict[str, Any] = {}
     if mode == "prod":
         mode_kwargs.update(workers=8)
     else:

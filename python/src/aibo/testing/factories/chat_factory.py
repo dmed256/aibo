@@ -100,12 +100,14 @@ class FunctionRequestContentFactory(BaseFactory[FunctionRequestContent]):
     @staticmethod
     async def build(
         *,
+        item_id: str | None = None,
         tool_call_id: str | None = None,
         package: str | None = None,
         function: str | None = None,
         arguments_json: str | None = None,
     ) -> FunctionRequestContent:
         return FunctionRequestContent(
+            item_id=item_id or fake.uuid4(),
             tool_call_id=tool_call_id or fake.word(),
             package=package or fake.word(),
             function=function or fake.word(),

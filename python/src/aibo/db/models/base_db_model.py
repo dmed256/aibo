@@ -27,3 +27,5 @@ class BaseDBModel(orm.DeclarativeBase):
         async with get_session() as session:
             session.add(self)
             await session.commit()
+
+        return self

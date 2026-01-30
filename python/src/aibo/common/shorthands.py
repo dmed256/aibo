@@ -3,6 +3,7 @@ import logging
 import os
 import re
 from functools import cache
+from typing import Sequence
 from uuid import UUID
 
 from aibo.core import chat
@@ -31,7 +32,7 @@ FILE_SHORTHAND_PATTERN = re.compile(FILE_SHORTHAND_PATTERN_STR)
 
 @cache
 def _shorthand_re_sub_pattern(shorthand: str) -> re.Pattern:
-    """
+    r"""
     Match \{shorthand} in the beginning, middle, or end:
     - "\r hello world"
     - "hello \r world"
@@ -71,7 +72,7 @@ def message_content_expands_image(
 async def expand_messages_shorthands_inplace(
     *,
     trace_id: UUID,
-    messages: list[chat.Message] | list[chat.CreateMessageInputs],
+    messages: Sequence[chat.Message | chat.CreateMessageInputs],
     shorthands: dict[str, str],
 ) -> None:
     message_contents = [message.contents for message in messages]
@@ -124,7 +125,7 @@ def replace_custom_shorthands(
     text_contents: dict[tuple[int, int], chat.TextMessageContent],
     shorthands: dict[str, str],
 ) -> None:
-    """
+    r"""
     Common custom shorthands:
     - \r: Emacs region
     - \b: Emacs buffer
@@ -140,7 +141,7 @@ def replace_image_shorthands(
     message_contents: list[list[chat.MessageContent]],
     text_contents: dict[tuple[int, int], chat.TextMessageContent],
 ) -> None:
-    """
+    r"""
     Builtins:
     - \i[<uuid>]: Inject an image by its ID
     """
@@ -164,7 +165,7 @@ async def replace_clipboard_image_shorthands(
     message_contents: list[list[chat.MessageContent]],
     text_contents: dict[tuple[int, int], chat.TextMessageContent],
 ) -> None:
-    """
+    r"""
     Builtins:
     - \im: Clipboard image
     - \sc: Monitor screenshot
@@ -236,7 +237,7 @@ def replace_directory_shorthands(
     *,
     text_contents: dict[tuple[int, int], chat.TextMessageContent],
 ) -> None:
-    """
+    r"""
     Builtins:
     - \d: Inject the directory contents
         - \d[<directory-or-glob>]: Injects all non-binary files in the directory (or glob)

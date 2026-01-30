@@ -5,6 +5,7 @@ from functools import cache
 from typing import TYPE_CHECKING, AsyncGenerator
 
 import openai
+import openai.types.shared_params.reasoning as reasoning_params
 
 from aibo.common.chat.message_source import OpenAIModelSource
 from aibo.common.constants import Env
@@ -167,12 +168,12 @@ async def _stream_responses_completion(
     messages: list[Message],
     packages: list[Package] | None = None,
 ) -> AsyncGenerator[StreamingMessageResult, None]:
-    temperature = source.temperature
-    reasoning: openai.types.Reasoning | None = None
+    temperature: float | None = source.temperature
+    reasoning: reasoning_params.Reasoning | None = None
     if source.is_reasoning_model:
         temperature = None
         # TODO: Make this configurable
-        reasoning = openai.types.Reasoning(
+        reasoning = reasoning_params.Reasoning(
             effort="high",
             summary="detailed",
         )
