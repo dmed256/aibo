@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import asyncio
 import base64
+import logging
 import os
 from typing import TYPE_CHECKING, Annotated, AsyncGenerator, Literal, Union
 
@@ -13,6 +14,8 @@ from aibo.db.models import ImageModel
 
 if TYPE_CHECKING:
     from aibo.core.chat import Message
+
+logger = logging.getLogger(__name__)
 
 __all__ = [
     "CodexAgentMessageItem",
@@ -57,6 +60,31 @@ class CodexCommandExecutionItem(BaseModel):
     aggregated_output: str
     exit_code: int | None
     status: Literal["in_progress", "completed", "failed"]
+
+    def to_summary(self) -> str:
+        """
+        Format a command execution like Codex CLI output.
+        """
+        if len(self.aggregated_output) <= 10_000:
+            output = self.aggregated_output
+        else:
+            prefix = self.aggregated_output[:5000]
+            suffix = self.aggregated_output[-5000:]
+            removed_chars = len(self.aggregated_output) - 10_000
+            output = f"{prefix}\n\n... {removed_chars} chars truncated ...\n\n{suffix}"
+
+        exit_code = "unknown"
+        if self.exit_code is not None:
+            exit_code = str(self.exit_code)
+        line_count = len(self.aggregated_output.splitlines())
+
+        return '\n'.join([
+            f"> {self.command}",
+            '-' * 60,
+            output,
+            '-' * 60,
+            f"[{exit_code=} {line_count=}]",
+        ])
 
 
 class CodexReasoningItem(BaseModel):
@@ -180,7 +208,7 @@ async def stream_codex_events(
             text = line.decode("utf-8").strip()
             if not text:
                 continue
-        yield CodexEventAdapter.validate_json(text)
+            yield CodexEventAdapter.validate_json(text)
 
         return_code = await process.wait()
         stderr_output = b""

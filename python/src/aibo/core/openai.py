@@ -140,14 +140,9 @@ async def _stream_codex_completion(
                         encrypted_reasoning=None,
                     )
                 elif isinstance(item, CodexCommandExecutionItem):
-                    summary_lines = [f"$ {item.command}"]
-                    if item.aggregated_output.strip():
-                        summary_lines.append(item.aggregated_output.rstrip())
-                    if item.exit_code is not None:
-                        summary_lines.append(f"[exit_code={item.exit_code}]")
                     yield StreamingReasoningChunk(
                         item_id=item.id,
-                        summaries=["\n".join(summary_lines).strip()],
+                        summaries=[item.to_summary()],
                         encrypted_reasoning=None,
                     )
     except Exception as exception:
