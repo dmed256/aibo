@@ -16,11 +16,6 @@
   :type 'string
   :group 'aibo)
 
-(defcustom aibo:reasoning-model "o3"
-  "The OpenAI model name used for reasoning completions"
-  :type 'string
-  :group 'aibo)
-
 (defcustom aibo:temperature 0.3
   "The temperature used when sampling the model"
   :type 'string
@@ -89,6 +84,21 @@
 (defface aibo:user-content-face
   '((t :foreground "#dce9fc"))
   "Conversation user text content face"
+  :group 'aibo)
+
+(defface aibo:queued-user-header-face
+  '((t :foreground "#ffffff" :background "#4a6286"))
+  "Conversation queued user header face"
+  :group 'aibo)
+
+(defface aibo:queued-user-subheader-face
+  '((t :foreground "#000000" :background "#dce9fc"))
+  "Conversation queued user subheader face"
+  :group 'aibo)
+
+(defface aibo:queued-user-content-face
+  '((t :foreground "#b7c9e3"))
+  "Conversation queued user text content face"
   :group 'aibo)
 
 (defface aibo:tool-header-face

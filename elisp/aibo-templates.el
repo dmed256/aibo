@@ -41,19 +41,6 @@
               ,(ht ("role"     "user")
                    ("contents" `(,(ht ("kind" "text")
                                       ("text" content))))))))
-        ,(aibo:ConversationTemplate
-          :short-name "r"
-          :name "Reasoning"
-          :action-type :new-conversation
-          :model aibo:reasoning-model
-          :get-message-inputs
-          (lambda (content)
-            `(,(ht ("role"     "system")
-                   ("contents" `(,(ht ("kind" "text")
-                                      ("text" aibo:--generic-system-message)))))
-              ,(ht ("role"     "user")
-                   ("contents" `(,(ht ("kind" "text")
-                                      ("text" content))))))))
         ;; ---[ Command ]---------------------------
         ,(aibo:ConversationTemplate
           :short-name "e"
