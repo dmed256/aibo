@@ -78,13 +78,15 @@ class CodexCommandExecutionItem(BaseModel):
             exit_code = str(self.exit_code)
         line_count = len(self.aggregated_output.splitlines())
 
-        return '\n'.join([
-            f"> {self.command}",
-            '-' * 60,
-            output,
-            '-' * 60,
-            f"[{exit_code=} {line_count=}]",
-        ])
+        return "\n".join(
+            [
+                f"> {self.command}",
+                "-" * 60,
+                output,
+                "-" * 60,
+                f"[{exit_code=} {line_count=}]",
+            ]
+        )
 
 
 class CodexReasoningItem(BaseModel):

@@ -610,9 +610,7 @@ class Conversation(ConversationSummary):
 
                         conversation_model = await ConversationModel.by_id(self.id)
                         if conversation_model is None:
-                            raise ValueError(
-                                f"Conversation not found: {self.id}"
-                            )
+                            raise ValueError(f"Conversation not found: {self.id}")
 
                         message, new_cwd = await self.call_function(
                             conversation=self,
