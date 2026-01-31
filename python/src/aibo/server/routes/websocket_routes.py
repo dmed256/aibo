@@ -6,6 +6,7 @@ from fastapi import APIRouter, WebSocket
 from pydantic import Field
 from starlette.websockets import WebSocketDisconnect
 
+from aibo.common.chat.message_source import OpenAIModelSource
 from aibo.core import chat
 from aibo.server.routes import api_models
 from aibo.server.routes.websocket_route import BaseEvent, WebsocketRouter
@@ -142,7 +143,9 @@ async def regenerate_last_assistant_message(
     conversation = await chat.Conversation.get(event.conversation_id)
     assert conversation, f"Conversation doesn't exist: {event.conversation_id}"
 
-    messages_deleted = await conversation.delete_last_assistant_message()
+    messages_deleted = 0
+    if not OpenAIModelSource.build(model=event.model).is_codex_model:
+        messages_deleted = await conversation.delete_last_assistant_message()
     if messages_deleted:
         yield CurrentConversationEventResponse(
             id=event.id, conversation=api_models.Conversation.from_chat(conversation)

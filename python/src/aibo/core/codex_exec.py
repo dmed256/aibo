@@ -65,26 +65,23 @@ class CodexCommandExecutionItem(BaseModel):
         """
         Format a command execution like Codex CLI output.
         """
-        if len(self.aggregated_output) <= 10_000:
+        if len(self.aggregated_output) <= 6_000:
             output = self.aggregated_output
         else:
-            prefix = self.aggregated_output[:5000]
-            suffix = self.aggregated_output[-5000:]
-            removed_chars = len(self.aggregated_output) - 10_000
+            prefix = self.aggregated_output[:3000]
+            suffix = self.aggregated_output[-3000:]
+            removed_chars = len(self.aggregated_output) - 6_000
             output = f"{prefix}\n\n... {removed_chars} chars truncated ...\n\n{suffix}"
 
-        exit_code = "unknown"
-        if self.exit_code is not None:
-            exit_code = str(self.exit_code)
         line_count = len(self.aggregated_output.splitlines())
 
         return "\n".join(
             [
                 f"> {self.command}",
                 "-" * 60,
-                output,
+                output.strip("\n"),
                 "-" * 60,
-                f"[{exit_code=} {line_count=}]",
+                f"[exit_code={self.exit_code} {line_count=}]",
             ]
         )
 
@@ -160,14 +157,11 @@ CodexEventAdapter: TypeAdapter[CodexEvent] = TypeAdapter(CodexEvent)
 
 
 async def build_codex_prompt(messages: list["Message"]) -> tuple[str, list[str]]:
-    user_message = None
-    for message in reversed(messages):
-        if message.role == MessageRole.USER:
-            user_message = message
-            break
-    if user_message is None:
+    # If the last message isn't a user message, we're resuming some conversation
+    if not messages or messages[-1].role != MessageRole.USER:
         return "", []
 
+    user_message = messages[-1]
     image_paths: list[str] = []
     content_parts: list[str] = []
     for content in user_message.contents:
