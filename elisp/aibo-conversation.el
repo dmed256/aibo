@@ -7,6 +7,7 @@
 
 (require 'aibo-api)
 (require 'aibo-buffers)
+(require 'aibo-conversation-header)
 (require 'aibo-custom)
 (require 'aibo-types)
 (require 'aibo-utils)
@@ -227,7 +228,10 @@
     ;; Kill all the widget local variables but
     ;; remember to keep our own local varibles
     (let ((ws (and (boundp 'aibo:b-streaming-websocket)
-                   aibo:b-streaming-websocket)))
+                   aibo:b-streaming-websocket))
+          (loader-timer aibo:b-loader-timer))
+      (if loader-timer
+          (cancel-timer loader-timer))
       (kill-all-local-variables)
       (remove-overlays)
       (let ((inhibit-read-only t))
@@ -242,6 +246,10 @@
       (setq-local aibo:b-new-user-message-widget nil)
       (setq-local aibo:b-queued-user-messages queued-user-messages)
       (setq-local aibo:b-sampling-active sampling-active)
+      (setq-local aibo:b-loader-timer nil)
+      (setq-local aibo:b-loader-frame-index 0)
+      (when ws (setq-local aibo:b-streaming-websocket ws))
+      (add-hook 'kill-buffer-hook #'aibo:--stop-conversation-loader nil t)
 
       ;; Render title
       (aibo:--on-conversation-title-change conversation)
@@ -273,9 +281,7 @@
 
       ;; Clean up buffer state
       (if set-not-modified
-          (set-buffer-modified-p nil))
-
-      (when ws (setq-local aibo:b-streaming-websocket ws)))
+          (set-buffer-modified-p nil)))
 
     (widget-setup)
 
@@ -312,60 +318,7 @@
      :title title
      :on-success #'aibo:--on-conversation-title-change)))
 
-(defun aibo:--on-conversation-title-change (conversation)
-  (let* ((conversation-id (ht-get conversation "id"))
-         (title (ht-get conversation "title"))
-         (conversation-buffer (aibo:buffers-get-conversation-buffer conversation-id)))
-    (when conversation-buffer
-      (with-current-buffer conversation-buffer
-        (setq header-line-format
-              (format "[%s] %s"
-                      aibo:model
-                      title))
-        (aibo:buffers-apply-conversation-title conversation)))
-    (when (and (boundp 'aibo:homepage-buffer-name)
-               (get-buffer aibo:homepage-buffer-name))
-      (aibo:refresh-homepage)))
-  ;; Locks down emacs for a while
-  ;; (save-window-excursion (aibo:homepage))
-  )
 
-(defun aibo:--render-conversation-header (conversation)
-  (let* ((id (ht-get conversation "id"))
-         (cwd (ht-get conversation "cwd"))
-         (header-width (max (string-width " Conversation ")
-                            (string-width " CWD ")))
-         (subheader-width (max (string-width (format " %s " id))
-                               (if cwd (string-width (format " %s " cwd)) 0))))
-
-    ;; Conversation
-    (widget-insert
-     (propertize
-      (aibo:--pad-right " Conversation " header-width)
-      'font-lock-face 'aibo:conversation-header-face))
-    (widget-insert
-     (propertize
-      (aibo:--pad-right (format " %s " id) subheader-width)
-      'font-lock-face 'aibo:conversation-subheader-face))
-    (widget-insert "\n")
-
-    ;; CWD (optional)
-    (when cwd
-      (widget-insert
-       (propertize
-        (aibo:--pad-right " CWD " header-width)
-        'font-lock-face 'aibo:conversation-header-face))
-      (widget-create
-       'link
-       :notify (lambda (&rest _)
-                 (aibo:set-cwd))
-       :button-prefix ""
-       :button-suffix ""
-       :tag (propertize
-             (aibo:--pad-right (format " %s " cwd) subheader-width)
-             'read-only t
-             'font-lock-face 'aibo:conversation-subheader-face))
-      (widget-insert "\n"))))
 
 (defun aibo:submit-user-message (&rest args)
   (interactive)
@@ -389,6 +342,7 @@
   (interactive)
   (aibo:stop-streaming-message)
   (setq-local aibo:b-sampling-active nil)
+  (aibo:--ensure-conversation-loader)
   (aibo:--flush-queued-user-messages :force t))
 
 (defun aibo:stream-assistant-message (&rest args)
@@ -423,13 +377,16 @@
               (when (buffer-live-p buffer)
                 (with-current-buffer buffer
                   (setq-local aibo:b-sampling-active nil)
+                  (setq-local aibo:b-streaming-websocket nil)
+                  (aibo:--ensure-conversation-loader)
                   (aibo:--flush-queued-user-messages :force t)
                   ;; jump to end of the new‐message widget
                   (goto-char (widget-field-end aibo:b-new-user-message-widget))
                   (recenter-bottom)))
               ;; if someone passed their own on-success, run it too
               (when on-success
-                (funcall on-success)))))))))
+                (funcall on-success)))))))
+      (aibo:--ensure-conversation-loader)))
 
 (defun aibo:regenerate-current-conversation-last-assistant-message ()
   (interactive)
@@ -442,31 +399,34 @@
          (on-success (plist-get args :on-success))
          (buffer (aibo:--get-conversation-buffer conversation-id)))
     (with-current-buffer buffer
-      (setq-local aibo:b-sampling-active t))
-    (aibo:api-ws-regenerate-last-assistant-message
-     :conversation-id conversation-id
-     :message-callbacks
-     (ht ("current_conversation"
-          (lambda (ws-message)
-            (with-current-buffer buffer
-              (aibo:go-to-conversation
-               :conversation (ht-get ws-message "conversation")
-               :buffer-open-style :nothing))))
-         ("stream_assistant_message"
-          (lambda (ws-message)
-            (with-current-buffer buffer
-              (widget-value-set
-               aibo:b-streaming-assistant-message-widget
-               (ht-get ws-message "message"))
-              (set-buffer-modified-p nil))))
-         ("event_completed"
-          (lambda (&rest _)
-            (when (buffer-live-p buffer)
+      (setq-local aibo:b-sampling-active t)
+      (aibo:api-ws-regenerate-last-assistant-message
+       :conversation-id conversation-id
+       :message-callbacks
+       (ht ("current_conversation"
+            (lambda (ws-message)
               (with-current-buffer buffer
-                (setq-local aibo:b-sampling-active nil)
-                (aibo:--flush-queued-user-messages :force t)))
-            (when on-success
-              (funcall on-success))))))))
+                (aibo:go-to-conversation
+                 :conversation (ht-get ws-message "conversation")
+                 :buffer-open-style :nothing))))
+           ("stream_assistant_message"
+            (lambda (ws-message)
+              (with-current-buffer buffer
+                (widget-value-set
+                 aibo:b-streaming-assistant-message-widget
+                 (ht-get ws-message "message"))
+                (set-buffer-modified-p nil))))
+           ("event_completed"
+            (lambda (&rest _)
+              (when (buffer-live-p buffer)
+                (with-current-buffer buffer
+                  (setq-local aibo:b-sampling-active nil)
+                  (setq-local aibo:b-streaming-websocket nil)
+                  (aibo:--ensure-conversation-loader)
+                  (aibo:--flush-queued-user-messages :force t)))
+              (when on-success
+                (funcall on-success)))))))
+      (aibo:--ensure-conversation-loader)))
 
 (defun aibo:--submit-user-message-text (&rest args)
   (let* ((model (plist-get args :model))
@@ -482,10 +442,6 @@
        (aibo:stream-assistant-message
         :model model
         :conversation-id conversation-id)))))
-
-(defun aibo:--streaming-active-p ()
-  (and (boundp 'aibo:b-streaming-websocket)
-       aibo:b-streaming-websocket))
 
 (defun aibo:--flush-queued-user-messages (&rest args)
   (let* ((force (plist-get args :force)))
