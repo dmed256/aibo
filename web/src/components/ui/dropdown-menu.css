@@ -1,0 +1,14 @@
+/* Scoped equivalent of shadcn's new-york dropdown-menu utilities. */
+.aibo-dropdown-content { z-index:50; min-width:var(--radix-dropdown-menu-trigger-width); max-height:var(--radix-dropdown-menu-content-available-height); overflow-y:auto; overflow-x:hidden; border:1px solid var(--line); border-radius:0; padding:4px; background:var(--panel); color:var(--text); box-shadow:0 4px 6px -1px #0003,0 2px 4px -2px #0003; transform-origin:var(--radix-dropdown-menu-content-transform-origin); }
+.aibo-dropdown-item { position:relative; display:flex; align-items:center; border-radius:0; padding:4px 8px 4px 28px; cursor:default; user-select:none; outline:none; transition:background-color .15s,color .15s; }
+.aibo-dropdown-item[data-highlighted] { background:var(--selected); color:var(--text); }
+.aibo-dropdown-item[data-disabled] { pointer-events:none; opacity:.5; }
+.aibo-dropdown-item.codex-default { color:var(--muted); }
+.aibo-dropdown-indicator { position:absolute; left:8px; display:flex; height:14px; width:14px; align-items:center; justify-content:center; }
+.aibo-dropdown-dot { width:8px; height:8px; fill:currentColor; }
+@media (prefers-reduced-motion:no-preference) {
+  .aibo-dropdown-content[data-state="open"] { animation:aibo-dropdown-in .15s ease-out; }
+  .aibo-dropdown-content[data-state="closed"] { animation:aibo-dropdown-out .1s ease-in; }
+}
+@keyframes aibo-dropdown-in { from { opacity:0; transform:scale(.95); } to { opacity:1; transform:scale(1); } }
+@keyframes aibo-dropdown-out { from { opacity:1; transform:scale(1); } to { opacity:0; transform:scale(.95); } }

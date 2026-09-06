@@ -1,0 +1,32 @@
+ # Help                                                                                         
+                                                                                                
+ C-M-h                 Home / return to full mode                                               
+ M-0                   New m# chat                                                              
+ M-1 … M-9             Open b# from the purple bar                                              
+ C-c b 0 … 9           Open m# from the orange bar                                              
+ C-c b                 Search chats (cowork mode)                                               
+ C-c p s               Search chats in either mode                                              
+ C-c n 0 … z           Open a notification                                                      
+ C-c p n               Focus and scroll notifications                                           
+ C-c p l               Locations                                                                
+ C-c p p               Projects                                                                 
+ C-c p h               Help                                                                     
+ M-/                   Focus input; repeat to cycle targets                                     
+ C-o                   Cycle content / input; skip sidebar                                      
+ RET                   Newline in input; activate links/buttons                                 
+ M-RET                 Send draft                                                               
+ C-g                   Clear; also close input in cowork                                        
+ C-c C-i               Attach clipboard image                                                   
+ M-w                   Copy literal selected text                                               
+ C-x 0/1/2/3           Leave full mode; normal window command                                   
+                                                                                                
+                                                                                                
+                                                                                                
+                                                                                                
+                                                                                                
+                                                                                                
+                                                                                                
+                                                                                                
+                                                                                                
+                                                                                                
+                                                                                                

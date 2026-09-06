@@ -1,0 +1,1276 @@
+{
+  "scenario": "cowork-input",
+  "columns": 120,
+  "rows": 40,
+  "cursor": {
+    "row": 38,
+    "col": 27
+  },
+  "regions": {
+    "main": {
+      "x": 0,
+      "y": 0,
+      "width": 120,
+      "height": 35
+    },
+    "input": {
+      "x": 1,
+      "y": 38,
+      "width": 118,
+      "height": 1
+    },
+    "bars": {
+      "x": 0,
+      "y": 35,
+      "width": 120,
+      "height": 3
+    }
+  },
+  "runs": [
+    [
+      {
+        "col": 0,
+        "text": " ",
+        "face": "botBadge"
+      },
+      {
+        "col": 1,
+        "text": "●",
+        "face": "greenOnbotBadge"
+      },
+      {
+        "col": 2,
+        "text": " b2 ",
+        "face": "botBadge"
+      },
+      {
+        "col": 6,
+        "text": " aibo ",
+        "face": "location"
+      },
+      {
+        "col": 12,
+        "text": "  ",
+        "face": "base"
+      },
+      {
+        "col": 14,
+        "text": "Make the three panels stable",
+        "face": "orange"
+      },
+      {
+        "col": 42,
+        "text": "                  ",
+        "face": "base"
+      },
+      {
+        "col": 60,
+        "text": "│",
+        "face": "rule"
+      },
+      {
+        "col": 61,
+        "text": " ",
+        "face": "managerBadge"
+      },
+      {
+        "col": 62,
+        "text": "●",
+        "face": "mutedOnmanagerBadge"
+      },
+      {
+        "col": 63,
+        "text": " m0 ",
+        "face": "managerBadge"
+      },
+      {
+        "col": 67,
+        "text": "  ",
+        "face": "base"
+      },
+      {
+        "col": 69,
+        "text": "Plan the workspace redesign",
+        "face": "orange"
+      },
+      {
+        "col": 96,
+        "text": "                        ",
+        "face": "base"
+      }
+    ],
+    [
+      {
+        "col": 0,
+        "text": " project ",
+        "face": "location"
+      },
+      {
+        "col": 9,
+        "text": " — ",
+        "face": "metadataValue"
+      },
+      {
+        "col": 12,
+        "text": " ",
+        "face": "base"
+      },
+      {
+        "col": 13,
+        "text": " goal ",
+        "face": "location"
+      },
+      {
+        "col": 19,
+        "text": " ready ",
+        "face": "metadataValue"
+      },
+      {
+        "col": 26,
+        "text": " ",
+        "face": "base"
+      },
+      {
+        "col": 27,
+        "text": " tokens ",
+        "face": "location"
+      },
+      {
+        "col": 35,
+        "text": " 0 ",
+        "face": "metadataValue"
+      },
+      {
+        "col": 38,
+        "text": " ",
+        "face": "base"
+      },
+      {
+        "col": 39,
+        "text": " elapsed ",
+        "face": "location"
+      },
+      {
+        "col": 48,
+        "text": " 0s ",
+        "face": "metadataValue"
+      },
+      {
+        "col": 52,
+        "text": "        ",
+        "face": "base"
+      },
+      {
+        "col": 60,
+        "text": "│",
+        "face": "rule"
+      },
+      {
+        "col": 61,
+        "text": " project ",
+        "face": "location"
+      },
+      {
+        "col": 70,
+        "text": " — ",
+        "face": "metadataValue"
+      },
+      {
+        "col": 73,
+        "text": " ",
+        "face": "base"
+      },
+      {
+        "col": 74,
+        "text": " goal ",
+        "face": "location"
+      },
+      {
+        "col": 80,
+        "text": " ready ",
+        "face": "metadataValue"
+      },
+      {
+        "col": 87,
+        "text": " ",
+        "face": "base"
+      },
+      {
+        "col": 88,
+        "text": " tokens ",
+        "face": "location"
+      },
+      {
+        "col": 96,
+        "text": " 0 ",
+        "face": "metadataValue"
+      },
+      {
+        "col": 99,
+        "text": " ",
+        "face": "base"
+      },
+      {
+        "col": 100,
+        "text": " elapsed ",
+        "face": "location"
+      },
+      {
+        "col": 109,
+        "text": " 0s ",
+        "face": "metadataValue"
+      },
+      {
+        "col": 113,
+        "text": "       ",
+        "face": "base"
+      }
+    ],
+    [
+      {
+        "col": 0,
+        "text": " ",
+        "face": "base"
+      },
+      {
+        "col": 1,
+        "text": "[2 hidden messages] ▸",
+        "face": "muted",
+        "action": "hidden:toggle"
+      },
+      {
+        "col": 22,
+        "text": "                                      ",
+        "face": "base"
+      },
+      {
+        "col": 60,
+        "text": "│",
+        "face": "rule"
+      },
+      {
+        "col": 61,
+        "text": " ",
+        "face": "base"
+      },
+      {
+        "col": 62,
+        "text": "[2 hidden messages] ▸",
+        "face": "muted",
+        "action": "hidden:toggle"
+      },
+      {
+        "col": 83,
+        "text": "                                     ",
+        "face": "base"
+      }
+    ],
+    [
+      {
+        "col": 0,
+        "text": "                                                            ",
+        "face": "base"
+      },
+      {
+        "col": 60,
+        "text": "│",
+        "face": "rule"
+      },
+      {
+        "col": 61,
+        "text": "                                                           ",
+        "face": "base"
+      }
+    ],
+    [
+      {
+        "col": 0,
+        "text": " ",
+        "face": "base"
+      },
+      {
+        "col": 1,
+        "text": " user ",
+        "face": "userBadge"
+      },
+      {
+        "col": 7,
+        "text": "                                                     ",
+        "face": "base"
+      },
+      {
+        "col": 60,
+        "text": "│",
+        "face": "rule"
+      },
+      {
+        "col": 61,
+        "text": " ",
+        "face": "base"
+      },
+      {
+        "col": 62,
+        "text": " user ",
+        "face": "userBadge"
+      },
+      {
+        "col": 68,
+        "text": "                                                    ",
+        "face": "base"
+      }
+    ],
+    [
+      {
+        "col": 0,
+        "text": " ",
+        "face": "base"
+      },
+      {
+        "col": 1,
+        "text": "▏",
+        "face": "blueOnuser"
+      },
+      {
+        "col": 2,
+        "text": " I want three stable panels: notifications on the left,   ",
+        "face": "user"
+      },
+      {
+        "col": 60,
+        "text": "│",
+        "face": "rule"
+      },
+      {
+        "col": 61,
+        "text": " ",
+        "face": "base"
+      },
+      {
+        "col": 62,
+        "text": "▏",
+        "face": "blueOnuser"
+      },
+      {
+        "col": 63,
+        "text": " I want three stable panels: notifications on the left,  ",
+        "face": "user"
+      }
+    ],
+    [
+      {
+        "col": 0,
+        "text": " ",
+        "face": "base"
+      },
+      {
+        "col": 1,
+        "text": "▏",
+        "face": "blueOnuser"
+      },
+      {
+        "col": 2,
+        "text": " the page I am viewing on the right, and a normally       ",
+        "face": "user"
+      },
+      {
+        "col": 60,
+        "text": "│",
+        "face": "rule"
+      },
+      {
+        "col": 61,
+        "text": " ",
+        "face": "base"
+      },
+      {
+        "col": 62,
+        "text": "▏",
+        "face": "blueOnuser"
+      },
+      {
+        "col": 63,
+        "text": " the page I am viewing on the right, and a normally      ",
+        "face": "user"
+      }
+    ],
+    [
+      {
+        "col": 0,
+        "text": " ",
+        "face": "base"
+      },
+      {
+        "col": 1,
+        "text": "▏",
+        "face": "blueOnuser"
+      },
+      {
+        "col": 2,
+        "text": " growing input across the bottom.                         ",
+        "face": "user"
+      },
+      {
+        "col": 60,
+        "text": "│",
+        "face": "rule"
+      },
+      {
+        "col": 61,
+        "text": " ",
+        "face": "base"
+      },
+      {
+        "col": 62,
+        "text": "▏",
+        "face": "blueOnuser"
+      },
+      {
+        "col": 63,
+        "text": " growing input across the bottom.                        ",
+        "face": "user"
+      }
+    ],
+    [
+      {
+        "col": 0,
+        "text": "                                                            ",
+        "face": "base"
+      },
+      {
+        "col": 60,
+        "text": "│",
+        "face": "rule"
+      },
+      {
+        "col": 61,
+        "text": "                                                           ",
+        "face": "base"
+      }
+    ],
+    [
+      {
+        "col": 0,
+        "text": " ",
+        "face": "base"
+      },
+      {
+        "col": 1,
+        "text": " ",
+        "face": "botBadge"
+      },
+      {
+        "col": 2,
+        "text": "●",
+        "face": "greenOnbotBadge"
+      },
+      {
+        "col": 3,
+        "text": " b2 ",
+        "face": "botBadge"
+      },
+      {
+        "col": 7,
+        "text": " aibo ",
+        "face": "location"
+      },
+      {
+        "col": 13,
+        "text": "                                               ",
+        "face": "base"
+      },
+      {
+        "col": 60,
+        "text": "│",
+        "face": "rule"
+      },
+      {
+        "col": 61,
+        "text": " ",
+        "face": "base"
+      },
+      {
+        "col": 62,
+        "text": " ",
+        "face": "managerBadge"
+      },
+      {
+        "col": 63,
+        "text": "●",
+        "face": "mutedOnmanagerBadge"
+      },
+      {
+        "col": 64,
+        "text": " m0 ",
+        "face": "managerBadge"
+      },
+      {
+        "col": 68,
+        "text": "                                                    ",
+        "face": "base"
+      }
+    ],
+    [
+      {
+        "col": 0,
+        "text": " ",
+        "face": "base"
+      },
+      {
+        "col": 1,
+        "text": "▏",
+        "face": "purpleOnbot"
+      },
+      {
+        "col": 2,
+        "text": " The workspace keeps its three panels while pages change  ",
+        "face": "bot"
+      },
+      {
+        "col": 60,
+        "text": "│",
+        "face": "rule"
+      },
+      {
+        "col": 61,
+        "text": " ",
+        "face": "base"
+      },
+      {
+        "col": 62,
+        "text": "▏",
+        "face": "orangeOnmanager"
+      },
+      {
+        "col": 63,
+        "text": " The workspace keeps its three panels while pages        ",
+        "face": "manager"
+      }
+    ],
+    [
+      {
+        "col": 0,
+        "text": " ",
+        "face": "base"
+      },
+      {
+        "col": 1,
+        "text": "▏",
+        "face": "purpleOnbot"
+      },
+      {
+        "col": 2,
+        "text": " and messages arrive.                                     ",
+        "face": "bot"
+      },
+      {
+        "col": 60,
+        "text": "│",
+        "face": "rule"
+      },
+      {
+        "col": 61,
+        "text": " ",
+        "face": "base"
+      },
+      {
+        "col": 62,
+        "text": "▏",
+        "face": "orangeOnmanager"
+      },
+      {
+        "col": 63,
+        "text": " change and messages arrive.                             ",
+        "face": "manager"
+      }
+    ],
+    [
+      {
+        "col": 0,
+        "text": " ",
+        "face": "base"
+      },
+      {
+        "col": 1,
+        "text": "▏",
+        "face": "purpleOnbot"
+      },
+      {
+        "col": 2,
+        "text": "                                                          ",
+        "face": "bot"
+      },
+      {
+        "col": 60,
+        "text": "│",
+        "face": "rule"
+      },
+      {
+        "col": 61,
+        "text": " ",
+        "face": "base"
+      },
+      {
+        "col": 62,
+        "text": "▏",
+        "face": "orangeOnmanager"
+      },
+      {
+        "col": 63,
+        "text": "                                                         ",
+        "face": "manager"
+      }
+    ],
+    [
+      {
+        "col": 0,
+        "text": " ",
+        "face": "base"
+      },
+      {
+        "col": 1,
+        "text": "▏",
+        "face": "purpleOnbot"
+      },
+      {
+        "col": 2,
+        "text": " What changed                                             ",
+        "face": "bot"
+      },
+      {
+        "col": 60,
+        "text": "│",
+        "face": "rule"
+      },
+      {
+        "col": 61,
+        "text": " ",
+        "face": "base"
+      },
+      {
+        "col": 62,
+        "text": "▏",
+        "face": "orangeOnmanager"
+      },
+      {
+        "col": 63,
+        "text": " What changed                                            ",
+        "face": "manager"
+      }
+    ],
+    [
+      {
+        "col": 0,
+        "text": " ",
+        "face": "base"
+      },
+      {
+        "col": 1,
+        "text": "▏",
+        "face": "purpleOnbot"
+      },
+      {
+        "col": 2,
+        "text": " The sidebar keeps its scroll position. C-o switches      ",
+        "face": "bot"
+      },
+      {
+        "col": 60,
+        "text": "│",
+        "face": "rule"
+      },
+      {
+        "col": 61,
+        "text": " ",
+        "face": "base"
+      },
+      {
+        "col": 62,
+        "text": "▏",
+        "face": "orangeOnmanager"
+      },
+      {
+        "col": 63,
+        "text": " The sidebar keeps its scroll position. C-o switches     ",
+        "face": "manager"
+      }
+    ],
+    [
+      {
+        "col": 0,
+        "text": " ",
+        "face": "base"
+      },
+      {
+        "col": 1,
+        "text": "▏",
+        "face": "purpleOnbot"
+      },
+      {
+        "col": 2,
+        "text": " between the main page and input. M-/ selects the         ",
+        "face": "bot"
+      },
+      {
+        "col": 60,
+        "text": "│",
+        "face": "rule"
+      },
+      {
+        "col": 61,
+        "text": " ",
+        "face": "base"
+      },
+      {
+        "col": 62,
+        "text": "▏",
+        "face": "orangeOnmanager"
+      },
+      {
+        "col": 63,
+        "text": " between the main page and input. M-/ selects the        ",
+        "face": "manager"
+      }
+    ],
+    [
+      {
+        "col": 0,
+        "text": " ",
+        "face": "base"
+      },
+      {
+        "col": 1,
+        "text": "▏",
+        "face": "purpleOnbot"
+      },
+      {
+        "col": 2,
+        "text": " conversation you are looking at.                         ",
+        "face": "bot"
+      },
+      {
+        "col": 60,
+        "text": "│",
+        "face": "rule"
+      },
+      {
+        "col": 61,
+        "text": " ",
+        "face": "base"
+      },
+      {
+        "col": 62,
+        "text": "▏",
+        "face": "orangeOnmanager"
+      },
+      {
+        "col": 63,
+        "text": " conversation you are looking at.                        ",
+        "face": "manager"
+      }
+    ],
+    [
+      {
+        "col": 0,
+        "text": "                                                            ",
+        "face": "base"
+      },
+      {
+        "col": 60,
+        "text": "│",
+        "face": "rule"
+      },
+      {
+        "col": 61,
+        "text": "                                                           ",
+        "face": "base"
+      }
+    ],
+    [
+      {
+        "col": 0,
+        "text": "                                                            ",
+        "face": "base"
+      },
+      {
+        "col": 60,
+        "text": "│",
+        "face": "rule"
+      },
+      {
+        "col": 61,
+        "text": "                                                           ",
+        "face": "base"
+      }
+    ],
+    [
+      {
+        "col": 0,
+        "text": "                                                            ",
+        "face": "base"
+      },
+      {
+        "col": 60,
+        "text": "│",
+        "face": "rule"
+      },
+      {
+        "col": 61,
+        "text": "                                                           ",
+        "face": "base"
+      }
+    ],
+    [
+      {
+        "col": 0,
+        "text": "                                                            ",
+        "face": "base"
+      },
+      {
+        "col": 60,
+        "text": "│",
+        "face": "rule"
+      },
+      {
+        "col": 61,
+        "text": "                                                           ",
+        "face": "base"
+      }
+    ],
+    [
+      {
+        "col": 0,
+        "text": "                                                            ",
+        "face": "base"
+      },
+      {
+        "col": 60,
+        "text": "│",
+        "face": "rule"
+      },
+      {
+        "col": 61,
+        "text": "                                                           ",
+        "face": "base"
+      }
+    ],
+    [
+      {
+        "col": 0,
+        "text": "                                                            ",
+        "face": "base"
+      },
+      {
+        "col": 60,
+        "text": "│",
+        "face": "rule"
+      },
+      {
+        "col": 61,
+        "text": "                                                           ",
+        "face": "base"
+      }
+    ],
+    [
+      {
+        "col": 0,
+        "text": "                                                            ",
+        "face": "base"
+      },
+      {
+        "col": 60,
+        "text": "│",
+        "face": "rule"
+      },
+      {
+        "col": 61,
+        "text": "                                                           ",
+        "face": "base"
+      }
+    ],
+    [
+      {
+        "col": 0,
+        "text": "                                                            ",
+        "face": "base"
+      },
+      {
+        "col": 60,
+        "text": "│",
+        "face": "rule"
+      },
+      {
+        "col": 61,
+        "text": "                                                           ",
+        "face": "base"
+      }
+    ],
+    [
+      {
+        "col": 0,
+        "text": "                                                            ",
+        "face": "base"
+      },
+      {
+        "col": 60,
+        "text": "│",
+        "face": "rule"
+      },
+      {
+        "col": 61,
+        "text": "                                                           ",
+        "face": "base"
+      }
+    ],
+    [
+      {
+        "col": 0,
+        "text": "                                                            ",
+        "face": "base"
+      },
+      {
+        "col": 60,
+        "text": "│",
+        "face": "rule"
+      },
+      {
+        "col": 61,
+        "text": "                                                           ",
+        "face": "base"
+      }
+    ],
+    [
+      {
+        "col": 0,
+        "text": "                                                            ",
+        "face": "base"
+      },
+      {
+        "col": 60,
+        "text": "│",
+        "face": "rule"
+      },
+      {
+        "col": 61,
+        "text": "                                                           ",
+        "face": "base"
+      }
+    ],
+    [
+      {
+        "col": 0,
+        "text": "                                                            ",
+        "face": "base"
+      },
+      {
+        "col": 60,
+        "text": "│",
+        "face": "rule"
+      },
+      {
+        "col": 61,
+        "text": "                                                           ",
+        "face": "base"
+      }
+    ],
+    [
+      {
+        "col": 0,
+        "text": "                                                            ",
+        "face": "base"
+      },
+      {
+        "col": 60,
+        "text": "│",
+        "face": "rule"
+      },
+      {
+        "col": 61,
+        "text": "                                                           ",
+        "face": "base"
+      }
+    ],
+    [
+      {
+        "col": 0,
+        "text": "                                                            ",
+        "face": "base"
+      },
+      {
+        "col": 60,
+        "text": "│",
+        "face": "rule"
+      },
+      {
+        "col": 61,
+        "text": "                                                           ",
+        "face": "base"
+      }
+    ],
+    [
+      {
+        "col": 0,
+        "text": "                                                            ",
+        "face": "base"
+      },
+      {
+        "col": 60,
+        "text": "│",
+        "face": "rule"
+      },
+      {
+        "col": 61,
+        "text": "                                                           ",
+        "face": "base"
+      }
+    ],
+    [
+      {
+        "col": 0,
+        "text": "                                                            ",
+        "face": "base"
+      },
+      {
+        "col": 60,
+        "text": "│",
+        "face": "rule"
+      },
+      {
+        "col": 61,
+        "text": "                                                           ",
+        "face": "base"
+      }
+    ],
+    [
+      {
+        "col": 0,
+        "text": "                                                            ",
+        "face": "base"
+      },
+      {
+        "col": 60,
+        "text": "│",
+        "face": "rule"
+      },
+      {
+        "col": 61,
+        "text": "                                                           ",
+        "face": "base"
+      }
+    ],
+    [
+      {
+        "col": 0,
+        "text": "                                                            ",
+        "face": "base"
+      },
+      {
+        "col": 60,
+        "text": "│",
+        "face": "rule"
+      },
+      {
+        "col": 61,
+        "text": "                                                           ",
+        "face": "base"
+      }
+    ],
+    [
+      {
+        "col": 0,
+        "text": "          ",
+        "face": "purpleBar"
+      },
+      {
+        "col": 10,
+        "text": " ",
+        "face": "botShortcutOnbotBadge",
+        "action": "target:b2"
+      },
+      {
+        "col": 11,
+        "text": "●",
+        "face": "greenOnbotShortcutOnbotBadge",
+        "action": "target:b2"
+      },
+      {
+        "col": 12,
+        "text": " M-1 Make the th… ",
+        "face": "botShortcutOnbotBadge",
+        "action": "target:b2"
+      },
+      {
+        "col": 30,
+        "text": " ",
+        "face": "botShortcutOnpurpleBar",
+        "action": "target:b21"
+      },
+      {
+        "col": 31,
+        "text": "M-2",
+        "face": "botShortcutOnbotShortcutOnpurpleBar",
+        "action": "target:b21"
+      },
+      {
+        "col": 34,
+        "text": " Fix notificat… ",
+        "face": "botShortcutOnpurpleBar",
+        "action": "target:b21"
+      },
+      {
+        "col": 50,
+        "text": " ",
+        "face": "botShortcutOnpurpleBar",
+        "action": "target:b8"
+      },
+      {
+        "col": 51,
+        "text": "●",
+        "face": "errorOnbotShortcutOnpurpleBar",
+        "action": "target:b8"
+      },
+      {
+        "col": 52,
+        "text": " ",
+        "face": "botShortcutOnpurpleBar",
+        "action": "target:b8"
+      },
+      {
+        "col": 53,
+        "text": "M-3",
+        "face": "botShortcutOnbotShortcutOnpurpleBar",
+        "action": "target:b8"
+      },
+      {
+        "col": 56,
+        "text": " Inspect the… ",
+        "face": "botShortcutOnpurpleBar",
+        "action": "target:b8"
+      },
+      {
+        "col": 70,
+        "text": "                                                  ",
+        "face": "purpleBar"
+      }
+    ],
+    [
+      {
+        "col": 0,
+        "text": " M-0 new ",
+        "face": "managerShortcutOnorangeBar",
+        "action": "new-manager"
+      },
+      {
+        "col": 9,
+        "text": " ",
+        "face": "orangeBar"
+      },
+      {
+        "col": 10,
+        "text": " ",
+        "face": "managerShortcutOnorangeBar",
+        "action": "target:m0"
+      },
+      {
+        "col": 11,
+        "text": "cb0",
+        "face": "managerShortcutOnmanagerShortcutOnorangeBar",
+        "action": "target:m0"
+      },
+      {
+        "col": 14,
+        "text": " Plan the work… ",
+        "face": "managerShortcutOnorangeBar",
+        "action": "target:m0"
+      },
+      {
+        "col": 30,
+        "text": " ",
+        "face": "managerShortcutOnorangeBar",
+        "action": "target:m1"
+      },
+      {
+        "col": 31,
+        "text": "cb1",
+        "face": "managerShortcutOnmanagerShortcutOnorangeBar",
+        "action": "target:m1"
+      },
+      {
+        "col": 34,
+        "text": " Review termin… ",
+        "face": "managerShortcutOnorangeBar",
+        "action": "target:m1"
+      },
+      {
+        "col": 50,
+        "text": "                                                                      ",
+        "face": "orangeBar"
+      }
+    ],
+    [
+      {
+        "col": 0,
+        "text": " ",
+        "face": "base"
+      },
+      {
+        "col": 1,
+        "text": "●",
+        "face": "greenOnbase"
+      },
+      {
+        "col": 2,
+        "text": " ",
+        "face": "base"
+      },
+      {
+        "col": 3,
+        "text": " b2 ",
+        "face": "botBadge"
+      },
+      {
+        "col": 7,
+        "text": " aibo ",
+        "face": "location"
+      },
+      {
+        "col": 13,
+        "text": "  ",
+        "face": "base"
+      },
+      {
+        "col": 15,
+        "text": "continue 'Make the three panels stable'",
+        "face": "muted"
+      },
+      {
+        "col": 54,
+        "text": "                                                                  ",
+        "face": "base"
+      }
+    ],
+    [
+      {
+        "col": 0,
+        "text": " Work on this visible chat.",
+        "face": "botInput"
+      },
+      {
+        "col": 27,
+        "text": " ",
+        "face": "cursor"
+      },
+      {
+        "col": 28,
+        "text": "                                                                                            ",
+        "face": "botInput"
+      }
+    ],
+    [
+      {
+        "col": 0,
+        "text": "                                                                                                                        ",
+        "face": "echo"
+      }
+    ]
+  ]
+}

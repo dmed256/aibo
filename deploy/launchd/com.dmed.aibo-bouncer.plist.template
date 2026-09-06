@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+  <key>Label</key><string>com.dmed.aibo-bouncer</string>
+  <key>ProgramArguments</key>
+  <array>
+    <string>__PYTHON__</string><string>-m</string><string>uvicorn</string>
+    <string>aibo.bouncer.main:create_app</string><string>--factory</string>
+    <string>--host</string><string>127.0.0.1</string>
+    <string>--port</string><string>5010</string>
+    <string>--timeout-graceful-shutdown</string><string>30</string>
+  </array>
+  <key>WorkingDirectory</key><string>__AIBO_ROOT__/python</string>
+  <key>KeepAlive</key><true/>
+  <key>ProcessType</key><string>Interactive</string>
+  <key>ThrottleInterval</key><integer>2</integer>
+  <key>EnvironmentVariables</key>
+  <dict><key>AIBO_LOG_CONSOLE</key><string>0</string></dict>
+  <key>StandardOutPath</key><string>/dev/null</string>
+  <key>StandardErrorPath</key><string>/dev/null</string>
+</dict>
+</plist>

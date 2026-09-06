@@ -1,0 +1,40 @@
+ # (0) ACTIVE                      │ ●  b2   Make the three panels stable                                               
+                                   │ ●  m0   Plan the workspace redesign                                                
+ # (0) UNREAD                      │                                                                                    
+                                   │ # research                                                                         
+ # (8) READ                        │                                                                                    
+                                   │                                                                                    
+ 0  ●  m0                       1h │ # aibo                                                                             
+    Plan the workspace redesign    │                                                                                    
+    Read summary 1.                │ ●  b21   Fix notification refresh and scroll                                       
+                                   │ ●  b8   Inspect the location change                                                
+ 1  ●  m0                       2h │ ●  m1   Review terminal acceptance cases                                           
+    Plan the workspace redesign    │                                                                                    
+    Read summary 2.                │ old-prototype                                                                      
+                                   │                                                                                    
+ 2  ●  m0                       3h │                                                                                    
+    Plan the workspace redesign    │                                                                                    
+    Read summary 3.                │                                                                                    
+                                   │                                                                                    
+ 3  ●  m0                       4h │                                                                                    
+    Plan the workspace redesign    │                                                                                    
+    Read summary 4.                │                                                                                    
+                                   │                                                                                    
+ 4  ●  m0                       5h │                                                                                    
+    Plan the workspace redesign    │                                                                                    
+    Read summary 5.                │                                                                                    
+                                   │                                                                                    
+                                   │                                                                                    
+                                   │                                                                                    
+                                   │                                                                                    
+                                   │                                                                                    
+                                   │                                                                                    
+                                   │                                                                                    
+                                   │                                                                                    
+                                   │                                                                                    
+                                   │                                                                                    
+           M-1 Make the thre…  M-2 Fix notificat…  ● M-3 Inspect the…                                                   
+ M-0 new   cb0 Plan the work…  cb1 Review termin…                                                                       
+ ●  m0   continue 'Plan the workspace redesign'                                                                         
+                                                                                                                        
+                                                                                                                        

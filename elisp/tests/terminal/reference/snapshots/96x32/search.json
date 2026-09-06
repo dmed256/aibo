@@ -1,0 +1,287 @@
+{
+  "scenario": "search",
+  "columns": 96,
+  "rows": 32,
+  "cursor": {
+    "row": 0,
+    "col": 9
+  },
+  "regions": {
+    "main": {
+      "x": 0,
+      "y": 0,
+      "width": 96,
+      "height": 31
+    },
+    "searchInput": {
+      "x": 1,
+      "y": 0,
+      "width": 94,
+      "height": 1
+    }
+  },
+  "runs": [
+    [
+      {
+        "col": 0,
+        "text": " 1 scroll",
+        "face": "searchInput",
+        "action": "search:input"
+      },
+      {
+        "col": 9,
+        "text": " ",
+        "face": "cursor",
+        "action": "search:input"
+      },
+      {
+        "col": 10,
+        "text": "                                                                                      ",
+        "face": "searchInput",
+        "action": "search:input"
+      }
+    ],
+    [
+      {
+        "col": 0,
+        "text": "                                                                                                ",
+        "face": "base"
+      }
+    ],
+    [
+      {
+        "col": 0,
+        "text": " ",
+        "face": "base",
+        "action": "search:select:0"
+      },
+      {
+        "col": 1,
+        "text": "●",
+        "face": "mutedOnbase",
+        "action": "search:select:0"
+      },
+      {
+        "col": 2,
+        "text": " ",
+        "face": "base",
+        "action": "search:select:0"
+      },
+      {
+        "col": 3,
+        "text": " b21 ",
+        "face": "botBadge",
+        "action": "search:select:0"
+      },
+      {
+        "col": 8,
+        "text": "  Fix notification refresh and scroll                                                   ",
+        "face": "base",
+        "action": "search:select:0"
+      }
+    ],
+    [
+      {
+        "col": 0,
+        "text": "                                                                                                ",
+        "face": "base"
+      }
+    ],
+    [
+      {
+        "col": 0,
+        "text": "                                                                                                ",
+        "face": "base"
+      }
+    ],
+    [
+      {
+        "col": 0,
+        "text": "                                                                                                ",
+        "face": "base"
+      }
+    ],
+    [
+      {
+        "col": 0,
+        "text": "                                                                                                ",
+        "face": "base"
+      }
+    ],
+    [
+      {
+        "col": 0,
+        "text": "                                                                                                ",
+        "face": "base"
+      }
+    ],
+    [
+      {
+        "col": 0,
+        "text": "                                                                                                ",
+        "face": "base"
+      }
+    ],
+    [
+      {
+        "col": 0,
+        "text": "                                                                                                ",
+        "face": "base"
+      }
+    ],
+    [
+      {
+        "col": 0,
+        "text": "                                                                                                ",
+        "face": "base"
+      }
+    ],
+    [
+      {
+        "col": 0,
+        "text": "                                                                                                ",
+        "face": "base"
+      }
+    ],
+    [
+      {
+        "col": 0,
+        "text": "                                                                                                ",
+        "face": "base"
+      }
+    ],
+    [
+      {
+        "col": 0,
+        "text": "                                                                                                ",
+        "face": "base"
+      }
+    ],
+    [
+      {
+        "col": 0,
+        "text": "                                                                                                ",
+        "face": "base"
+      }
+    ],
+    [
+      {
+        "col": 0,
+        "text": "                                                                                                ",
+        "face": "base"
+      }
+    ],
+    [
+      {
+        "col": 0,
+        "text": "                                                                                                ",
+        "face": "base"
+      }
+    ],
+    [
+      {
+        "col": 0,
+        "text": "                                                                                                ",
+        "face": "base"
+      }
+    ],
+    [
+      {
+        "col": 0,
+        "text": "                                                                                                ",
+        "face": "base"
+      }
+    ],
+    [
+      {
+        "col": 0,
+        "text": "                                                                                                ",
+        "face": "base"
+      }
+    ],
+    [
+      {
+        "col": 0,
+        "text": "                                                                                                ",
+        "face": "base"
+      }
+    ],
+    [
+      {
+        "col": 0,
+        "text": "                                                                                                ",
+        "face": "base"
+      }
+    ],
+    [
+      {
+        "col": 0,
+        "text": "                                                                                                ",
+        "face": "base"
+      }
+    ],
+    [
+      {
+        "col": 0,
+        "text": "                                                                                                ",
+        "face": "base"
+      }
+    ],
+    [
+      {
+        "col": 0,
+        "text": "                                                                                                ",
+        "face": "base"
+      }
+    ],
+    [
+      {
+        "col": 0,
+        "text": "                                                                                                ",
+        "face": "base"
+      }
+    ],
+    [
+      {
+        "col": 0,
+        "text": "                                                                                                ",
+        "face": "base"
+      }
+    ],
+    [
+      {
+        "col": 0,
+        "text": "                                                                                                ",
+        "face": "base"
+      }
+    ],
+    [
+      {
+        "col": 0,
+        "text": "                                                                                                ",
+        "face": "base"
+      }
+    ],
+    [
+      {
+        "col": 0,
+        "text": "                                                                                                ",
+        "face": "base"
+      }
+    ],
+    [
+      {
+        "col": 0,
+        "text": "                                                                                                ",
+        "face": "base"
+      }
+    ],
+    [
+      {
+        "col": 0,
+        "text": "                                                                                                ",
+        "face": "echo"
+      }
+    ]
+  ]
+}

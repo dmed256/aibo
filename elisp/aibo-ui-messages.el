@@ -1,0 +1,493 @@
+;;; aibo-ui-messages.el --- Message, Markdown and file rendering -*- lexical-binding: t -*-
+
+(require 'aibo-ui-base)
+(require 'json)
+(defvar aibo:history-loaded-p)
+(declare-function aibo:render-chat "aibo-ui-chat")
+(declare-function aibo:open-chat-link "aibo-ui-chat")
+(declare-function aibo:activate "aibo-ui-chat")
+(declare-function aibo:render-sidebar "aibo-ui-sidebar")
+(declare-function aibo:--echo "aibo-ui-input")
+(declare-function aibo:--show-file-beside "aibo-ui-layout")
+
+(defun aibo:--external-file-p (path)
+  (or (member (downcase (or (file-name-extension path) ""))
+              '("gif" "heic" "html" "htm" "jpeg" "jpg" "mov" "mp3" "mp4"
+                "pdf" "png" "svg" "webm" "webp" "zip" "gz" "dmg" "exe"))
+      (and (file-readable-p path) (not (file-directory-p path))
+           (with-temp-buffer
+             (insert-file-contents-literally path nil 0 4096)
+             (goto-char (point-min))
+             (search-forward "\0" nil t)))))
+
+(defun aibo:open-link (button)
+  "Open BUTTON's target in cowork mode, honoring :LINE in its path or label.
+A line in the target takes precedence over one in the Markdown label."
+  (let* ((case-fold-search t)
+         (raw (button-get button 'aibo-path))
+         (url (string-match-p "\\`\\(?:https?://\\|aibo:\\)" raw))
+         (label (button-label button))
+         (line (unless url
+                 (cond ((string-match "\\`\\(.+\\):\\([1-9][0-9]*\\)\\'" raw)
+                        (prog1 (string-to-number (match-string 2 raw))
+                          (setq raw (match-string 1 raw))))
+                       ((string-match "\\`\\[[^]\n]+:\\([1-9][0-9]*\\)\\](" label)
+                        (string-to-number (match-string 1 label))))))
+         (cwd (aibo:--get (aibo:--get aibo:buffer-chat "location") "path"))
+         (path (if url raw
+                 (expand-file-name raw (or cwd default-directory)))))
+    (cond ((string-match-p "\\`aibo:" raw) (aibo:open-chat-link raw))
+          ((string-match-p "\\`https?://" path) (browse-url path))
+          ((aibo:--external-file-p path)
+           (start-process "aibo-open" nil "open" (expand-file-name path))
+           (aibo:--echo (concat "Opened " path)))
+          (t (let ((buffer (find-file-noselect path)))
+               (setq aibo:page 'file aibo:current-chat nil aibo:opening-chat-id nil)
+               (aibo:--show-file-beside (current-buffer) buffer)
+               (when line
+                 (widen)
+                 (goto-char (point-min))
+                 (forward-line (1- line)))
+               (aibo:--echo (abbreviate-file-name path)))))))
+
+(defun aibo:--buttonize-links (start end)
+  (save-excursion
+    (goto-char start)
+    (while (re-search-forward "\\[\\([^]\n]+\\)\\](\\([^)\n]+\\))" end t)
+      (let ((beginning (match-beginning 0))
+            (finish (match-end 0))
+            (label-start (match-beginning 1))
+            (label-end (match-end 1)))
+        (unless (get-text-property beginning 'aibo-code)
+          (make-text-button beginning finish
+                            'follow-link t
+                            'face (cons 'aibo:link-face (ensure-list (get-text-property beginning 'face)))
+                            'help-echo (match-string-no-properties 2)
+                            'aibo-path (match-string-no-properties 2)
+                            'action #'aibo:open-link)
+          ;; Keep the label as real characters so point can move within it.
+          ;; Only the Markdown delimiters and destination are hidden.
+          (put-text-property beginning label-start 'display "")
+          (put-text-property label-end finish 'display ""))))))
+
+(defun aibo:--fontify-markdown (start end)
+  (save-excursion
+    (goto-char start)
+    (let (fence)
+      (while (< (point) end)
+        (let* ((beginning (point)) (finish (min end (1+ (line-end-position))))
+               (marker (when (looking-at "[ \t]*\\(`\\{3,\\}\\|~\\{3,\\}\\)\\(.*\\)$")
+                         (match-string-no-properties 1)))
+               (closing (and marker fence (= (aref marker 0) (aref fence 0))
+                             (>= (length marker) (length fence))
+                             (string-empty-p (string-trim (match-string-no-properties 2))))))
+          (cond ((and marker (or (not fence) closing))
+                 (setq fence (unless closing marker))
+                 (add-text-properties beginning finish '(display "" aibo-code t)))
+                (fence
+                 (add-face-text-property beginning finish 'aibo:code-face)
+                 (put-text-property beginning finish 'aibo-code t)))
+          (goto-char finish))))
+    (goto-char start)
+    (while (re-search-forward "^\\(#\\{1,6\\}\\) +\\(.+\\)$" end t)
+      (unless (get-text-property (match-beginning 0) 'aibo-code)
+        (put-text-property (match-beginning 1) (match-beginning 2) 'display "")
+        (add-face-text-property (match-beginning 2) (match-end 2)
+                                '(:inherit aibo:orange-face :weight bold))))
+    (goto-char start)
+    (while (re-search-forward "`\\([^`\n]+\\)`" end t)
+      (unless (get-text-property (match-beginning 0) 'aibo-code)
+        (put-text-property (match-beginning 0) (1+ (match-beginning 0)) 'display "")
+        (put-text-property (1- (match-end 0)) (match-end 0) 'display "")
+        (add-face-text-property (match-beginning 1) (match-end 1) 'aibo:key-face)
+        (put-text-property (match-beginning 0) (match-end 0) 'aibo-code t)))
+    (goto-char start)
+    (while (re-search-forward "\\*\\*\\([^*\n]+\\)\\*\\*" end t)
+      (unless (get-text-property (match-beginning 0) 'aibo-code)
+        (put-text-property (match-beginning 0) (+ 2 (match-beginning 0)) 'display "")
+        (put-text-property (- (match-end 0) 2) (match-end 0) 'display "")
+        (add-face-text-property (match-beginning 1) (match-end 1) 'bold)))))
+
+(defun aibo:--fontify-shell (start end)
+  "Apply zsh font lock without executing commands or altering literal text."
+  (unless aibo:shell-cache (setq aibo:shell-cache (make-hash-table :test #'equal)))
+  (let* ((text (buffer-substring-no-properties start end))
+         (colored (or (gethash text aibo:shell-cache)
+                      (puthash text
+                               (with-temp-buffer
+                                 (insert text)
+                                 (let ((inhibit-message t) (sh-set-shell-hook nil))
+                                   (delay-mode-hooks (sh-mode))
+                                   (sh-set-shell "zsh" nil nil)
+                                   (font-lock-ensure))
+                                 (buffer-string))
+                               aibo:shell-cache))))
+    (aibo:--copy-font-lock start colored)))
+
+(defun aibo:--copy-font-lock (start colored)
+  "Copy syntax faces from COLORED while retaining the event background."
+  (let ((pos 0))
+    (while (< pos (length colored))
+      (let ((next (next-single-property-change pos 'face colored (length colored)))
+            (face (get-text-property pos 'face colored)))
+        (when face
+          (add-face-text-property (+ start pos) (+ start next)
+                                  `(:inherit ,face :background ,(face-background 'aibo:internal-message-face nil t))))
+        (setq pos next)))))
+
+(defun aibo:--insert-diff (diff kind)
+  "Render a unified patch; add/delete payloads contain raw whole-file text."
+  (let ((start (point)))
+    (if (member kind '("add" "delete"))
+        (let* ((lines (split-string (string-remove-suffix "\n" diff) "\n"))
+               (count (if (string-empty-p diff) 0 (length lines)))
+               (adding (equal kind "add")))
+          (insert (if adding (format "@@ -0,0 +1,%d @@\n" count)
+                    (format "@@ -1,%d +0,0 @@\n" count)))
+          (when (> count 0)
+            (dolist (line lines) (insert (if adding "+" "-") line "\n"))
+            (unless (string-suffix-p "\n" diff) (insert "\\ No newline at end of file\n"))))
+      (insert diff)
+      (unless (string-suffix-p "\n" diff) (insert "\n")))
+    (save-excursion
+      (let ((end (point)))
+        (goto-char start)
+        (while (< (point) end)
+          (let ((face (cond ((looking-at "@@") 'aibo:diff-hunk-face)
+                            ((looking-at "\\(?:---\\|\\+\\+\\+\\) ") 'aibo:internal-message-face)
+                            ((looking-at "+") 'aibo:diff-added-face)
+                            ((looking-at "-") 'aibo:diff-removed-face))))
+            (when face (add-face-text-property (point) (min end (1+ (line-end-position))) face)))
+          (forward-line 1))))))
+
+(defun aibo:--insert-file-changes (item)
+  "Insert literal patch details with ordinary file-opening buttons."
+  (let ((changes (aibo:--get item "changes")))
+    (when-let ((status (aibo:--get item "status")))
+      (unless (equal status "completed") (insert status "\n")))
+    (if (not changes) (insert "No file details available\n")
+      (dolist (change changes)
+        (let* ((kind (aibo:--get change "kind"))
+               (path (aibo:--get change "path"))
+               (moved (and (hash-table-p kind) (aibo:--get kind "move_path"))))
+          (insert (or (if (hash-table-p kind) (aibo:--get kind "type") kind) "update") " ")
+          (insert-text-button (or path "Unknown file")
+                              'face '(aibo:link-face aibo:internal-message-face)
+                              'follow-link t 'aibo-path path 'action #'aibo:open-link)
+          (when moved
+            (insert " → ")
+            (insert-text-button moved 'face '(aibo:link-face aibo:internal-message-face)
+                                'follow-link t 'aibo-path moved 'action #'aibo:open-link))
+          (insert "\n")
+          (when-let ((diff (aibo:--get change "diff")))
+            (aibo:--insert-diff
+             (if moved (string-remove-suffix (concat "\n\nMoved to: " moved) diff) diff)
+             (if (hash-table-p kind) (aibo:--get kind "type") kind))))))))
+
+(defun aibo:--message-id (message)
+  "Use the protocol identity when a sampled item becomes a stored message."
+  (or (aibo:--get (aibo:--get (aibo:--get message "data") "item") "id")
+      (aibo:--get message "id")
+      (aibo:--get message "content")))
+
+(defun aibo:--insert-json (value)
+  (let ((start (point)))
+    (insert (json-encode value))
+    (json-pretty-print start (point))
+    (let ((text (buffer-substring-no-properties start (point))))
+      (aibo:--copy-font-lock
+       start (with-temp-buffer
+               (insert text)
+               (delay-mode-hooks (js-json-mode))
+               (font-lock-ensure)
+               (buffer-string))))
+    (insert "\n")))
+
+(defun aibo:--mcp-payload (value)
+  "Pretty-print structured payloads, keeping ordinary output literal."
+  (when (and (stringp value) (string-match-p "\\`[ \t\n]*[[{]" value))
+    (setq value (condition-case nil
+                    (json-parse-string value :object-type 'hash-table :array-type 'array
+                                       :null-object :null :false-object :false)
+                  (error value))))
+  (if (stringp value) value
+    (with-temp-buffer
+      (let ((json-null :null) (json-false :false)) (aibo:--insert-json value))
+      (string-remove-suffix "\n" (buffer-string)))))
+
+(defun aibo:--mcp-heading (label)
+  (insert "\n" (propertize label 'face '(aibo:muted-face bold)) "\n"))
+
+(defun aibo:--insert-mcp (item)
+  "Show the call and its payload, not the protocol envelope or binary data."
+  (insert (propertize (string-join (delq nil (list (aibo:--get item "server")
+                                                   (aibo:--get item "tool"))) "/")
+                      'face 'aibo:blue-face))
+  (when-let ((status (aibo:--get item "status"))) (insert " · " status))
+  (insert "\n")
+  (when-let ((arguments (aibo:--get item "arguments")))
+    (aibo:--mcp-heading "arguments")
+    (insert (aibo:--mcp-payload arguments) "\n"))
+  (when-let ((result (aibo:--get item "result")))
+    (let ((parts (mapcar
+                  (lambda (part)
+                    (let ((resource (aibo:--get part "resource")))
+                      (aibo:--mcp-payload
+                       (or (aibo:--get part "text") (aibo:--get resource "text")
+                           (aibo:--get part "uri") (aibo:--get resource "uri")
+                           (format "[%s]" (or (aibo:--get part "type") "content"))))))
+                  (aibo:--get result "content"))))
+      (when-let ((structured (aibo:--get result "structuredContent")))
+        (let ((formatted (aibo:--mcp-payload structured)))
+          (unless (member formatted parts) (setq parts (append parts (list formatted))))))
+      (when parts
+        (aibo:--mcp-heading "result")
+        (insert (string-join parts "\n\n") "\n"))
+      (when (and (aibo:--get result "isError") (not (aibo:--get item "error")))
+        (insert (propertize "error: tool returned an error\n" 'face 'aibo:error-face)))))
+  (when-let ((error (aibo:--get item "error")))
+    (insert "\n" (propertize (concat "error: " (if (stringp error) error
+                                                 (or (aibo:--get error "message") "Tool call failed")))
+                             'face 'aibo:error-face) "\n")))
+
+(defun aibo:--insert-message (chat message)
+  (let* ((kind (aibo:--get message "kind"))
+         (message-start (point))
+         (item (aibo:--get (aibo:--get message "data") "item"))
+         (raw-p (member (aibo:--message-id message) aibo:raw-messages))
+         (exec-p (and (equal kind "event")
+                      (equal (aibo:--get item "type") "commandExecution")))
+         (reasoning-p (and (equal kind "event")
+                           (equal (or (aibo:--get item "type") (aibo:--get message "content")) "reasoning")))
+         (file-p (and (equal kind "event") (equal (aibo:--get item "type") "fileChange")))
+         (mcp-p (equal (aibo:--get item "type") "mcpToolCall"))
+         (user-p (string= kind "user"))
+         (error-p (string= kind "error"))
+         (internal-p (not (member kind '("user" "assistant" "error"))))
+         (header (cond (user-p (propertize " user " 'face 'aibo:user-badge-face))
+                       (error-p (propertize " error " 'face 'aibo:error-badge-face))
+                       (exec-p (propertize " exec " 'face 'aibo:internal-badge-face))
+                       (reasoning-p (propertize " reasoning " 'face 'aibo:internal-badge-face))
+                       (file-p (propertize " file change " 'face 'aibo:internal-badge-face))
+                       (mcp-p (propertize " mcp " 'face 'aibo:internal-badge-face))
+                       (internal-p (propertize (format " %s " (downcase (or kind "message")))
+                                               'face 'aibo:internal-badge-face))
+                       (t (aibo:--badge chat nil t))))
+         (face (cond (user-p 'aibo:user-message-face)
+                     (error-p 'aibo:error-message-face)
+                     (internal-p 'aibo:internal-message-face)
+                     (t (aibo:--message-face chat))))
+         (border-face (cond (user-p 'aibo:blue-face)
+                            (error-p 'aibo:error-face)
+                            (internal-p 'aibo:muted-face)
+                            ((string= (aibo:--get chat "kind") "bot") 'aibo:purple-face)
+                            (t 'aibo:orange-face))))
+    (insert header)
+    (let ((age (aibo:--relative-time (aibo:--get message "created_at"))))
+      (unless (string-empty-p age)
+        (insert (propertize (concat " " age) 'face 'aibo:muted-face))))
+    (insert "\n")
+    (unless (and reasoning-p (not raw-p))
+      (let ((start (point)))
+	(cond (raw-p (if item (aibo:--insert-json item)
+                       (insert (or (aibo:--get message "content") "") "\n")))
+              (file-p (aibo:--insert-file-changes item))
+              (mcp-p (aibo:--insert-mcp item))
+              (t
+               (insert (if exec-p (or (aibo:--get item "command") "Command unavailable")
+                         (aibo:--get message "content")) "\n")))
+	(add-face-text-property start (point) face t)
+	(when (and exec-p (not raw-p)) (aibo:--fontify-shell start (point)))
+	;; Shell syntax is literal, not Markdown (backticks, #, links, etc.).
+	(unless (or raw-p exec-p file-p mcp-p)
+          (aibo:--fontify-markdown start (point))
+          (aibo:--buttonize-links start (point)))
+	(dolist (path (aibo:--get (aibo:--get message "data") "attachments"))
+          (when (stringp path)
+            (insert-text-button (concat "[" (file-name-nondirectory path) "]")
+				'face 'aibo:link-face 'follow-link t
+				'aibo-path path 'action #'aibo:open-link)
+            (insert "\n")))
+	(let ((end (point)))
+          (save-excursion
+            (goto-char start)
+            (while (< (point) end)
+              (let* ((finish (min end (1+ (line-end-position))))
+                     (padding-face (or (get-text-property
+					(if (and (get-text-property (point) 'aibo-code)
+						 (equal (get-text-property (point) 'display) ""))
+					    finish (point)) 'face) face))
+                     (prefix (concat (propertize "▏" 'face (cons border-face (ensure-list padding-face)))
+                                     (propertize " " 'face padding-face))))
+		(add-text-properties (point) finish `(line-prefix ,prefix wrap-prefix ,prefix))
+		(goto-char finish)))))))
+    (insert "\n")
+    (put-text-property message-start (point) 'aibo-message-id (aibo:--message-id message))))
+
+(aibo:--define-keymap aibo:hidden-body-map
+                      (let ((map (make-sparse-keymap)))
+                        (set-keymap-parent map button-map)
+                        (define-key map (kbd "RET") #'aibo:activate)
+                        (define-key map [return] #'aibo:activate)
+                        map))
+
+(defun aibo:--expand-hidden (button)
+  "Toggle a group, retaining its identity across chat refreshes."
+  (let* ((inhibit-read-only t)
+         (expanded (button-get button 'aibo-expanded))
+         (ids (mapcar #'aibo:--message-id (button-get button 'aibo-messages)))
+         (end (button-get button 'aibo-group-end)))
+    (save-excursion
+      (put-text-property (1- (button-end button)) (button-end button)
+                         'display (if expanded "▸" "▾"))
+      (goto-char (+ (button-end button) 2))
+      (if expanded
+          (progn
+            (delete-region (point) end)
+            (setq aibo:expanded-groups (seq-difference aibo:expanded-groups ids #'equal)))
+        (dolist (message (button-get button 'aibo-messages))
+          (aibo:--insert-message aibo:buffer-chat message))
+        (add-text-properties (+ (button-end button) 2) (point)
+                             `(aibo-hidden-group ,button keymap ,aibo:hidden-body-map))
+        (setq aibo:expanded-groups (seq-union ids aibo:expanded-groups #'equal)))
+      (set-marker end (point)))
+    (button-put button 'aibo-expanded (not expanded))))
+
+(defun aibo:--routine-turn-p (message)
+  "Identify bookkeeping, without hiding failures or literal user/assistant text."
+  (let* ((data (aibo:--get message "data"))
+         (event (aibo:--get data "event")))
+    (and (equal (aibo:--get message "kind") "event")
+         (or (member (aibo:--get message "content")
+                     '("Codex turn started" "Codex turn completed"))
+             (member event '("turn_started" "turn/started"))
+             (and (equal event "turn/completed")
+                  (equal (aibo:--get (aibo:--get data "turn") "status") "completed"))))))
+
+(defun aibo:--insert-messages (chat)
+  (when-let ((before (aibo:--get chat "older_before")))
+    (insert-text-button "[Load older messages]" 'face 'aibo:hidden-message-face
+                        'action (lambda (_button) (aibo:--load-older before)))
+    (insert "\n\n"))
+  (let ((messages (seq-remove
+                   (lambda (message)
+                     (or (aibo:--routine-turn-p message)
+                         (and (not (equal (aibo:--get message "kind") "error"))
+                              (not (aibo:--get (aibo:--get message "data") "hidden_count"))
+                              (aibo:--get chat "notice_message_id")
+                              (equal (aibo:--get message "id") (aibo:--get chat "notice_message_id")))))
+                   (aibo:--get chat "messages")))
+        hidden)
+    (dolist (message messages)
+      (if (or (aibo:--get (aibo:--get message "data") "hidden_count")
+              (member (aibo:--get message "kind") '("user" "assistant" "error")))
+          (progn
+            (when hidden
+              (aibo:--insert-hidden (nreverse hidden))
+              (setq hidden nil))
+            (if (aibo:--get (aibo:--get message "data") "hidden_count")
+                (aibo:--insert-details message)
+              (aibo:--insert-message chat message)))
+        (push message hidden)))
+    (when hidden (aibo:--insert-hidden (nreverse hidden)))))
+
+(defun aibo:--insert-hidden (messages)
+  (let* ((ids (mapcar #'aibo:--message-id messages))
+         (group-id (car ids))
+         (button (insert-text-button
+                  (format "[%d hidden message%s] ▸" (length messages)
+                          (if (= (length messages) 1) "" "s"))
+                  'face 'aibo:hidden-message-face 'follow-link t
+                  'aibo-group-id group-id 'aibo-messages messages
+                  'action #'aibo:--expand-hidden)))
+    (insert "\n\n")
+    (button-put button 'aibo-group-end (copy-marker (point)))
+    (when (seq-intersection ids aibo:expanded-groups #'equal)
+      (aibo:--expand-hidden button)
+      (goto-char (marker-position (button-get button 'aibo-group-end))))))
+
+(defvar-local aibo:detail-cache nil)
+(defvar-local aibo:older-loading nil)
+
+(defun aibo:--load-older (before)
+  (unless aibo:older-loading
+    (setq aibo:older-loading t)
+    (let ((buffer (current-buffer)) (id (aibo:--get aibo:buffer-chat "id")))
+      (aibo:api--request
+       "GET" (format "/api/chats/%s/history?before=%s" id before) nil
+       (lambda (page)
+         (when (buffer-live-p buffer)
+           (with-current-buffer buffer
+             (setq aibo:older-loading nil)
+             (when (equal before (aibo:--get aibo:buffer-chat "older_before"))
+               (let ((chat (copy-hash-table aibo:buffer-chat)))
+                 (setq aibo:history-loaded-p t)
+                 (puthash "messages" (append (aibo:--get page "messages")
+                                             (aibo:--get chat "messages")) chat)
+                 (puthash "older_before" (aibo:--get page "older_before") chat)
+                 (aibo:render-chat chat t t))))))
+       (lambda (_error)
+         (when (buffer-live-p buffer)
+           (with-current-buffer buffer (setq aibo:older-loading nil)))
+         (message "Could not load older messages · press RET to retry"))))))
+
+(defun aibo:--fetch-details (data &optional after)
+  (let* ((buffer (current-buffer))
+         (first (aibo:--get data "first_id"))
+         (last (aibo:--get data "last_id"))
+         (entry (gethash first aibo:detail-cache)))
+    (unless (eq (plist-get entry :state) 'loading)
+      (puthash first (plist-put entry :state 'loading) aibo:detail-cache)
+      (aibo:api--request
+       "GET" (format "/api/chats/%s/details?first=%s&last=%s%s"
+                     (aibo:--get aibo:buffer-chat "id") first last
+                     (if after (concat "&after=" after) "")) nil
+       (lambda (page)
+         (when (buffer-live-p buffer)
+           (with-current-buffer buffer
+             (puthash first (list :last last :messages (append (and after (plist-get entry :messages))
+                                                               (aibo:--get page "messages"))
+                                  :next (aibo:--get page "next_after")) aibo:detail-cache)
+             (aibo:render-chat aibo:buffer-chat t t))))
+       (lambda (_error)
+         (when (buffer-live-p buffer)
+           (with-current-buffer buffer
+             (puthash first (plist-put entry :state 'error) aibo:detail-cache)
+             (aibo:render-chat aibo:buffer-chat t t)))
+         (message "Could not load details · press RET to retry"))))))
+
+(defun aibo:--insert-details (message)
+  "Insert only a summary; fetch bounded detail pages on explicit expansion."
+  (unless aibo:detail-cache (setq aibo:detail-cache (make-hash-table :test #'equal)))
+  (let* ((data (aibo:--get message "data"))
+         (first (aibo:--get data "first_id"))
+         (entry (gethash first aibo:detail-cache))
+         (expanded (member first aibo:expanded-groups)))
+    (insert-text-button
+     (format "[%s hidden messages] %s" (aibo:--get data "hidden_count") (if expanded "▾" "▸"))
+     'face 'aibo:hidden-message-face 'aibo-group-id first
+     'action (lambda (_button)
+               (if (and expanded (not (eq (plist-get entry :state) 'error)))
+                   (setq aibo:expanded-groups (delete first aibo:expanded-groups))
+                 (cl-pushnew first aibo:expanded-groups :test #'equal)
+                 (when (or (not entry) (eq (plist-get entry :state) 'error)
+                           (not (equal (plist-get entry :last) (aibo:--get data "last_id"))))
+                   (aibo:--fetch-details data)))
+               (aibo:render-chat aibo:buffer-chat t t)))
+    (insert "\n\n")
+    (when expanded
+      (dolist (detail (plist-get entry :messages))
+        (unless (aibo:--routine-turn-p detail)
+          (aibo:--insert-message aibo:buffer-chat detail)))
+      (cond ((eq (plist-get entry :state) 'loading) (insert "Loading details…\n\n"))
+            ((eq (plist-get entry :state) 'error) (insert "Could not load details · RET above to retry\n\n"))
+            ((or (plist-get entry :next)
+                 (not (equal (plist-get entry :last) (aibo:--get data "last_id"))))
+             (insert-text-button "[Load more details]" 'face 'aibo:hidden-message-face
+                                 'action (lambda (_button)
+                                           (aibo:--fetch-details data (plist-get entry :next))
+                                           (aibo:render-chat aibo:buffer-chat t t)))
+             (insert "\n\n"))))))
+
+(provide 'aibo-ui-messages)
+;;; aibo-ui-messages.el ends here

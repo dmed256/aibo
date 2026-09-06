@@ -1,0 +1,32 @@
+ # (1) ACTIVE                      │ ● b2  aibo   Make the three panels stable                  
+                                   │ project  —   goal  ready   tokens  0   elapsed  0s         
+ 0 ▏ ● b2  aibo  Make the three p… │ [2 hidden messages] ▸                                      
+                                   │                                                            
+ # (18) UNREAD                     │  user                                                      
+                                   │ ▏ I want three stable panels: notifications on the left,   
+ 1  ●  b21                      1m │ ▏ the page I am viewing on the right, and a normally       
+    Fix notification refresh and … │ ▏ growing input across the bottom.                         
+    Notification 1: a concise      │                                                            
+    useful update.                 │  ● b2  aibo                                                
+                                   │ ▏ The workspace keeps its three panels while pages change  
+ 2 ▏●  b2                       2m │ ▏ and messages arrive.                                     
+   ▏Make the three panels stable   │ ▏                                                          
+   ▏Notification 2: a concise      │ ▏ What changed                                             
+   ▏useful update.                 │ ▏ The sidebar keeps its scroll position. C-o switches      
+                                   │ ▏ between the main page and input. M-/ selects the         
+ 3  ●  b21                      3m │ ▏ conversation you are looking at.                         
+    Fix notification refresh and … │                                                            
+    Notification 3: a concise      │                                                            
+    useful update.                 │                                                            
+                                   │                                                            
+ 4 ▏●  b2                       4m │                                                            
+   ▏Make the three panels stable   │                                                            
+   ▏Notification 4: a concise      │                                                            
+   ▏useful update.                 │                                                            
+                                   │                                                            
+ 5  ●  b21                      5m │                                                            
+           ● M-1 Make the th…  M-2 Fix notificat…  ● M-3 Inspect the…                           
+ M-0 new   cb0 Plan the work…  cb1 Review termin…                                               
+ ●  b2  aibo   continue 'Make the three panels stable'                                          
+                                                                                                
+                                                                                                

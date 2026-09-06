@@ -1,0 +1,841 @@
+[
+  {
+    "id": "home",
+    "category": "Pages",
+    "title": "Home · projects and recent chats",
+    "requirements": [
+      "home",
+      "three-panels",
+      "project-order",
+      "role-colors"
+    ],
+    "notes": "Unassigned chats come first without a section title. Active rows carry their role color. Archived projects follow the active projects."
+  },
+  {
+    "id": "chat-bot",
+    "category": "Chats",
+    "title": "Bot chat · active",
+    "requirements": [
+      "chat-badges",
+      "message-colors",
+      "hidden-messages"
+    ],
+    "notes": "The main chat is b2. Every sidebar entry for b2 is selected; input is purple. Internal messages start collapsed."
+  },
+  {
+    "id": "input-multiline",
+    "category": "Input",
+    "title": "Input · grows naturally",
+    "requirements": [
+      "growing-input",
+      "plain-newline",
+      "pinned-bars"
+    ],
+    "notes": "The composer grows to fit visual lines; the two bars and target row remain outside editable text."
+  },
+  {
+    "id": "home-empty",
+    "category": "Pages",
+    "title": "Home · empty workspace",
+    "requirements": [
+      "empty-state",
+      "locations",
+      "new-manager"
+    ],
+    "notes": "A first run shows an empty workspace. Configuration is managed through the assistant, not through forms."
+  },
+  {
+    "id": "home-many",
+    "category": "Pages",
+    "title": "Home · ten chats per project",
+    "requirements": [
+      "home",
+      "project-order",
+      "group-limits"
+    ],
+    "notes": "Each group is independently capped at ten recent chats, even when another group has hundreds. Scroll the main panel without moving the sidebar."
+  },
+  {
+    "id": "home-archived",
+    "category": "Pages",
+    "title": "Home · archived projects",
+    "requirements": [
+      "archive-order",
+      "home"
+    ],
+    "notes": "Archived projects appear below active sections, one muted line each, ordered by archive time."
+  },
+  {
+    "id": "help",
+    "category": "Pages",
+    "title": "Help · full-mode bindings",
+    "requirements": [
+      "help",
+      "shortcut-map"
+    ],
+    "notes": "Bindings are aligned in cell columns. M-0 starts a new manager; M-1 selects the first recent bot, aligned with cb0 for the first manager."
+  },
+  {
+    "id": "help-cowork",
+    "category": "Pages",
+    "title": "Help · cowork bindings",
+    "requirements": [
+      "help",
+      "cowork-search",
+      "cowork-focus"
+    ],
+    "notes": "Help itself remains an ordinary main buffer in cowork mode; reading help must not rebuild full mode."
+  },
+  {
+    "id": "locations",
+    "category": "Locations",
+    "title": "Locations · named directories",
+    "requirements": [
+      "locations",
+      "main-pages"
+    ],
+    "notes": "Locations are read-only and organized by name and working directory. Ask the assistant to make changes; navigating here preserves the input draft."
+  },
+  {
+    "id": "location-moved",
+    "category": "Locations",
+    "title": "Chat · moved during work",
+    "requirements": [
+      "location-interrupt",
+      "location-cwd",
+      "move-event"
+    ],
+    "notes": "The bot shows its interrupted status and the new location. Resuming must actually use the new cwd; merely changing the badge is insufficient."
+  },
+  {
+    "id": "projects",
+    "category": "Projects",
+    "title": "Projects · descriptions and README",
+    "requirements": [
+      "projects",
+      "project-readme",
+      "main-pages"
+    ],
+    "notes": "Projects are read-only. Descriptions and README paths expose context; the assistant makes changes through the API and project instructions."
+  },
+  {
+    "id": "project-assigned",
+    "category": "Projects",
+    "title": "Chat · project context",
+    "requirements": [
+      "project-context",
+      "delegation"
+    ],
+    "notes": "The manager checks the project description and reads its README before delegating. The bot inherits the intended project and location."
+  },
+  {
+    "id": "chat-manager",
+    "category": "Chats",
+    "title": "Manager chat · orange",
+    "requirements": [
+      "manager-number",
+      "chat-badges",
+      "message-colors"
+    ],
+    "notes": "m0 is orange, b# is purple, and user messages remain blue. The manager number is independent of the bot counter."
+  },
+  {
+    "id": "chat-completed",
+    "category": "Chats",
+    "title": "Bot chat · completed",
+    "requirements": [
+      "status-badge",
+      "inactive-tab"
+    ],
+    "notes": "A completed chat has a muted circle in its badge and no circle in its shortcut tab."
+  },
+  {
+    "id": "chat-interrupted",
+    "category": "Chats",
+    "title": "Bot chat · interrupted",
+    "requirements": [
+      "interrupted",
+      "exception-notification"
+    ],
+    "notes": "An interrupted chat uses a red status circle and an explicit interruption notification."
+  },
+  {
+    "id": "chat-cancelled",
+    "category": "Chats",
+    "title": "Bot chat · cancelled",
+    "requirements": [
+      "cancelled",
+      "exception-notification"
+    ],
+    "notes": "Cancellation is distinct from successful completion. The conversation remains readable and resumable."
+  },
+  {
+    "id": "chat-error",
+    "category": "Chats",
+    "title": "Bot chat · error",
+    "requirements": [
+      "error-state",
+      "exception-notification"
+    ],
+    "notes": "An error is visible in the badge, tab, and notification. Existing messages and the draft remain intact."
+  },
+  {
+    "id": "chat-blocked",
+    "category": "Chats",
+    "title": "Bot chat · blocked",
+    "requirements": [
+      "blocked-state",
+      "notification-summary"
+    ],
+    "notes": "A concise blocked notification describes the missing prerequisite rather than saying the bot is done."
+  },
+  {
+    "id": "chat-empty",
+    "category": "Chats",
+    "title": "Chat · no messages yet",
+    "requirements": [
+      "empty-chat",
+      "chat-buffer-name"
+    ],
+    "notes": "Opening a newly created chat keeps the layout and gives the input the correct target."
+  },
+  {
+    "id": "chat-streaming",
+    "category": "Chats",
+    "title": "Streaming · following the bottom",
+    "requirements": [
+      "stream-follow",
+      "stable-layout",
+      "focus-preservation"
+    ],
+    "notes": "Output follows the bottom only if the reader was already there. Input focus and any partial draft remain untouched."
+  },
+  {
+    "id": "chat-reading",
+    "category": "Chats",
+    "title": "Streaming · reading earlier messages",
+    "requirements": [
+      "scroll-preservation",
+      "focus-preservation"
+    ],
+    "notes": "New output must not scroll a reader back to the bottom. This fixture is deliberately scrolled into earlier messages."
+  },
+  {
+    "id": "markdown",
+    "category": "Messages",
+    "title": "Markdown · headings, lists, code, links",
+    "requirements": [
+      "markdown",
+      "literal-copy",
+      "links"
+    ],
+    "notes": "Markup is rendered for reading; decorative borders are display-only. Copying returns literal selected message content."
+  },
+  {
+    "id": "hidden-collapsed",
+    "category": "Messages",
+    "title": "Internal messages · collapsed",
+    "requirements": [
+      "hidden-messages",
+      "role-injection"
+    ],
+    "notes": "A consecutive run of internal events becomes one gray group. The visible user and assistant sequence is preserved."
+  },
+  {
+    "id": "hidden-expanded",
+    "category": "Messages",
+    "title": "Internal messages · expanded",
+    "requirements": [
+      "hidden-expansion",
+      "expansion-preservation"
+    ],
+    "notes": "RET expands the group underneath its summary. The expansion survives new events and can be collapsed again."
+  },
+  {
+    "id": "copy-selection",
+    "category": "Messages",
+    "title": "Selection · borders excluded",
+    "requirements": [
+      "literal-copy",
+      "selection"
+    ],
+    "notes": "The blue selection contains message text only. Expected copied text: \"Keep the sidebar reachable.\""
+  },
+  {
+    "id": "link-text",
+    "category": "Messages",
+    "title": "Text link · main editor buffer",
+    "requirements": [
+      "text-links",
+      "main-pages",
+      "no-extra-splits"
+    ],
+    "notes": "RET on a text link opens that file in the existing main window, resolved against the chat location."
+  },
+  {
+    "id": "link-media",
+    "category": "Messages",
+    "title": "Media link · external open",
+    "requirements": [
+      "media-links",
+      "binary-links"
+    ],
+    "notes": "Images, videos, HTML, and binary files open externally. The terminal remains on the chat and keeps its draft."
+  },
+  {
+    "id": "delegation",
+    "category": "Messages",
+    "title": "Delegation · literal user request and context",
+    "requirements": [
+      "delegation",
+      "role-injection",
+      "project-context"
+    ],
+    "notes": "The two required sections remain visible as the bot’s initial user message. Manager context adds only information absent from the user’s wording."
+  },
+  {
+    "id": "new-manager",
+    "category": "Input",
+    "title": "New manager · empty one-line input",
+    "requirements": [
+      "new-manager",
+      "one-line-input",
+      "role-colors"
+    ],
+    "notes": "M-0 prepares a new manager conversation. Creating and numbering the chat must not lose the draft."
+  },
+  {
+    "id": "input-bot",
+    "category": "Input",
+    "title": "Input · one purple line",
+    "requirements": [
+      "one-line-input",
+      "role-colors",
+      "cursor-boundary"
+    ],
+    "notes": "Only the editable line contains the cursor. The bars and target row never become editable."
+  },
+  {
+    "id": "input-manager",
+    "category": "Input",
+    "title": "Input · one orange line",
+    "requirements": [
+      "one-line-input",
+      "role-colors",
+      "input-toggle"
+    ],
+    "notes": "The same input becomes orange when addressed to m0. Main content remains b2."
+  },
+  {
+    "id": "input-wrapped",
+    "category": "Input",
+    "title": "Input · soft wrapping",
+    "requirements": [
+      "visual-line-growth",
+      "plain-editing"
+    ],
+    "notes": "Growth uses displayed lines, including soft wraps. Wrapping never inserts spaces or newlines into the submitted text."
+  },
+  {
+    "id": "input-ten-lines",
+    "category": "Input",
+    "title": "Input · ten-line limit",
+    "requirements": [
+      "input-max-height",
+      "pinned-bars"
+    ],
+    "notes": "At ten visual lines, the composer stops growing and preserves useful main content."
+  },
+  {
+    "id": "input-overflow",
+    "category": "Input",
+    "title": "Input · scroll within the draft",
+    "requirements": [
+      "input-overflow",
+      "pinned-bars",
+      "cursor-visibility"
+    ],
+    "notes": "When the draft exceeds ten visual lines, its viewport follows the cursor while all three control rows remain pinned."
+  },
+  {
+    "id": "input-cursor",
+    "category": "Input",
+    "title": "Input · edit the middle",
+    "requirements": [
+      "cursor-preservation",
+      "undo",
+      "selection"
+    ],
+    "notes": "A refresh must preserve the editing position inside the draft, not move it to the end. Undo applies only to text edits."
+  },
+  {
+    "id": "input-cleared",
+    "category": "Input",
+    "title": "Input · C-g clears",
+    "requirements": [
+      "clear-input",
+      "input-shrink"
+    ],
+    "notes": "Clearing removes text and attachments and shrinks back to one line. Full mode keeps its composer open."
+  },
+  {
+    "id": "attachments",
+    "category": "Attachments",
+    "title": "Attachments · images and sizes",
+    "requirements": [
+      "clipboard-image",
+      "attachment-controls",
+      "attachment-only"
+    ],
+    "notes": "Attachments are listed before editable text. RET or click on [del] removes only that item; the name opens the image."
+  },
+  {
+    "id": "attachment-removed",
+    "category": "Attachments",
+    "title": "Attachment · removed without losing draft",
+    "requirements": [
+      "attachment-delete",
+      "undo",
+      "draft-preservation"
+    ],
+    "notes": "Removing an attachment preserves the draft, cursor, and text undo history."
+  },
+  {
+    "id": "attachment-only",
+    "category": "Attachments",
+    "title": "Attachment · no text",
+    "requirements": [
+      "attachment-only",
+      "submission"
+    ],
+    "notes": "An image-only draft is sendable. Empty text alone must not prevent submission when an attachment exists."
+  },
+  {
+    "id": "clipboard-empty",
+    "category": "Attachments",
+    "title": "Clipboard · no image",
+    "requirements": [
+      "clipboard-failure",
+      "draft-preservation"
+    ],
+    "notes": "A missing image produces a concise message and leaves the draft untouched."
+  },
+  {
+    "id": "send-pending",
+    "category": "Submission",
+    "title": "Send · in flight",
+    "requirements": [
+      "submit-pending",
+      "duplicate-submit",
+      "draft-preservation"
+    ],
+    "notes": "A second M-RET cannot duplicate the request. Text remains visible until acknowledgement."
+  },
+  {
+    "id": "send-failed",
+    "category": "Submission",
+    "title": "Send · failure preserves draft",
+    "requirements": [
+      "submit-failure",
+      "draft-preservation"
+    ],
+    "notes": "The error is actionable and the complete draft and attachments remain available for retry."
+  },
+  {
+    "id": "send-late-reply",
+    "category": "Submission",
+    "title": "Send · late reply cannot erase new text",
+    "requirements": [
+      "late-reply",
+      "draft-preservation",
+      "target-identity"
+    ],
+    "notes": "The earlier submission succeeded after the user typed a new draft. The new text and recipient must remain untouched."
+  },
+  {
+    "id": "send-success",
+    "category": "Submission",
+    "title": "Send · success",
+    "requirements": [
+      "submit-success",
+      "input-shrink"
+    ],
+    "notes": "Acknowledged text appears once in the chat. Only the submitted draft is cleared; input returns to one line."
+  },
+  {
+    "id": "sidebar-selected",
+    "category": "Notifications",
+    "title": "Sidebar · all matching rows selected",
+    "requirements": [
+      "sidebar-selection",
+      "notification-badge"
+    ],
+    "notes": "Every active/unread/read entry belonging to the selected chat shares the orange left rule and dark highlight."
+  },
+  {
+    "id": "sidebar-scrolled",
+    "category": "Notifications",
+    "title": "Sidebar · scroll survives refresh",
+    "requirements": [
+      "sidebar-scroll",
+      "focus-preservation"
+    ],
+    "notes": "The sidebar is scrolled independently. An arriving event does not return it to row zero or move the text cursor."
+  },
+  {
+    "id": "sidebar-overflow",
+    "category": "Notifications",
+    "title": "Sidebar · beyond 36 shortcuts",
+    "requirements": [
+      "all-notifications",
+      "shortcut-limit",
+      "shadow-invisibility"
+    ],
+    "notes": "The shortcut alphabet ends at z, but notifications do not disappear. Later entries remain clickable and reachable by scrolling."
+  },
+  {
+    "id": "sidebar-read",
+    "category": "Notifications",
+    "title": "Sidebar · recent five read",
+    "requirements": [
+      "read-limit",
+      "notification-read"
+    ],
+    "notes": "The read section shows only the five newest entries; active and unread sections are not capped at five."
+  },
+  {
+    "id": "sidebar-time",
+    "category": "Notifications",
+    "title": "Sidebar · relative timestamps",
+    "requirements": [
+      "relative-time",
+      "notification-layout"
+    ],
+    "notes": "Recent updates use minutes or hours. Older entries use month and day, with muted right-aligned timestamps."
+  },
+  {
+    "id": "tabs-many",
+    "category": "Navigation",
+    "title": "Bars · overflow without wrapping",
+    "requirements": [
+      "tab-limit",
+      "tab-width",
+      "tab-overflow"
+    ],
+    "notes": "Each tab is at most 20 cells and the bot row lists up to nine chats and the manager row up to ten chats, plus the M-0 new action. Overflow stays on one line and exposes a scroll affordance."
+  },
+  {
+    "id": "tabs-scrolled",
+    "category": "Navigation",
+    "title": "Bars · reveal later entries",
+    "requirements": [
+      "tab-overflow",
+      "shortcut-map"
+    ],
+    "notes": "Scrolling a bar changes what is visible, never the shortcut index. M-4 still selects its original slot."
+  },
+  {
+    "id": "long-titles",
+    "category": "Navigation",
+    "title": "Titles · truncation and identity",
+    "requirements": [
+      "long-titles",
+      "tab-width",
+      "buffer-identity"
+    ],
+    "notes": "Long titles truncate with an ellipsis rather than wrapping controls. The UUID, not the visible title or label, remains identity."
+  },
+  {
+    "id": "numbering-wrap",
+    "category": "Navigation",
+    "title": "Labels · wrap and historical duplicates",
+    "requirements": [
+      "manager-number",
+      "bot-number-wrap",
+      "chat-identity",
+      "latest-label"
+    ],
+    "notes": "Historical b0 and m0 labels can repeat. Search distinguishes conversations by title/time; API operations always use UUIDs."
+  },
+  {
+    "id": "cowork-single",
+    "category": "Cowork",
+    "title": "Cowork · ordinary chat buffer",
+    "requirements": [
+      "cowork-entry",
+      "cowork-buffers"
+    ],
+    "notes": "C-x 1 leaves full mode and keeps only the main buffer. The sidebar and composer are absent until explicitly requested."
+  },
+  {
+    "id": "cowork-right",
+    "category": "Cowork",
+    "title": "Cowork · split right",
+    "requirements": [
+      "cowork-entry",
+      "normal-splits"
+    ],
+    "notes": "C-x 3 first leaves full mode, then splits the main chat like an ordinary Emacs buffer. Repeating the command follows normal Emacs behavior."
+  },
+  {
+    "id": "cowork-below",
+    "category": "Cowork",
+    "title": "Cowork · split below",
+    "requirements": [
+      "cowork-entry",
+      "normal-splits"
+    ],
+    "notes": "C-x 2 creates an ordinary vertical stack after removing the full-mode panels."
+  },
+  {
+    "id": "cowork-code",
+    "category": "Cowork",
+    "title": "Cowork · chat beside code",
+    "requirements": [
+      "cowork-buffers",
+      "text-links"
+    ],
+    "notes": "A chat and a normal file can coexist. Opening links must not create an accumulating series of extra windows."
+  },
+  {
+    "id": "cowork-input",
+    "category": "Cowork",
+    "title": "Cowork · summon the input",
+    "requirements": [
+      "cowork-input",
+      "cowork-focus"
+    ],
+    "notes": "M-/ opens a full-width temporary composer targeting the visible chat from which it was invoked."
+  },
+  {
+    "id": "cowork-cycle",
+    "category": "Cowork",
+    "title": "Cowork · cycle visible targets",
+    "requirements": [
+      "cowork-target-cycle",
+      "cowork-focus"
+    ],
+    "notes": "Repeated M-/ follows visible-buffer order, then the manager fallback. The focused input retains its draft."
+  },
+  {
+    "id": "cowork-cleared",
+    "category": "Cowork",
+    "title": "Cowork · C-g closes input",
+    "requirements": [
+      "cowork-clear",
+      "cowork-focus"
+    ],
+    "notes": "C-g clears the composer and closes its window in cowork mode, returning focus to the source buffer."
+  },
+  {
+    "id": "cowork-to-full",
+    "category": "Cowork",
+    "title": "Cowork · return to home",
+    "requirements": [
+      "cowork-return",
+      "three-panels"
+    ],
+    "notes": "C-M-h is the explicit return to full mode. The three-panel arrangement is restored once, with no leftover cowork splits."
+  },
+  {
+    "id": "search",
+    "category": "Search",
+    "title": "Search · fuzzy label and title",
+    "requirements": [
+      "fuzzy-search",
+      "search-limit",
+      "shadow-invisibility"
+    ],
+    "notes": "The query \"1 scroll\" can match b21 and title words in order. Searching goes beyond the cached 20 chats; results load 50 at a time, with RET on [Show 50 more] to continue."
+  },
+  {
+    "id": "search-empty",
+    "category": "Search",
+    "title": "Search · no matches",
+    "requirements": [
+      "search-empty",
+      "search-recovery"
+    ],
+    "notes": "An empty result set preserves the query and gives a useful recovery hint."
+  },
+  {
+    "id": "search-loading",
+    "category": "Search",
+    "title": "Search · loading older results",
+    "requirements": [
+      "search-loading",
+      "stale-response"
+    ],
+    "notes": "A remote search shows its in-flight state. A late response from an older query must not replace newer results."
+  },
+  {
+    "id": "loading",
+    "category": "Recovery",
+    "title": "Workspace · initial loading",
+    "requirements": [
+      "loading-state",
+      "stable-layout"
+    ],
+    "notes": "Loading keeps a recognizable stable shell and lets the user retain a draft while the workspace connects."
+  },
+  {
+    "id": "load-error",
+    "category": "Recovery",
+    "title": "Workspace · load failed",
+    "requirements": [
+      "load-error",
+      "retry",
+      "draft-preservation"
+    ],
+    "notes": "A page-level failure has a retry action. The draft remains editable and is never erased by failure."
+  },
+  {
+    "id": "reconnecting",
+    "category": "Recovery",
+    "title": "Connection · reconnecting",
+    "requirements": [
+      "reconnect",
+      "blue-green",
+      "draft-preservation"
+    ],
+    "notes": "During server restart or blue/green handoff, existing content and drafts remain visible. Reconnect reconciles missed state without changing focus."
+  },
+  {
+    "id": "reconnected",
+    "category": "Recovery",
+    "title": "Connection · recovered",
+    "requirements": [
+      "reconciliation",
+      "stream-follow",
+      "shadow-notification"
+    ],
+    "notes": "After reconnect, completed messages and notifications are reconciled once. The reader remains at the same place."
+  },
+  {
+    "id": "shadow-hidden",
+    "category": "Recovery",
+    "title": "Shadow chat · never visible",
+    "requirements": [
+      "shadow-invisibility",
+      "shadow-notification",
+      "role-injection"
+    ],
+    "notes": "The fixture deliberately includes an active shadow chat. It is absent from every badge, bar, homepage, and notification entry."
+  },
+  {
+    "id": "notification-outcome",
+    "category": "Recovery",
+    "title": "Completion · concise outcome",
+    "requirements": [
+      "shadow-notification",
+      "notification-summary"
+    ],
+    "notes": "The notification describes the useful result, omits the invisible shadow identity, and does not merely announce completion."
+  },
+  {
+    "id": "unicode",
+    "category": "Edge cases",
+    "title": "Text · wide characters and literal paths",
+    "requirements": [
+      "unicode-width",
+      "literal-copy",
+      "wrap-boundary"
+    ],
+    "notes": "Cell widths account for wide characters and combining marks. Paths and selected text retain their literal contents."
+  },
+  {
+    "id": "narrow-frame",
+    "category": "Edge cases",
+    "title": "Frame · narrow but usable",
+    "requirements": [
+      "small-frame",
+      "three-panels",
+      "input-max-height"
+    ],
+    "notes": "The 96×32 fixture keeps the 30-column sidebar and a usable content/input area. The 400×80 version checks that extra width does not add panels."
+  },
+  {
+    "id": "long-notification",
+    "category": "Edge cases",
+    "title": "Notification · multiline body",
+    "requirements": [
+      "multiline-notification",
+      "sidebar-scroll"
+    ],
+    "notes": "Notification summaries wrap inside the sidebar instead of being flattened into one truncated line."
+  },
+  {
+    "id": "locations-empty",
+    "category": "Locations",
+    "title": "Locations · no configured entries",
+    "requirements": [
+      "read-only-reference",
+      "main-pages"
+    ],
+    "notes": "Reference content only. Changes are made through the assistant using the project README and API."
+  },
+  {
+    "id": "projects-empty",
+    "category": "Projects",
+    "title": "Projects · no configured entries",
+    "requirements": [
+      "read-only-reference",
+      "main-pages"
+    ],
+    "notes": "Reference content only. Changes are made through the assistant using the project README and API."
+  },
+  {
+    "id": "project-readme",
+    "category": "Projects",
+    "title": "Project · README context",
+    "requirements": [
+      "read-only-reference",
+      "main-pages"
+    ],
+    "notes": "Reference content only. Changes are made through the assistant using the project README and API."
+  },
+  {
+    "id": "search-many",
+    "category": "Search",
+    "title": "Search · first 50 results",
+    "requirements": [
+      "search-limit",
+      "search-pagination",
+      "search-focus"
+    ],
+    "notes": "The gray query line is editable. Arrow keys select results below it; RET opens a chat or loads the next 50. Cursor movement stays within the query and options."
+  },
+  {
+    "id": "search-more",
+    "category": "Search",
+    "title": "Search · Show 50 more selected",
+    "requirements": [
+      "search-limit",
+      "search-pagination",
+      "search-focus"
+    ],
+    "notes": "The gray query line is editable. Arrow keys select results below it; RET opens a chat or loads the next 50. Cursor movement stays within the query and options."
+  },
+  {
+    "id": "search-next",
+    "category": "Search",
+    "title": "Search · next 50 results",
+    "requirements": [
+      "search-limit",
+      "search-pagination",
+      "search-focus"
+    ],
+    "notes": "The gray query line is editable. Arrow keys select results below it; RET opens a chat or loads the next 50. Cursor movement stays within the query and options."
+  },
+  {
+    "id": "search-last",
+    "category": "Search",
+    "title": "Search · final batch",
+    "requirements": [
+      "search-limit",
+      "search-pagination",
+      "search-focus"
+    ],
+    "notes": "The gray query line is editable. Arrow keys select results below it; RET opens a chat or loads the next 50. Cursor movement stays within the query and options."
+  }
+]

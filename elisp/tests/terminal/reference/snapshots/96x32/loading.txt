@@ -1,0 +1,32 @@
+ # (0) ACTIVE                      │ Loading…                                                   
+                                   │                                                            
+ # (0) UNREAD                      │ Connecting to your workspace.                              
+                                   │                                                            
+ # (0) READ                        │                                                            
+                                   │                                                            
+                                   │                                                            
+                                   │                                                            
+                                   │                                                            
+                                   │                                                            
+                                   │                                                            
+                                   │                                                            
+                                   │                                                            
+                                   │                                                            
+                                   │                                                            
+                                   │                                                            
+                                   │                                                            
+                                   │                                                            
+                                   │                                                            
+                                   │                                                            
+                                   │                                                            
+                                   │                                                            
+                                   │                                                            
+                                   │                                                            
+                                   │                                                            
+                                   │                                                            
+                                   │                                                            
+                                                                                                
+ M-0 new                                                                                        
+  m   New chat                                                                                  
+ Keep this while connecting.                                                                    
+                                                                                                

@@ -1,0 +1,40 @@
+ # (1) ACTIVE                      │ ● b2  aibo   Make the three panels stable                                          
+                                   │ project  —   goal  ready   tokens  0   elapsed  0s                                 
+ 0 ▏ ● b2  aibo  Make the three p… │ [2 hidden messages] ▸                                                              
+                                   │                                                                                    
+ # (44) UNREAD                     │  user                                                                              
+                                   │ ▏ I want three stable panels: notifications on the left, the page I am viewing on  
+ 1  ●  b21                      1m │ ▏ the right, and a normally growing input across the bottom.                       
+    Fix notification refresh and … │                                                                                    
+    Notification 1: this remains   │  ● b2  aibo                                                                        
+    visible without a shortcut.    │ ▏ The workspace keeps its three panels while pages change and messages arrive.     
+                                   │ ▏                                                                                  
+ 2  ●  b21                      2m │ ▏ What changed                                                                     
+    Fix notification refresh and … │ ▏ The sidebar keeps its scroll position. C-o switches between the main page and    
+    Notification 2: this remains   │ ▏ input. M-/ selects the conversation you are looking at.                          
+    visible without a shortcut.    │                                                                                    
+                                   │                                                                                    
+ 3  ●  b21                      3m │                                                                                    
+    Fix notification refresh and … │                                                                                    
+    Notification 3: this remains   │                                                                                    
+    visible without a shortcut.    │                                                                                    
+                                   │                                                                                    
+ 4  ●  b21                      4m │                                                                                    
+    Fix notification refresh and … │                                                                                    
+    Notification 4: this remains   │                                                                                    
+    visible without a shortcut.    │                                                                                    
+                                   │                                                                                    
+ 5  ●  b21                      5m │                                                                                    
+    Fix notification refresh and … │                                                                                    
+    Notification 5: this remains   │                                                                                    
+    visible without a shortcut.    │                                                                                    
+                                   │                                                                                    
+ 6  ●  b21                      6m │                                                                                    
+    Fix notification refresh and … │                                                                                    
+    Notification 6: this remains   │                                                                                    
+    visible without a shortcut.    │                                                                                    
+           ● M-1 Make the th…  M-2 Fix notificat…  ● M-3 Inspect the…                                                   
+ M-0 new   cb0 Plan the work…  cb1 Review termin…                                                                       
+ ●  b2  aibo   continue 'Make the three panels stable'                                                                  
+                                                                                                                        
+                                                                                                                        

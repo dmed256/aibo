@@ -1,0 +1,975 @@
+{
+  "scenario": "search-last",
+  "columns": 96,
+  "rows": 32,
+  "cursor": {
+    "row": 30,
+    "col": 1
+  },
+  "regions": {
+    "main": {
+      "x": 0,
+      "y": 0,
+      "width": 96,
+      "height": 31
+    },
+    "searchInput": {
+      "x": 1,
+      "y": 0,
+      "width": 94,
+      "height": 1
+    }
+  },
+  "runs": [
+    [
+      {
+        "col": 0,
+        "text": "                                                                                                ",
+        "face": "searchInput",
+        "action": "search:input"
+      }
+    ],
+    [
+      {
+        "col": 0,
+        "text": "                                                                                                ",
+        "face": "base"
+      }
+    ],
+    [
+      {
+        "col": 0,
+        "text": " ",
+        "face": "base",
+        "action": "search:select:94"
+      },
+      {
+        "col": 1,
+        "text": "●",
+        "face": "mutedOnbase",
+        "action": "search:select:94"
+      },
+      {
+        "col": 2,
+        "text": " ",
+        "face": "base",
+        "action": "search:select:94"
+      },
+      {
+        "col": 3,
+        "text": " b94 ",
+        "face": "botBadge",
+        "action": "search:select:94"
+      },
+      {
+        "col": 8,
+        "text": "  Search task 95                                                                        ",
+        "face": "base",
+        "action": "search:select:94"
+      }
+    ],
+    [
+      {
+        "col": 0,
+        "text": " ",
+        "face": "base",
+        "action": "search:select:95"
+      },
+      {
+        "col": 1,
+        "text": "●",
+        "face": "mutedOnbase",
+        "action": "search:select:95"
+      },
+      {
+        "col": 2,
+        "text": " ",
+        "face": "base",
+        "action": "search:select:95"
+      },
+      {
+        "col": 3,
+        "text": " b95 ",
+        "face": "botBadge",
+        "action": "search:select:95"
+      },
+      {
+        "col": 8,
+        "text": "  Search task 96                                                                        ",
+        "face": "base",
+        "action": "search:select:95"
+      }
+    ],
+    [
+      {
+        "col": 0,
+        "text": " ",
+        "face": "base",
+        "action": "search:select:96"
+      },
+      {
+        "col": 1,
+        "text": "●",
+        "face": "mutedOnbase",
+        "action": "search:select:96"
+      },
+      {
+        "col": 2,
+        "text": " ",
+        "face": "base",
+        "action": "search:select:96"
+      },
+      {
+        "col": 3,
+        "text": " b96 ",
+        "face": "botBadge",
+        "action": "search:select:96"
+      },
+      {
+        "col": 8,
+        "text": "  Search task 97                                                                        ",
+        "face": "base",
+        "action": "search:select:96"
+      }
+    ],
+    [
+      {
+        "col": 0,
+        "text": " ",
+        "face": "base",
+        "action": "search:select:97"
+      },
+      {
+        "col": 1,
+        "text": "●",
+        "face": "mutedOnbase",
+        "action": "search:select:97"
+      },
+      {
+        "col": 2,
+        "text": " ",
+        "face": "base",
+        "action": "search:select:97"
+      },
+      {
+        "col": 3,
+        "text": " b97 ",
+        "face": "botBadge",
+        "action": "search:select:97"
+      },
+      {
+        "col": 8,
+        "text": "  Search task 98                                                                        ",
+        "face": "base",
+        "action": "search:select:97"
+      }
+    ],
+    [
+      {
+        "col": 0,
+        "text": " ",
+        "face": "base",
+        "action": "search:select:98"
+      },
+      {
+        "col": 1,
+        "text": "●",
+        "face": "mutedOnbase",
+        "action": "search:select:98"
+      },
+      {
+        "col": 2,
+        "text": " ",
+        "face": "base",
+        "action": "search:select:98"
+      },
+      {
+        "col": 3,
+        "text": " b98 ",
+        "face": "botBadge",
+        "action": "search:select:98"
+      },
+      {
+        "col": 8,
+        "text": "  Search task 99                                                                        ",
+        "face": "base",
+        "action": "search:select:98"
+      }
+    ],
+    [
+      {
+        "col": 0,
+        "text": " ",
+        "face": "base",
+        "action": "search:select:99"
+      },
+      {
+        "col": 1,
+        "text": "●",
+        "face": "mutedOnbase",
+        "action": "search:select:99"
+      },
+      {
+        "col": 2,
+        "text": " ",
+        "face": "base",
+        "action": "search:select:99"
+      },
+      {
+        "col": 3,
+        "text": " b99 ",
+        "face": "botBadge",
+        "action": "search:select:99"
+      },
+      {
+        "col": 8,
+        "text": "  Search task 100                                                                       ",
+        "face": "base",
+        "action": "search:select:99"
+      }
+    ],
+    [
+      {
+        "col": 0,
+        "text": " ",
+        "face": "base",
+        "action": "search:select:100"
+      },
+      {
+        "col": 1,
+        "text": "●",
+        "face": "mutedOnbase",
+        "action": "search:select:100"
+      },
+      {
+        "col": 2,
+        "text": " ",
+        "face": "base",
+        "action": "search:select:100"
+      },
+      {
+        "col": 3,
+        "text": " b100 ",
+        "face": "botBadge",
+        "action": "search:select:100"
+      },
+      {
+        "col": 9,
+        "text": "  Search task 101                                                                      ",
+        "face": "base",
+        "action": "search:select:100"
+      }
+    ],
+    [
+      {
+        "col": 0,
+        "text": " ",
+        "face": "base",
+        "action": "search:select:101"
+      },
+      {
+        "col": 1,
+        "text": "●",
+        "face": "mutedOnbase",
+        "action": "search:select:101"
+      },
+      {
+        "col": 2,
+        "text": " ",
+        "face": "base",
+        "action": "search:select:101"
+      },
+      {
+        "col": 3,
+        "text": " b101 ",
+        "face": "botBadge",
+        "action": "search:select:101"
+      },
+      {
+        "col": 9,
+        "text": "  Search task 102                                                                      ",
+        "face": "base",
+        "action": "search:select:101"
+      }
+    ],
+    [
+      {
+        "col": 0,
+        "text": " ",
+        "face": "base",
+        "action": "search:select:102"
+      },
+      {
+        "col": 1,
+        "text": "●",
+        "face": "mutedOnbase",
+        "action": "search:select:102"
+      },
+      {
+        "col": 2,
+        "text": " ",
+        "face": "base",
+        "action": "search:select:102"
+      },
+      {
+        "col": 3,
+        "text": " b102 ",
+        "face": "botBadge",
+        "action": "search:select:102"
+      },
+      {
+        "col": 9,
+        "text": "  Search task 103                                                                      ",
+        "face": "base",
+        "action": "search:select:102"
+      }
+    ],
+    [
+      {
+        "col": 0,
+        "text": " ",
+        "face": "base",
+        "action": "search:select:103"
+      },
+      {
+        "col": 1,
+        "text": "●",
+        "face": "mutedOnbase",
+        "action": "search:select:103"
+      },
+      {
+        "col": 2,
+        "text": " ",
+        "face": "base",
+        "action": "search:select:103"
+      },
+      {
+        "col": 3,
+        "text": " b103 ",
+        "face": "botBadge",
+        "action": "search:select:103"
+      },
+      {
+        "col": 9,
+        "text": "  Search task 104                                                                      ",
+        "face": "base",
+        "action": "search:select:103"
+      }
+    ],
+    [
+      {
+        "col": 0,
+        "text": " ",
+        "face": "base",
+        "action": "search:select:104"
+      },
+      {
+        "col": 1,
+        "text": "●",
+        "face": "mutedOnbase",
+        "action": "search:select:104"
+      },
+      {
+        "col": 2,
+        "text": " ",
+        "face": "base",
+        "action": "search:select:104"
+      },
+      {
+        "col": 3,
+        "text": " b104 ",
+        "face": "botBadge",
+        "action": "search:select:104"
+      },
+      {
+        "col": 9,
+        "text": "  Search task 105                                                                      ",
+        "face": "base",
+        "action": "search:select:104"
+      }
+    ],
+    [
+      {
+        "col": 0,
+        "text": " ",
+        "face": "base",
+        "action": "search:select:105"
+      },
+      {
+        "col": 1,
+        "text": "●",
+        "face": "mutedOnbase",
+        "action": "search:select:105"
+      },
+      {
+        "col": 2,
+        "text": " ",
+        "face": "base",
+        "action": "search:select:105"
+      },
+      {
+        "col": 3,
+        "text": " b105 ",
+        "face": "botBadge",
+        "action": "search:select:105"
+      },
+      {
+        "col": 9,
+        "text": "  Search task 106                                                                      ",
+        "face": "base",
+        "action": "search:select:105"
+      }
+    ],
+    [
+      {
+        "col": 0,
+        "text": " ",
+        "face": "base",
+        "action": "search:select:106"
+      },
+      {
+        "col": 1,
+        "text": "●",
+        "face": "mutedOnbase",
+        "action": "search:select:106"
+      },
+      {
+        "col": 2,
+        "text": " ",
+        "face": "base",
+        "action": "search:select:106"
+      },
+      {
+        "col": 3,
+        "text": " b106 ",
+        "face": "botBadge",
+        "action": "search:select:106"
+      },
+      {
+        "col": 9,
+        "text": "  Search task 107                                                                      ",
+        "face": "base",
+        "action": "search:select:106"
+      }
+    ],
+    [
+      {
+        "col": 0,
+        "text": " ",
+        "face": "base",
+        "action": "search:select:107"
+      },
+      {
+        "col": 1,
+        "text": "●",
+        "face": "mutedOnbase",
+        "action": "search:select:107"
+      },
+      {
+        "col": 2,
+        "text": " ",
+        "face": "base",
+        "action": "search:select:107"
+      },
+      {
+        "col": 3,
+        "text": " b107 ",
+        "face": "botBadge",
+        "action": "search:select:107"
+      },
+      {
+        "col": 9,
+        "text": "  Search task 108                                                                      ",
+        "face": "base",
+        "action": "search:select:107"
+      }
+    ],
+    [
+      {
+        "col": 0,
+        "text": " ",
+        "face": "base",
+        "action": "search:select:108"
+      },
+      {
+        "col": 1,
+        "text": "●",
+        "face": "mutedOnbase",
+        "action": "search:select:108"
+      },
+      {
+        "col": 2,
+        "text": " ",
+        "face": "base",
+        "action": "search:select:108"
+      },
+      {
+        "col": 3,
+        "text": " b108 ",
+        "face": "botBadge",
+        "action": "search:select:108"
+      },
+      {
+        "col": 9,
+        "text": "  Search task 109                                                                      ",
+        "face": "base",
+        "action": "search:select:108"
+      }
+    ],
+    [
+      {
+        "col": 0,
+        "text": " ",
+        "face": "base",
+        "action": "search:select:109"
+      },
+      {
+        "col": 1,
+        "text": "●",
+        "face": "mutedOnbase",
+        "action": "search:select:109"
+      },
+      {
+        "col": 2,
+        "text": " ",
+        "face": "base",
+        "action": "search:select:109"
+      },
+      {
+        "col": 3,
+        "text": " b109 ",
+        "face": "botBadge",
+        "action": "search:select:109"
+      },
+      {
+        "col": 9,
+        "text": "  Search task 110                                                                      ",
+        "face": "base",
+        "action": "search:select:109"
+      }
+    ],
+    [
+      {
+        "col": 0,
+        "text": " ",
+        "face": "base",
+        "action": "search:select:110"
+      },
+      {
+        "col": 1,
+        "text": "●",
+        "face": "mutedOnbase",
+        "action": "search:select:110"
+      },
+      {
+        "col": 2,
+        "text": " ",
+        "face": "base",
+        "action": "search:select:110"
+      },
+      {
+        "col": 3,
+        "text": " b110 ",
+        "face": "botBadge",
+        "action": "search:select:110"
+      },
+      {
+        "col": 9,
+        "text": "  Search task 111                                                                      ",
+        "face": "base",
+        "action": "search:select:110"
+      }
+    ],
+    [
+      {
+        "col": 0,
+        "text": " ",
+        "face": "base",
+        "action": "search:select:111"
+      },
+      {
+        "col": 1,
+        "text": "●",
+        "face": "mutedOnbase",
+        "action": "search:select:111"
+      },
+      {
+        "col": 2,
+        "text": " ",
+        "face": "base",
+        "action": "search:select:111"
+      },
+      {
+        "col": 3,
+        "text": " b111 ",
+        "face": "botBadge",
+        "action": "search:select:111"
+      },
+      {
+        "col": 9,
+        "text": "  Search task 112                                                                      ",
+        "face": "base",
+        "action": "search:select:111"
+      }
+    ],
+    [
+      {
+        "col": 0,
+        "text": " ",
+        "face": "base",
+        "action": "search:select:112"
+      },
+      {
+        "col": 1,
+        "text": "●",
+        "face": "mutedOnbase",
+        "action": "search:select:112"
+      },
+      {
+        "col": 2,
+        "text": " ",
+        "face": "base",
+        "action": "search:select:112"
+      },
+      {
+        "col": 3,
+        "text": " b112 ",
+        "face": "botBadge",
+        "action": "search:select:112"
+      },
+      {
+        "col": 9,
+        "text": "  Search task 113                                                                      ",
+        "face": "base",
+        "action": "search:select:112"
+      }
+    ],
+    [
+      {
+        "col": 0,
+        "text": " ",
+        "face": "base",
+        "action": "search:select:113"
+      },
+      {
+        "col": 1,
+        "text": "●",
+        "face": "mutedOnbase",
+        "action": "search:select:113"
+      },
+      {
+        "col": 2,
+        "text": " ",
+        "face": "base",
+        "action": "search:select:113"
+      },
+      {
+        "col": 3,
+        "text": " b113 ",
+        "face": "botBadge",
+        "action": "search:select:113"
+      },
+      {
+        "col": 9,
+        "text": "  Search task 114                                                                      ",
+        "face": "base",
+        "action": "search:select:113"
+      }
+    ],
+    [
+      {
+        "col": 0,
+        "text": " ",
+        "face": "base",
+        "action": "search:select:114"
+      },
+      {
+        "col": 1,
+        "text": "●",
+        "face": "mutedOnbase",
+        "action": "search:select:114"
+      },
+      {
+        "col": 2,
+        "text": " ",
+        "face": "base",
+        "action": "search:select:114"
+      },
+      {
+        "col": 3,
+        "text": " b114 ",
+        "face": "botBadge",
+        "action": "search:select:114"
+      },
+      {
+        "col": 9,
+        "text": "  Search task 115                                                                      ",
+        "face": "base",
+        "action": "search:select:114"
+      }
+    ],
+    [
+      {
+        "col": 0,
+        "text": " ",
+        "face": "base",
+        "action": "search:select:115"
+      },
+      {
+        "col": 1,
+        "text": "●",
+        "face": "mutedOnbase",
+        "action": "search:select:115"
+      },
+      {
+        "col": 2,
+        "text": " ",
+        "face": "base",
+        "action": "search:select:115"
+      },
+      {
+        "col": 3,
+        "text": " b115 ",
+        "face": "botBadge",
+        "action": "search:select:115"
+      },
+      {
+        "col": 9,
+        "text": "  Search task 116                                                                      ",
+        "face": "base",
+        "action": "search:select:115"
+      }
+    ],
+    [
+      {
+        "col": 0,
+        "text": " ",
+        "face": "base",
+        "action": "search:select:116"
+      },
+      {
+        "col": 1,
+        "text": "●",
+        "face": "mutedOnbase",
+        "action": "search:select:116"
+      },
+      {
+        "col": 2,
+        "text": " ",
+        "face": "base",
+        "action": "search:select:116"
+      },
+      {
+        "col": 3,
+        "text": " b116 ",
+        "face": "botBadge",
+        "action": "search:select:116"
+      },
+      {
+        "col": 9,
+        "text": "  Search task 117                                                                      ",
+        "face": "base",
+        "action": "search:select:116"
+      }
+    ],
+    [
+      {
+        "col": 0,
+        "text": " ",
+        "face": "base",
+        "action": "search:select:117"
+      },
+      {
+        "col": 1,
+        "text": "●",
+        "face": "mutedOnbase",
+        "action": "search:select:117"
+      },
+      {
+        "col": 2,
+        "text": " ",
+        "face": "base",
+        "action": "search:select:117"
+      },
+      {
+        "col": 3,
+        "text": " b117 ",
+        "face": "botBadge",
+        "action": "search:select:117"
+      },
+      {
+        "col": 9,
+        "text": "  Search task 118                                                                      ",
+        "face": "base",
+        "action": "search:select:117"
+      }
+    ],
+    [
+      {
+        "col": 0,
+        "text": " ",
+        "face": "base",
+        "action": "search:select:118"
+      },
+      {
+        "col": 1,
+        "text": "●",
+        "face": "mutedOnbase",
+        "action": "search:select:118"
+      },
+      {
+        "col": 2,
+        "text": " ",
+        "face": "base",
+        "action": "search:select:118"
+      },
+      {
+        "col": 3,
+        "text": " b118 ",
+        "face": "botBadge",
+        "action": "search:select:118"
+      },
+      {
+        "col": 9,
+        "text": "  Search task 119                                                                      ",
+        "face": "base",
+        "action": "search:select:118"
+      }
+    ],
+    [
+      {
+        "col": 0,
+        "text": " ",
+        "face": "base",
+        "action": "search:select:119"
+      },
+      {
+        "col": 1,
+        "text": "●",
+        "face": "mutedOnbase",
+        "action": "search:select:119"
+      },
+      {
+        "col": 2,
+        "text": " ",
+        "face": "base",
+        "action": "search:select:119"
+      },
+      {
+        "col": 3,
+        "text": " b119 ",
+        "face": "botBadge",
+        "action": "search:select:119"
+      },
+      {
+        "col": 9,
+        "text": "  Search task 120                                                                      ",
+        "face": "base",
+        "action": "search:select:119"
+      }
+    ],
+    [
+      {
+        "col": 0,
+        "text": " ",
+        "face": "base",
+        "action": "search:select:120"
+      },
+      {
+        "col": 1,
+        "text": "●",
+        "face": "mutedOnbase",
+        "action": "search:select:120"
+      },
+      {
+        "col": 2,
+        "text": " ",
+        "face": "base",
+        "action": "search:select:120"
+      },
+      {
+        "col": 3,
+        "text": " b120 ",
+        "face": "botBadge",
+        "action": "search:select:120"
+      },
+      {
+        "col": 9,
+        "text": "  Search task 121                                                                      ",
+        "face": "base",
+        "action": "search:select:120"
+      }
+    ],
+    [
+      {
+        "col": 0,
+        "text": " ",
+        "face": "base",
+        "action": "search:select:121"
+      },
+      {
+        "col": 1,
+        "text": "●",
+        "face": "mutedOnbase",
+        "action": "search:select:121"
+      },
+      {
+        "col": 2,
+        "text": " ",
+        "face": "base",
+        "action": "search:select:121"
+      },
+      {
+        "col": 3,
+        "text": " b121 ",
+        "face": "botBadge",
+        "action": "search:select:121"
+      },
+      {
+        "col": 9,
+        "text": "  Search task 122                                                                      ",
+        "face": "base",
+        "action": "search:select:121"
+      }
+    ],
+    [
+      {
+        "col": 0,
+        "text": " ",
+        "face": "selected",
+        "action": "search:select:122"
+      },
+      {
+        "col": 1,
+        "text": "●",
+        "face": "cursor",
+        "action": "search:select:122"
+      },
+      {
+        "col": 2,
+        "text": " ",
+        "face": "selected",
+        "action": "search:select:122"
+      },
+      {
+        "col": 3,
+        "text": " b122 ",
+        "face": "botBadge",
+        "action": "search:select:122"
+      },
+      {
+        "col": 9,
+        "text": "  Search task 123                                                                      ",
+        "face": "selected",
+        "action": "search:select:122"
+      }
+    ],
+    [
+      {
+        "col": 0,
+        "text": "                                                                                                ",
+        "face": "echo"
+      }
+    ]
+  ]
+}

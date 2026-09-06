@@ -1,0 +1,258 @@
+{
+  "base": [
+    "#d8dee9",
+    "#15171c"
+  ],
+  "muted": [
+    "#8d929e",
+    "#15171c"
+  ],
+  "orange": [
+    "#e9b96e",
+    "#15171c"
+  ],
+  "purple": [
+    "#c792ea",
+    "#15171c"
+  ],
+  "blue": [
+    "#8cc4ff",
+    "#15171c"
+  ],
+  "green": [
+    "#8ae234",
+    "#15171c"
+  ],
+  "inactiveGreen": [
+    "#52882f",
+    "#15171c"
+  ],
+  "botShortcut": [
+    "#dfb8f5",
+    "#211a2b"
+  ],
+  "managerShortcut": [
+    "#f5d39a",
+    "#292218"
+  ],
+  "botInput": [
+    "#f5f7fb",
+    "#211b29"
+  ],
+  "managerInput": [
+    "#f5f7fb",
+    "#272119"
+  ],
+  "internal": [
+    "#a9aeba",
+    "#20232b"
+  ],
+  "internalBadge": [
+    "#c2c6cf",
+    "#383b44"
+  ],
+  "metadataValue": [
+    "#eeeeee",
+    "#292c34"
+  ],
+  "errorMessage": [
+    "#f07886",
+    "#2b1c21"
+  ],
+  "error": [
+    "#f07886",
+    "#15171c"
+  ],
+  "rule": [
+    "#414550",
+    "#15171c"
+  ],
+  "managerBadge": [
+    "#ffffff",
+    "#976b32"
+  ],
+  "botBadge": [
+    "#ffffff",
+    "#754993"
+  ],
+  "location": [
+    "#eeeeee",
+    "#383b44"
+  ],
+  "user": [
+    "#f5f7fb",
+    "#19232c"
+  ],
+  "userBadge": [
+    "#ffffff",
+    "#527da6"
+  ],
+  "manager": [
+    "#f5f7fb",
+    "#272119"
+  ],
+  "bot": [
+    "#f5f7fb",
+    "#211b29"
+  ],
+  "purpleBar": [
+    "#c792ea",
+    "#211a2b"
+  ],
+  "orangeBar": [
+    "#e9b96e",
+    "#292218"
+  ],
+  "selected": [
+    "#d8dee9",
+    "#24262d"
+  ],
+  "selectedTitle": [
+    "#e9b96e",
+    "#24262d"
+  ],
+  "selectedMuted": [
+    "#a0a4af",
+    "#24262d"
+  ],
+  "key": [
+    "#eeeeee",
+    "#343740"
+  ],
+  "cursor": [
+    "#15171c",
+    "#f0d29c"
+  ],
+  "selection": [
+    "#ffffff",
+    "#48648c"
+  ],
+  "searchInput": [
+    "#eeeeee",
+    "#383b44"
+  ],
+  "code": [
+    "#d1d7e0",
+    "#20232b"
+  ],
+  "link": [
+    "#8cc4ff",
+    "#15171c"
+  ],
+  "echo": [
+    "#a9aeba",
+    "#1c1e25"
+  ],
+  "greenOnbotBadge": [
+    "#8ae234",
+    "#754993"
+  ],
+  "mutedOnbase": [
+    "#8d929e",
+    "#15171c"
+  ],
+  "errorOnbase": [
+    "#f07886",
+    "#15171c"
+  ],
+  "greenOnbot": [
+    "#8ae234",
+    "#211b29"
+  ],
+  "botShortcutOnpurpleBar": [
+    "#dfb8f5",
+    "#211a2b"
+  ],
+  "botShortcutOnbotShortcutOnpurpleBar": [
+    "#dfb8f5",
+    "#211a2b"
+  ],
+  "inactiveGreenOnbotShortcutOnpurpleBar": [
+    "#52882f",
+    "#211a2b"
+  ],
+  "errorOnbotShortcutOnpurpleBar": [
+    "#f07886",
+    "#211a2b"
+  ],
+  "managerShortcutOnorangeBar": [
+    "#f5d39a",
+    "#292218"
+  ],
+  "managerShortcutOnmanagerBadge": [
+    "#f5d39a",
+    "#976b32"
+  ],
+  "managerShortcutOnmanagerShortcutOnorangeBar": [
+    "#f5d39a",
+    "#292218"
+  ],
+  "blueOnuser": [
+    "#8cc4ff",
+    "#19232c"
+  ],
+  "purpleOnbot": [
+    "#c792ea",
+    "#211b29"
+  ],
+  "botShortcutOnbotBadge": [
+    "#dfb8f5",
+    "#754993"
+  ],
+  "greenOnbotShortcutOnbotBadge": [
+    "#8ae234",
+    "#754993"
+  ],
+  "greenOnbase": [
+    "#8ae234",
+    "#15171c"
+  ],
+  "errorOnbotBadge": [
+    "#f07886",
+    "#754993"
+  ],
+  "errorOnbotShortcutOnbotBadge": [
+    "#f07886",
+    "#754993"
+  ],
+  "mutedOnselected": [
+    "#8d929e",
+    "#24262d"
+  ],
+  "mutedOnmanagerBadge": [
+    "#8d929e",
+    "#976b32"
+  ],
+  "orangeOnmanager": [
+    "#e9b96e",
+    "#272119"
+  ],
+  "mutedOnbotBadge": [
+    "#8d929e",
+    "#754993"
+  ],
+  "orangeOnbot": [
+    "#e9b96e",
+    "#211b29"
+  ],
+  "blueOnbot": [
+    "#8cc4ff",
+    "#211b29"
+  ],
+  "purpleOncode": [
+    "#c792ea",
+    "#20232b"
+  ],
+  "mutedOninternal": [
+    "#8d929e",
+    "#20232b"
+  ],
+  "orangeOnuser": [
+    "#e9b96e",
+    "#19232c"
+  ],
+  "greenOnselected": [
+    "#8ae234",
+    "#24262d"
+  ]
+}

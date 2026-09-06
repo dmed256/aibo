@@ -1,0 +1,40 @@
+ # (4) ACTIVE                      │ ● b2  aibo   Make the three panels stable                                          
+                                   │ project  —   goal  ready   tokens  0   elapsed  0s                                 
+ 0 ▏ ● b2  aibo  Make the three p… │ [2 hidden messages] ▸                                                              
+ 1   ● b40  aibo  Review workspac… │                                                                                    
+ 2   ● b41  aibo  Review workspac… │  user                                                                              
+ 3   ● b42  aibo  Review workspac… │ ▏ I want three stable panels: notifications on the left, the page I am viewing on  
+                                   │ ▏ the right, and a normally growing input across the bottom.                       
+ # (2) UNREAD                      │                                                                                    
+                                   │  ● b2  aibo                                                                        
+ 4  ●  b21                     18m │ ▏ The workspace keeps its three panels while pages change and messages arrive.     
+    Fix notification refresh and … │ ▏                                                                                  
+    Sidebar refresh preserves      │ ▏ What changed                                                                     
+    your place while new           │ ▏ The sidebar keeps its scroll position. C-o switches between the main page and    
+    notifications arrive.          │ ▏ input. M-/ selects the conversation you are looking at.                          
+                                   │                                                                                    
+ 5  ●  b8                       1h │                                                                                    
+    Inspect the location change    │                                                                                    
+    Interrupted during the         │                                                                                    
+    location change. No files      │                                                                                    
+    were lost.                     │                                                                                    
+                                   │                                                                                    
+ # (1) READ                        │                                                                                    
+                                   │                                                                                    
+ 6  ●  m0                       2h │                                                                                    
+    Plan the workspace redesign    │                                                                                    
+    The layout checklist is ready  │                                                                                    
+    to review.                     │                                                                                    
+                                   │                                                                                    
+                                   │                                                                                    
+                                   │                                                                                    
+                                   │                                                                                    
+                                   │                                                                                    
+                                   │                                                                                    
+                                   │                                                                                    
+                                   │                                                                                    
+           ● M-5 Review work…  ● M-6 Review work…  M-7 Review worksp…  M-8 Review worksp…  M-9 Review worksp…           
+ M-0 new   cb3 Coordinate pr…  cb4 Coordinate pr…  cb5 Coordinate pr…  cb6 Coordinate pr…  cb7 Coordinate pr…  cb8 Coo› 
+ ●  b2  aibo   continue 'Make the three panels stable'                                                                  
+                                                                                                                        
+                                                                                                                        
