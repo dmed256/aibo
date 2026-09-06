@@ -1,329 +1,214 @@
-;;; aibo-api.el --- API calls to the Python server -*- lexical-binding: t -*-
-(require 'aibo-custom)
-(require 'aibo-types)
-(require 'aibo-utils)
+;;; aibo-api.el --- Aibo HTTP and event client -*- lexical-binding: t -*-
 
-(require 'dash)
-(require 'eieio)
-(require 'ht)
 (require 'json)
-(require 'request)
-(require 'uuidgen)
-(require 'websocket)
+(require 'cl-lib)
+(require 'subr-x)
+(require 'url)
+(require 'url-http)
+(require 'aibo-custom)
 
-(defun aibo:start-server (&rest args)
+(defvar url-http-end-of-headers)
+(defvar url-http-response-status)
+(declare-function websocket-close "websocket")
+(declare-function websocket-frame-payload "websocket")
+(declare-function websocket-open "websocket")
+(declare-function websocket-openp "websocket")
+
+(defvar aibo:api-event-functions nil
+  "Functions called with each decoded server event.")
+
+(defvar aibo:api--websocket nil)
+(defvar aibo:api--events-enabled nil)
+(defvar aibo:api--reconnect-timer nil)
+(defvar aibo:api--connection-generation 0)
+(defvar aibo:api-connection-functions nil
+  "Functions called with `connected' or `reconnecting'.")
+
+(defun aibo:api--decode-buffer ()
+  (goto-char (or url-http-end-of-headers (point-min)))
+  (unless (eobp)
+    (json-parse-buffer :object-type 'hash-table
+                       :array-type 'list
+                       :null-object nil
+                       :false-object nil)))
+
+(defun aibo:api--error-detail ()
+  (when-let* ((payload (ignore-errors (aibo:api--decode-buffer)))
+              (detail (and (hash-table-p payload) (gethash "detail" payload))))
+    (if (stringp detail) detail (json-serialize detail))))
+
+(defun aibo:api--handle-response
+    (response-buffer status method path on-success on-error)
+  (unwind-protect
+      (with-current-buffer response-buffer
+        (let ((network-error (plist-get status :error))
+              (http-error (and url-http-response-status
+                               (>= url-http-response-status 400))))
+          (if (or network-error http-error)
+              (if on-error
+                  (funcall on-error status)
+                (message "Aibo request failed: %s %s%s"
+                         method path
+                         (if http-error
+                             (format " (HTTP %s%s)"
+                                     url-http-response-status
+                                     (if-let ((detail (aibo:api--error-detail)))
+                                         (concat ": " detail)
+                                       ""))
+                           (format " (%s)" network-error))))
+            (when on-success
+              (funcall on-success (aibo:api--decode-buffer))))))
+    (when (buffer-live-p response-buffer) (kill-buffer response-buffer))))
+
+(defun aibo:api--request (method path &optional body on-success on-error)
+  (let ((url-request-method method)
+        (url-request-extra-headers '(("Content-Type" . "application/json")))
+        (url-request-data (and body (encode-coding-string
+                                     (json-serialize body) 'utf-8))))
+    (url-retrieve
+     (concat aibo:server-url path)
+     (lambda (status)
+       (aibo:api--handle-response
+        (current-buffer) status method path on-success on-error))
+     nil t t)))
+
+(defun aibo:api-get-chats (on-success &optional query limit offset on-error)
+  (let ((parameters (delq nil
+                          (list (and query
+                                     (concat "query=" (url-hexify-string query)))
+                                (and limit (format "limit=%d" limit))
+                                (and offset (format "offset=%d" offset))))))
+    (aibo:api--request
+     "GET" (concat "/api/chats"
+                   (and parameters (concat "?" (string-join parameters "&"))))
+     nil on-success on-error)))
+
+(defun aibo:api-get-project-chats (project-id on-success &optional on-error)
+  "Get a home-page group independently of the recent-chat cache."
+  (aibo:api--request
+   "GET" (concat "/api/chats?limit=10&"
+                 (if project-id (concat "project_id=" (url-hexify-string project-id))
+                   "unassigned=true"))
+   nil on-success on-error))
+
+(defun aibo:api-get-chats-sync (&optional query limit)
+  (let* ((parameters (delq nil
+                           (list (and query
+                                      (concat "query=" (url-hexify-string query)))
+                                 (and limit (format "limit=%d" limit)))))
+         (url (concat aibo:server-url "/api/chats"
+                      (and parameters
+                           (concat "?" (string-join parameters "&")))))
+         (buffer (url-retrieve-synchronously url t t 2)))
+    (unless buffer (user-error "Aibo server is unavailable"))
+    (unwind-protect
+        (with-current-buffer buffer
+          (when (and url-http-response-status (>= url-http-response-status 400))
+            (user-error "Aibo search failed with HTTP %s"
+                        url-http-response-status))
+          (or (aibo:api--decode-buffer) nil))
+      (kill-buffer buffer))))
+
+(defun aibo:api-get-chat (chat-id on-success &optional on-error)
+  (aibo:api--request "GET" (format "/api/chats/%s/history" chat-id) nil on-success on-error))
+
+(defun aibo:api-create-chat (kind on-success &optional location-id project-id on-error)
+  (let ((body `((kind . ,kind))))
+    (when location-id
+      (setq body (append body `((location_id . ,location-id)))))
+    (when project-id
+      (setq body (append body `((project_id . ,project-id)))))
+    (aibo:api--request "POST" "/api/chats" body on-success on-error)))
+
+(defun aibo:api-submit (chat-id text attachments on-success &optional on-error)
+  (aibo:api--request
+   "POST" (format "/api/chats/%s/submit?compact=true" chat-id)
+   `((text . ,text) (attachments . ,(vconcat attachments)))
+   on-success on-error))
+
+(defun aibo:api-set-goal (chat-id enabled on-success)
+  "Set CHAT-ID's goal to its last user message, or disable it."
+  (aibo:api--request
+   "PUT" (format "/api/chats/%s/goal" chat-id)
+   `((enabled . ,(if enabled t :false))) on-success))
+
+(defun aibo:api-get-projects (on-success &optional archived on-error)
+  (aibo:api--request
+   "GET" (format "/api/projects?archived=%s" (if archived "true" "false"))
+   nil on-success on-error))
+
+(defun aibo:api-get-locations (on-success &optional on-error)
+  (aibo:api--request "GET" "/api/locations" nil on-success on-error))
+
+(defun aibo:api-get-sidebar (on-success &optional on-error)
+  (aibo:api--request "GET" "/api/notifications" nil on-success on-error))
+
+(defun aibo:api-read-notification (notification-id on-success)
+  (aibo:api--request
+   "POST" (format "/api/notifications/%s/read" notification-id)
+   nil on-success))
+
+(defun aibo:api-read-chat-notifications (chat-id on-success)
+  (aibo:api--request "POST" (format "/api/chats/%s/notifications/read" chat-id)
+                     nil on-success))
+
+(defun aibo:api-update-chat (chat-id updates on-success)
+  (aibo:api--request
+   "PATCH" (format "/api/chats/%s" chat-id) updates on-success))
+
+(defun aibo:api--event-url ()
+  (concat (replace-regexp-in-string
+           "\\`http" "ws" aibo:server-url)
+          "/api/events?compact=true"))
+
+(defun aibo:api--reconnect ()
+  (when (and aibo:api--events-enabled (not (timerp aibo:api--reconnect-timer)))
+    (run-hook-with-args 'aibo:api-connection-functions 'reconnecting)
+    (setq aibo:api--reconnect-timer
+          (run-with-timer 2 nil #'aibo:api-connect-events))))
+
+(defun aibo:api-connect-events ()
   (interactive)
-  (if (not (aibo:api-is-healthy))
-      (let* ((on-success (plist-get args :on-success)))
-        (aibo:--get-or-create-buffer
-         :name "*aibo server*"
-         :on-create
-         (lambda (buffer)
-           (with-current-buffer buffer
-             (add-hook 'after-change-functions 'aibo:--ansi-buffer nil t)
-             (start-process "aibo-server" buffer
-                            aibo:server-python
-                            "-m" "aibo.cli.start"
-                            "--port" (number-to-string aibo:server-port))))))))
+  (setq aibo:api--events-enabled t)
+  (unless (require 'websocket nil t)
+    (user-error "The websocket.el package is required for live Aibo events"))
+  (when (timerp aibo:api--reconnect-timer)
+    (cancel-timer aibo:api--reconnect-timer)
+    (setq aibo:api--reconnect-timer nil))
+  (unless aibo:api--websocket
+    (let ((generation (cl-incf aibo:api--connection-generation)))
+      (condition-case nil
+          (setq aibo:api--websocket
+                (websocket-open
+                 (aibo:api--event-url)
+                 :on-open
+                 (lambda (_websocket)
+                   (when (= generation aibo:api--connection-generation)
+                     (run-hook-with-args 'aibo:api-connection-functions 'connected)))
+                 :on-message
+                 (lambda (_websocket frame)
+                   (when (= generation aibo:api--connection-generation)
+                     (let ((event (json-parse-string
+                                   (websocket-frame-payload frame)
+                                   :object-type 'hash-table
+                                   :array-type 'list)))
+                       (run-hook-with-args 'aibo:api-event-functions event))))
+                 :on-close
+                 (lambda (_websocket)
+                   (when (= generation aibo:api--connection-generation)
+                     (setq aibo:api--websocket nil)
+                     (aibo:api--reconnect)))))
+        (error (setq aibo:api--websocket nil)
+               (aibo:api--reconnect))))))
 
-(setq aibo:--on-healthy-server-max-checks 5)
-(setq aibo:--on-healthy-server-checks nil)
-
-(defun aibo:--on-healthy-server (&rest args)
-  (if (not aibo:--on-healthy-server-checks)
-      (setq aibo:--on-healthy-server-checks 0)
-    (setq aibo:--on-healthy-server-checks (+ aibo:--on-healthy-server-checks 1)))
-
-  (let* ((on-success (plist-get args :on-success)))
-    (if (aibo:api-is-healthy)
-        (progn
-          (setq aibo:--on-healthy-server-checks nil)
-          (funcall on-success))
-      (if (< aibo:--on-healthy-server-checks aibo:--on-healthy-server-max-checks)
-          (run-with-timer 1 nil #'aibo:--on-healthy-server
-                          :on-success on-success)))))
-
-
-;; ---[ Request Wrappers ]------------------------
-(defun aibo:--request-json-parser ()
-  (let ((json-object-type 'hash-table)
-        (json-array-type 'list))
-    (json-read)))
-
-(defun aibo:--api-request (&rest args)
-  (let* ((path (plist-get args :path))
-         (type (plist-get args :type))
-         (data (plist-get args :data))
-         (sync (plist-get args :sync))
-         (timeout (plist-get args :timeout))
-         (response-transform (plist-get args :response-transform))
-         (on-success (plist-get args :on-success))
-         (response (request (format "http://localhost:%s%s" aibo:server-port path)
-                     :type type
-                     :headers '(("Content-Type" . "application/json"))
-                     :parser #'aibo:--request-json-parser
-                     :encoding 'utf-8
-                     :sync sync
-                     :timeout (or timeout 10)
-                     :data (if data (json-encode data) nil)
-                     :success (lambda (&rest args)
-                                (if on-success
-                                    (let* ((data (plist-get args :data))
-                                           (on-success-args (if response-transform
-                                                                (funcall response-transform data)
-                                                              data)))
-                                      (funcall on-success on-success-args)))))))
-    (if sync
-        (let* ((data (request-response-data response)))
-          (if response-transform
-              (funcall response-transform data)
-            data)))))
-
-
-(defun aibo:--api-get (&rest args)
-  (apply 'aibo:--api-request :type "GET" args))
-
-(defun aibo:--api-post (&rest args)
-  (apply 'aibo:--api-request :type "POST" args))
-
-(defun aibo:--api-patch (&rest args)
-  (apply 'aibo:--api-request :type "PATCH" args))
-
-(defun aibo:--api-delete (&rest args)
-  (apply 'aibo:--api-request :type "DELETE" args))
-
-
-;; ---[ API Methods ]-----------------------------
-(defun aibo:api-is-healthy ()
-  (string= "OK" (aibo:--api-get
-                 :path "/status"
-                 :bypass-server-check t
-                 :sync t
-                 :timeout 0.1)))
-
-(defun aibo:api-get-conversations (&rest args)
-  (let* ((limit (plist-get args :limit))
-         (on-success (plist-get args :on-success)))
-    (aibo:--api-post
-     :path "/chat/conversations/search"
-     :data (ht ("limit" limit))
-     :response-transform (lambda (response) (ht-get response "conversations"))
-     :on-success on-success)))
-
-(defun aibo:api-get-conversation (&rest args)
-  (let* ((conversation-id (plist-get args :conversation-id))
-         (on-success (plist-get args :on-success)))
-    (aibo:--api-get
-     :path (format "/chat/conversations/%s" conversation-id)
-     :response-transform (lambda (response) (ht-get response "conversation"))
-     :on-success on-success)))
-
-(defun aibo:api-create-conversation (&rest args)
-  (let* ((model (plist-get args :model))
-         (message-inputs (plist-get args :message-inputs))
-         (on-success (plist-get args :on-success)))
-    (aibo:--api-post
-     :path "/chat/conversations"
-     :data (ht ("messages"              message-inputs)
-               ("model"                 (or model aibo:model))
-               ("cwd"                   aibo:default-cwd)
-               ("enabled_package_names" aibo:enabled-package-names)
-               ("temperature"           aibo:temperature)
-               ("shorthands"            (aibo:--conversation-shorthands)))
-     :response-transform (lambda (response) (ht-get response "conversation"))
-     :on-success on-success)))
-
-(defun aibo:api-delete-conversation (&rest args)
-  (let* ((conversation-id (plist-get args :conversation-id))
-         (on-success (plist-get args :on-success)))
-    (aibo:--api-delete
-     :path (format "/chat/conversations/%s" conversation-id)
-     :on-success on-success)))
-
-(defun aibo:api-submit-user-message (&rest args)
-  (let* ((conversation-id (plist-get args :conversation-id))
-         (text (plist-get args :text))
-         (on-success (plist-get args :on-success)))
-    (aibo:--api-post
-     :path (format "/chat/conversations/%s/submit-user-message" conversation-id)
-     :data (ht ("text" text))
-     :response-transform (lambda (response) (ht-get response "conversation"))
-     :on-success on-success)))
-
-(defun aibo:api-edit-message (&rest args)
-  (let* ((conversation-id (plist-get args :conversation-id))
-         (message-id (plist-get args :message-id))
-         (text (plist-get args :text))
-         (on-success (plist-get args :on-success)))
-    (aibo:--api-put
-     :path (format "/chat/conversations/%s/messages/%s" conversation-id message-id)
-     :data (ht ("text" text))
-     :response-transform (lambda (response) (ht-get response "conversation"))
-     :on-success on-success)))
-
-(defun aibo:api-delete-message (&rest args)
-  (let* ((conversation-id (plist-get args :conversation-id))
-         (message-id (plist-get args :message-id))
-         (delete-after (plist-get args :delete-after))
-         (on-success (plist-get args :on-success)))
-    (aibo:--api-delete
-     :path (format "/chat/conversations/%s/messages/%s?delete-after=%s"
-                   conversation-id
-                   message-id
-                   (if delete-after "true" "false"))
-     :response-transform (lambda (response) (ht-get response "conversation"))
-     :on-success on-success)))
-
-(defun aibo:api-set-conversation-title (&rest args)
-  (let* ((conversation-id (plist-get args :conversation-id))
-         (title (plist-get args :title))
-         (on-success (plist-get args :on-success)))
-    (aibo:--api-patch
-     :path (format "/chat/conversations/%s" conversation-id)
-     :data (ht (:title title))
-     :response-transform (lambda (response) (ht-get response "conversation"))
-     :on-success on-success)))
-
-(defun aibo:api-conversation-message-search (&rest args)
-  (interactive)
-  (let* ((query (plist-get args :query))
-         (limit (plist-get args :limit))
-         (sync (plist-get args :sync)))
-    (aibo:--api-post
-     :path "/chat/conversations/message-search"
-     :data (ht (:query query)
-               (:limit limit))
-     :sync sync
-     :response-transform (lambda (response) (ht-get response "search_results")))))
-
-(defun aibo:api-generate-conversation-title (&rest args)
-  (let* ((conversation-id (plist-get args :conversation-id))
-         (on-success (plist-get args :on-success)))
-    (aibo:--api-post
-     :path (format "/chat/conversations/%s/generate-title" conversation-id)
-     :data (ht ("model" aibo:model))
-     :response-transform (lambda (response) (ht-get response "conversation"))
-     :on-success on-success)))
-
-(defun aibo:api-get-packages (&rest args)
-  (let* ((on-success (plist-get args :on-success)))
-    (aibo:--api-get
-     :path "/chat/packages"
-     :response-transform
-     (lambda (response)
-       (--sort #'string< (ht-get response "packages")))
-     :on-success on-success)))
-
-(defun aibo:api-set-package-enabled (&rest args)
-  (let* ((conversation-id (plist-get args :conversation-id))
-         (package-name (plist-get args :package-name))
-         (is-enabled (plist-get args :is-enabled))
-         (on-success (plist-get args :on-success)))
-    (aibo:--api-patch
-     :path (format "/chat/conversations/%s/packages" conversation-id)
-     :data (ht ("package_enabled_updates" (ht (package-name is-enabled))))
-     :response-transform (lambda (response) (ht-get response "conversation"))
-     :on-success on-success)))
-
-(defun aibo:api-set-cwd (&rest args)
-  (let* ((conversation-id (plist-get args :conversation-id))
-         (cwd (plist-get args :cwd))
-         (on-success (plist-get args :on-success)))
-    (aibo:--api-patch
-     :path (format "/chat/conversations/%s/cwd" conversation-id)
-     :data (ht ("cwd" cwd))
-     :response-transform (lambda (response) (ht-get response "conversation"))
-     :on-success on-success)))
-
-
-(defun aibo:api-create-image-from-clipboard (&rest args)
-  (let ((on-success (plist-get args :on-success)))
-    (aibo:--api-post
-     :path "/images/clipboard"
-     :response-transform (lambda (resp) (ht-get resp "image_id"))
-     :on-success on-success)))
-
-
-;; ---[ Websocket ]-------------------------------
-(defun aibo:--api-ws-send (&rest args)
-  (let* ((event (plist-get args :event))
-         (message-callbacks (plist-get args :message-callbacks))
-         (event-id (uuidgen-4))
-         (websocket-callback-buffer (current-buffer)))
-    (ht-set! event "id" event-id)
-    (let ((websocket
-           (websocket-open
-            (format "ws://localhost:%s/ws" aibo:server-port)
-            :on-message
-            (lambda (_websocket frame)
-              (let* ((event (json-parse-string (websocket-frame-payload frame)
-                                               :object-type 'hash-table
-                                               :array-type 'list))
-                     (event-kind (ht-get event "kind"))
-                     (callback (ht-get message-callbacks event-kind)))
-                (when callback
-                  (funcall callback event))
-                (when (string= event-kind "event_completed")
-                  (websocket-close _websocket))))
-            :on-close
-            (lambda (_ws)
-              (with-current-buffer websocket-callback-buffer
-                (setq-local aibo:b-streaming-websocket nil))))))
-      (websocket-send-text websocket (json-encode event))
-      websocket)))
-
-(defun aibo:stop-streaming-message ()
-  (interactive)
-  (when (and (boundp 'aibo:b-streaming-websocket)
-             aibo:b-streaming-websocket)
-    (websocket-close aibo:b-streaming-websocket)
-    (setq-local aibo:b-streaming-websocket nil)))
-
-(defun aibo:api-ws-stream-assistant-message (&rest args)
-  (let* ((conversation-id (plist-get args :conversation-id))
-         (model (plist-get args :model))
-         (message-callbacks (plist-get args :message-callbacks)))
-    (setq-local aibo:b-streaming-websocket
-                (aibo:--api-ws-send
-                 :event (ht ("kind"            "stream_assistant_message")
-                            ("conversation_id" conversation-id)
-                            ("model"           (or model aibo:model))
-                            ("temperature"     aibo:temperature))
-                 :message-callbacks message-callbacks))))
-
-(defun aibo:api-ws-regenerate-last-assistant-message (&rest args)
-  (let* ((conversation-id (plist-get args :conversation-id))
-         (message-callbacks (plist-get args :message-callbacks)))
-    (setq-local aibo:b-streaming-websocket
-                (aibo:--api-ws-send
-                 :event (ht ("kind"            "regenerate_last_assistant_message")
-                            ("conversation_id" conversation-id)
-                            ("model"           aibo:model))
-                 :message-callbacks message-callbacks))))
-
-(defun aibo:api-ws-stream-assistant-message-chunks (&rest args)
-  (let* ((conversation-id (plist-get args :conversation-id))
-         (message-callbacks (plist-get args :message-callbacks)))
-    (setq-local aibo:b-streaming-websocket
-                (aibo:--api-ws-send
-                 :event (ht ("kind"            "stream_assistant_message_chunks")
-                            ("conversation_id" conversation-id)
-                            ("model"           aibo:model)
-                            ("temperature"     aibo:temperature))
-                 :message-callbacks message-callbacks))))
-
-
-;; ---[ Utils ]-----------------------------------
-(defun aibo:--conversation-shorthands ()
-  (let* ((header (make-string 20 ?-))
-         (region-string (if (mark)
-                            (buffer-substring (min (mark) (point)) (max (mark) (point)))
-                          ""))
-         (region-value (if (> (length region-string) 0)
-                           (format "\n\n%s\n%s\n%s\n\n" header region-string header)
-                         " "))
-         (buffer-value (format "\n\n%s\n%s\n%s\n\n" header (buffer-string) header)))
-    (ht ("r" region-value)
-        ("b" buffer-value))))
+(defun aibo:api-disconnect-events ()
+  (setq aibo:api--events-enabled nil)
+  (cl-incf aibo:api--connection-generation)
+  (when (timerp aibo:api--reconnect-timer)
+    (cancel-timer aibo:api--reconnect-timer)
+    (setq aibo:api--reconnect-timer nil))
+  (when aibo:api--websocket
+    (websocket-close aibo:api--websocket))
+  (setq aibo:api--websocket nil))
 
 (provide 'aibo-api)

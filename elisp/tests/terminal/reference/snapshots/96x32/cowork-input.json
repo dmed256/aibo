@@ -1,0 +1,1160 @@
+{
+  "scenario": "cowork-input",
+  "columns": 96,
+  "rows": 32,
+  "cursor": {
+    "row": 30,
+    "col": 27
+  },
+  "regions": {
+    "main": {
+      "x": 0,
+      "y": 0,
+      "width": 96,
+      "height": 27
+    },
+    "input": {
+      "x": 1,
+      "y": 30,
+      "width": 94,
+      "height": 1
+    },
+    "bars": {
+      "x": 0,
+      "y": 27,
+      "width": 96,
+      "height": 3
+    }
+  },
+  "runs": [
+    [
+      {
+        "col": 0,
+        "text": " ",
+        "face": "botBadge"
+      },
+      {
+        "col": 1,
+        "text": "●",
+        "face": "greenOnbotBadge"
+      },
+      {
+        "col": 2,
+        "text": " b2 ",
+        "face": "botBadge"
+      },
+      {
+        "col": 6,
+        "text": " aibo ",
+        "face": "location"
+      },
+      {
+        "col": 12,
+        "text": "  ",
+        "face": "base"
+      },
+      {
+        "col": 14,
+        "text": "Make the three panels stable",
+        "face": "orange"
+      },
+      {
+        "col": 42,
+        "text": "      ",
+        "face": "base"
+      },
+      {
+        "col": 48,
+        "text": "│",
+        "face": "rule"
+      },
+      {
+        "col": 49,
+        "text": " ",
+        "face": "managerBadge"
+      },
+      {
+        "col": 50,
+        "text": "●",
+        "face": "mutedOnmanagerBadge"
+      },
+      {
+        "col": 51,
+        "text": " m0 ",
+        "face": "managerBadge"
+      },
+      {
+        "col": 55,
+        "text": "  ",
+        "face": "base"
+      },
+      {
+        "col": 57,
+        "text": "Plan the workspace redesign",
+        "face": "orange"
+      },
+      {
+        "col": 84,
+        "text": "            ",
+        "face": "base"
+      }
+    ],
+    [
+      {
+        "col": 0,
+        "text": " project ",
+        "face": "location"
+      },
+      {
+        "col": 9,
+        "text": " — ",
+        "face": "metadataValue"
+      },
+      {
+        "col": 12,
+        "text": " ",
+        "face": "base"
+      },
+      {
+        "col": 13,
+        "text": " goal ",
+        "face": "location"
+      },
+      {
+        "col": 19,
+        "text": " ready ",
+        "face": "metadataValue"
+      },
+      {
+        "col": 26,
+        "text": " ",
+        "face": "base"
+      },
+      {
+        "col": 27,
+        "text": " tokens ",
+        "face": "location"
+      },
+      {
+        "col": 35,
+        "text": " 0 ",
+        "face": "metadataValue"
+      },
+      {
+        "col": 38,
+        "text": " ",
+        "face": "base"
+      },
+      {
+        "col": 39,
+        "text": " elapsed ",
+        "face": "location"
+      },
+      {
+        "col": 48,
+        "text": "│",
+        "face": "rule"
+      },
+      {
+        "col": 49,
+        "text": " project ",
+        "face": "location"
+      },
+      {
+        "col": 58,
+        "text": " — ",
+        "face": "metadataValue"
+      },
+      {
+        "col": 61,
+        "text": " ",
+        "face": "base"
+      },
+      {
+        "col": 62,
+        "text": " goal ",
+        "face": "location"
+      },
+      {
+        "col": 68,
+        "text": " ready ",
+        "face": "metadataValue"
+      },
+      {
+        "col": 75,
+        "text": " ",
+        "face": "base"
+      },
+      {
+        "col": 76,
+        "text": " tokens ",
+        "face": "location"
+      },
+      {
+        "col": 84,
+        "text": " 0 ",
+        "face": "metadataValue"
+      },
+      {
+        "col": 87,
+        "text": " ",
+        "face": "base"
+      },
+      {
+        "col": 88,
+        "text": " elapsed",
+        "face": "location"
+      }
+    ],
+    [
+      {
+        "col": 0,
+        "text": " ",
+        "face": "base"
+      },
+      {
+        "col": 1,
+        "text": "[2 hidden messages] ▸",
+        "face": "muted",
+        "action": "hidden:toggle"
+      },
+      {
+        "col": 22,
+        "text": "                          ",
+        "face": "base"
+      },
+      {
+        "col": 48,
+        "text": "│",
+        "face": "rule"
+      },
+      {
+        "col": 49,
+        "text": " ",
+        "face": "base"
+      },
+      {
+        "col": 50,
+        "text": "[2 hidden messages] ▸",
+        "face": "muted",
+        "action": "hidden:toggle"
+      },
+      {
+        "col": 71,
+        "text": "                         ",
+        "face": "base"
+      }
+    ],
+    [
+      {
+        "col": 0,
+        "text": "                                                ",
+        "face": "base"
+      },
+      {
+        "col": 48,
+        "text": "│",
+        "face": "rule"
+      },
+      {
+        "col": 49,
+        "text": "                                               ",
+        "face": "base"
+      }
+    ],
+    [
+      {
+        "col": 0,
+        "text": " ",
+        "face": "base"
+      },
+      {
+        "col": 1,
+        "text": " user ",
+        "face": "userBadge"
+      },
+      {
+        "col": 7,
+        "text": "                                         ",
+        "face": "base"
+      },
+      {
+        "col": 48,
+        "text": "│",
+        "face": "rule"
+      },
+      {
+        "col": 49,
+        "text": " ",
+        "face": "base"
+      },
+      {
+        "col": 50,
+        "text": " user ",
+        "face": "userBadge"
+      },
+      {
+        "col": 56,
+        "text": "                                        ",
+        "face": "base"
+      }
+    ],
+    [
+      {
+        "col": 0,
+        "text": " ",
+        "face": "base"
+      },
+      {
+        "col": 1,
+        "text": "▏",
+        "face": "blueOnuser"
+      },
+      {
+        "col": 2,
+        "text": " I want three stable panels: notifications    ",
+        "face": "user"
+      },
+      {
+        "col": 48,
+        "text": "│",
+        "face": "rule"
+      },
+      {
+        "col": 49,
+        "text": " ",
+        "face": "base"
+      },
+      {
+        "col": 50,
+        "text": "▏",
+        "face": "blueOnuser"
+      },
+      {
+        "col": 51,
+        "text": " I want three stable panels: notifications   ",
+        "face": "user"
+      }
+    ],
+    [
+      {
+        "col": 0,
+        "text": " ",
+        "face": "base"
+      },
+      {
+        "col": 1,
+        "text": "▏",
+        "face": "blueOnuser"
+      },
+      {
+        "col": 2,
+        "text": " on the left, the page I am viewing on the    ",
+        "face": "user"
+      },
+      {
+        "col": 48,
+        "text": "│",
+        "face": "rule"
+      },
+      {
+        "col": 49,
+        "text": " ",
+        "face": "base"
+      },
+      {
+        "col": 50,
+        "text": "▏",
+        "face": "blueOnuser"
+      },
+      {
+        "col": 51,
+        "text": " on the left, the page I am viewing on the   ",
+        "face": "user"
+      }
+    ],
+    [
+      {
+        "col": 0,
+        "text": " ",
+        "face": "base"
+      },
+      {
+        "col": 1,
+        "text": "▏",
+        "face": "blueOnuser"
+      },
+      {
+        "col": 2,
+        "text": " right, and a normally growing input across   ",
+        "face": "user"
+      },
+      {
+        "col": 48,
+        "text": "│",
+        "face": "rule"
+      },
+      {
+        "col": 49,
+        "text": " ",
+        "face": "base"
+      },
+      {
+        "col": 50,
+        "text": "▏",
+        "face": "blueOnuser"
+      },
+      {
+        "col": 51,
+        "text": " right, and a normally growing input across  ",
+        "face": "user"
+      }
+    ],
+    [
+      {
+        "col": 0,
+        "text": " ",
+        "face": "base"
+      },
+      {
+        "col": 1,
+        "text": "▏",
+        "face": "blueOnuser"
+      },
+      {
+        "col": 2,
+        "text": " the bottom.                                  ",
+        "face": "user"
+      },
+      {
+        "col": 48,
+        "text": "│",
+        "face": "rule"
+      },
+      {
+        "col": 49,
+        "text": " ",
+        "face": "base"
+      },
+      {
+        "col": 50,
+        "text": "▏",
+        "face": "blueOnuser"
+      },
+      {
+        "col": 51,
+        "text": " the bottom.                                 ",
+        "face": "user"
+      }
+    ],
+    [
+      {
+        "col": 0,
+        "text": "                                                ",
+        "face": "base"
+      },
+      {
+        "col": 48,
+        "text": "│",
+        "face": "rule"
+      },
+      {
+        "col": 49,
+        "text": "                                               ",
+        "face": "base"
+      }
+    ],
+    [
+      {
+        "col": 0,
+        "text": " ",
+        "face": "base"
+      },
+      {
+        "col": 1,
+        "text": " ",
+        "face": "botBadge"
+      },
+      {
+        "col": 2,
+        "text": "●",
+        "face": "greenOnbotBadge"
+      },
+      {
+        "col": 3,
+        "text": " b2 ",
+        "face": "botBadge"
+      },
+      {
+        "col": 7,
+        "text": " aibo ",
+        "face": "location"
+      },
+      {
+        "col": 13,
+        "text": "                                   ",
+        "face": "base"
+      },
+      {
+        "col": 48,
+        "text": "│",
+        "face": "rule"
+      },
+      {
+        "col": 49,
+        "text": " ",
+        "face": "base"
+      },
+      {
+        "col": 50,
+        "text": " ",
+        "face": "managerBadge"
+      },
+      {
+        "col": 51,
+        "text": "●",
+        "face": "mutedOnmanagerBadge"
+      },
+      {
+        "col": 52,
+        "text": " m0 ",
+        "face": "managerBadge"
+      },
+      {
+        "col": 56,
+        "text": "                                        ",
+        "face": "base"
+      }
+    ],
+    [
+      {
+        "col": 0,
+        "text": " ",
+        "face": "base"
+      },
+      {
+        "col": 1,
+        "text": "▏",
+        "face": "purpleOnbot"
+      },
+      {
+        "col": 2,
+        "text": " The workspace keeps its three panels while   ",
+        "face": "bot"
+      },
+      {
+        "col": 48,
+        "text": "│",
+        "face": "rule"
+      },
+      {
+        "col": 49,
+        "text": " ",
+        "face": "base"
+      },
+      {
+        "col": 50,
+        "text": "▏",
+        "face": "orangeOnmanager"
+      },
+      {
+        "col": 51,
+        "text": " The workspace keeps its three panels while  ",
+        "face": "manager"
+      }
+    ],
+    [
+      {
+        "col": 0,
+        "text": " ",
+        "face": "base"
+      },
+      {
+        "col": 1,
+        "text": "▏",
+        "face": "purpleOnbot"
+      },
+      {
+        "col": 2,
+        "text": " pages change and messages arrive.            ",
+        "face": "bot"
+      },
+      {
+        "col": 48,
+        "text": "│",
+        "face": "rule"
+      },
+      {
+        "col": 49,
+        "text": " ",
+        "face": "base"
+      },
+      {
+        "col": 50,
+        "text": "▏",
+        "face": "orangeOnmanager"
+      },
+      {
+        "col": 51,
+        "text": " pages change and messages arrive.           ",
+        "face": "manager"
+      }
+    ],
+    [
+      {
+        "col": 0,
+        "text": " ",
+        "face": "base"
+      },
+      {
+        "col": 1,
+        "text": "▏",
+        "face": "purpleOnbot"
+      },
+      {
+        "col": 2,
+        "text": "                                              ",
+        "face": "bot"
+      },
+      {
+        "col": 48,
+        "text": "│",
+        "face": "rule"
+      },
+      {
+        "col": 49,
+        "text": " ",
+        "face": "base"
+      },
+      {
+        "col": 50,
+        "text": "▏",
+        "face": "orangeOnmanager"
+      },
+      {
+        "col": 51,
+        "text": "                                             ",
+        "face": "manager"
+      }
+    ],
+    [
+      {
+        "col": 0,
+        "text": " ",
+        "face": "base"
+      },
+      {
+        "col": 1,
+        "text": "▏",
+        "face": "purpleOnbot"
+      },
+      {
+        "col": 2,
+        "text": " What changed                                 ",
+        "face": "bot"
+      },
+      {
+        "col": 48,
+        "text": "│",
+        "face": "rule"
+      },
+      {
+        "col": 49,
+        "text": " ",
+        "face": "base"
+      },
+      {
+        "col": 50,
+        "text": "▏",
+        "face": "orangeOnmanager"
+      },
+      {
+        "col": 51,
+        "text": " What changed                                ",
+        "face": "manager"
+      }
+    ],
+    [
+      {
+        "col": 0,
+        "text": " ",
+        "face": "base"
+      },
+      {
+        "col": 1,
+        "text": "▏",
+        "face": "purpleOnbot"
+      },
+      {
+        "col": 2,
+        "text": " The sidebar keeps its scroll position. C-o   ",
+        "face": "bot"
+      },
+      {
+        "col": 48,
+        "text": "│",
+        "face": "rule"
+      },
+      {
+        "col": 49,
+        "text": " ",
+        "face": "base"
+      },
+      {
+        "col": 50,
+        "text": "▏",
+        "face": "orangeOnmanager"
+      },
+      {
+        "col": 51,
+        "text": " The sidebar keeps its scroll position. C-o  ",
+        "face": "manager"
+      }
+    ],
+    [
+      {
+        "col": 0,
+        "text": " ",
+        "face": "base"
+      },
+      {
+        "col": 1,
+        "text": "▏",
+        "face": "purpleOnbot"
+      },
+      {
+        "col": 2,
+        "text": " switches between the main page and input.    ",
+        "face": "bot"
+      },
+      {
+        "col": 48,
+        "text": "│",
+        "face": "rule"
+      },
+      {
+        "col": 49,
+        "text": " ",
+        "face": "base"
+      },
+      {
+        "col": 50,
+        "text": "▏",
+        "face": "orangeOnmanager"
+      },
+      {
+        "col": 51,
+        "text": " switches between the main page and input.   ",
+        "face": "manager"
+      }
+    ],
+    [
+      {
+        "col": 0,
+        "text": " ",
+        "face": "base"
+      },
+      {
+        "col": 1,
+        "text": "▏",
+        "face": "purpleOnbot"
+      },
+      {
+        "col": 2,
+        "text": " M-/ selects the conversation you are         ",
+        "face": "bot"
+      },
+      {
+        "col": 48,
+        "text": "│",
+        "face": "rule"
+      },
+      {
+        "col": 49,
+        "text": " ",
+        "face": "base"
+      },
+      {
+        "col": 50,
+        "text": "▏",
+        "face": "orangeOnmanager"
+      },
+      {
+        "col": 51,
+        "text": " M-/ selects the conversation you are        ",
+        "face": "manager"
+      }
+    ],
+    [
+      {
+        "col": 0,
+        "text": " ",
+        "face": "base"
+      },
+      {
+        "col": 1,
+        "text": "▏",
+        "face": "purpleOnbot"
+      },
+      {
+        "col": 2,
+        "text": " looking at.                                  ",
+        "face": "bot"
+      },
+      {
+        "col": 48,
+        "text": "│",
+        "face": "rule"
+      },
+      {
+        "col": 49,
+        "text": " ",
+        "face": "base"
+      },
+      {
+        "col": 50,
+        "text": "▏",
+        "face": "orangeOnmanager"
+      },
+      {
+        "col": 51,
+        "text": " looking at.                                 ",
+        "face": "manager"
+      }
+    ],
+    [
+      {
+        "col": 0,
+        "text": "                                                ",
+        "face": "base"
+      },
+      {
+        "col": 48,
+        "text": "│",
+        "face": "rule"
+      },
+      {
+        "col": 49,
+        "text": "                                               ",
+        "face": "base"
+      }
+    ],
+    [
+      {
+        "col": 0,
+        "text": "                                                ",
+        "face": "base"
+      },
+      {
+        "col": 48,
+        "text": "│",
+        "face": "rule"
+      },
+      {
+        "col": 49,
+        "text": "                                               ",
+        "face": "base"
+      }
+    ],
+    [
+      {
+        "col": 0,
+        "text": "                                                ",
+        "face": "base"
+      },
+      {
+        "col": 48,
+        "text": "│",
+        "face": "rule"
+      },
+      {
+        "col": 49,
+        "text": "                                               ",
+        "face": "base"
+      }
+    ],
+    [
+      {
+        "col": 0,
+        "text": "                                                ",
+        "face": "base"
+      },
+      {
+        "col": 48,
+        "text": "│",
+        "face": "rule"
+      },
+      {
+        "col": 49,
+        "text": "                                               ",
+        "face": "base"
+      }
+    ],
+    [
+      {
+        "col": 0,
+        "text": "                                                ",
+        "face": "base"
+      },
+      {
+        "col": 48,
+        "text": "│",
+        "face": "rule"
+      },
+      {
+        "col": 49,
+        "text": "                                               ",
+        "face": "base"
+      }
+    ],
+    [
+      {
+        "col": 0,
+        "text": "                                                ",
+        "face": "base"
+      },
+      {
+        "col": 48,
+        "text": "│",
+        "face": "rule"
+      },
+      {
+        "col": 49,
+        "text": "                                               ",
+        "face": "base"
+      }
+    ],
+    [
+      {
+        "col": 0,
+        "text": "                                                ",
+        "face": "base"
+      },
+      {
+        "col": 48,
+        "text": "│",
+        "face": "rule"
+      },
+      {
+        "col": 49,
+        "text": "                                               ",
+        "face": "base"
+      }
+    ],
+    [
+      {
+        "col": 0,
+        "text": "                                                ",
+        "face": "base"
+      },
+      {
+        "col": 48,
+        "text": "│",
+        "face": "rule"
+      },
+      {
+        "col": 49,
+        "text": "                                               ",
+        "face": "base"
+      }
+    ],
+    [
+      {
+        "col": 0,
+        "text": "          ",
+        "face": "purpleBar"
+      },
+      {
+        "col": 10,
+        "text": " ",
+        "face": "botShortcutOnbotBadge",
+        "action": "target:b2"
+      },
+      {
+        "col": 11,
+        "text": "●",
+        "face": "greenOnbotShortcutOnbotBadge",
+        "action": "target:b2"
+      },
+      {
+        "col": 12,
+        "text": " M-1 Make the th… ",
+        "face": "botShortcutOnbotBadge",
+        "action": "target:b2"
+      },
+      {
+        "col": 30,
+        "text": " ",
+        "face": "botShortcutOnpurpleBar",
+        "action": "target:b21"
+      },
+      {
+        "col": 31,
+        "text": "M-2",
+        "face": "botShortcutOnbotShortcutOnpurpleBar",
+        "action": "target:b21"
+      },
+      {
+        "col": 34,
+        "text": " Fix notificat… ",
+        "face": "botShortcutOnpurpleBar",
+        "action": "target:b21"
+      },
+      {
+        "col": 50,
+        "text": " ",
+        "face": "botShortcutOnpurpleBar",
+        "action": "target:b8"
+      },
+      {
+        "col": 51,
+        "text": "●",
+        "face": "errorOnbotShortcutOnpurpleBar",
+        "action": "target:b8"
+      },
+      {
+        "col": 52,
+        "text": " ",
+        "face": "botShortcutOnpurpleBar",
+        "action": "target:b8"
+      },
+      {
+        "col": 53,
+        "text": "M-3",
+        "face": "botShortcutOnbotShortcutOnpurpleBar",
+        "action": "target:b8"
+      },
+      {
+        "col": 56,
+        "text": " Inspect the… ",
+        "face": "botShortcutOnpurpleBar",
+        "action": "target:b8"
+      },
+      {
+        "col": 70,
+        "text": "                          ",
+        "face": "purpleBar"
+      }
+    ],
+    [
+      {
+        "col": 0,
+        "text": " M-0 new ",
+        "face": "managerShortcutOnorangeBar",
+        "action": "new-manager"
+      },
+      {
+        "col": 9,
+        "text": " ",
+        "face": "orangeBar"
+      },
+      {
+        "col": 10,
+        "text": " ",
+        "face": "managerShortcutOnorangeBar",
+        "action": "target:m0"
+      },
+      {
+        "col": 11,
+        "text": "cb0",
+        "face": "managerShortcutOnmanagerShortcutOnorangeBar",
+        "action": "target:m0"
+      },
+      {
+        "col": 14,
+        "text": " Plan the work… ",
+        "face": "managerShortcutOnorangeBar",
+        "action": "target:m0"
+      },
+      {
+        "col": 30,
+        "text": " ",
+        "face": "managerShortcutOnorangeBar",
+        "action": "target:m1"
+      },
+      {
+        "col": 31,
+        "text": "cb1",
+        "face": "managerShortcutOnmanagerShortcutOnorangeBar",
+        "action": "target:m1"
+      },
+      {
+        "col": 34,
+        "text": " Review termin… ",
+        "face": "managerShortcutOnorangeBar",
+        "action": "target:m1"
+      },
+      {
+        "col": 50,
+        "text": "                                              ",
+        "face": "orangeBar"
+      }
+    ],
+    [
+      {
+        "col": 0,
+        "text": " ",
+        "face": "base"
+      },
+      {
+        "col": 1,
+        "text": "●",
+        "face": "greenOnbase"
+      },
+      {
+        "col": 2,
+        "text": " ",
+        "face": "base"
+      },
+      {
+        "col": 3,
+        "text": " b2 ",
+        "face": "botBadge"
+      },
+      {
+        "col": 7,
+        "text": " aibo ",
+        "face": "location"
+      },
+      {
+        "col": 13,
+        "text": "  ",
+        "face": "base"
+      },
+      {
+        "col": 15,
+        "text": "continue 'Make the three panels stable'",
+        "face": "muted"
+      },
+      {
+        "col": 54,
+        "text": "                                          ",
+        "face": "base"
+      }
+    ],
+    [
+      {
+        "col": 0,
+        "text": " Work on this visible chat.",
+        "face": "botInput"
+      },
+      {
+        "col": 27,
+        "text": " ",
+        "face": "cursor"
+      },
+      {
+        "col": 28,
+        "text": "                                                                    ",
+        "face": "botInput"
+      }
+    ],
+    [
+      {
+        "col": 0,
+        "text": "                                                                                                ",
+        "face": "echo"
+      }
+    ]
+  ]
+}

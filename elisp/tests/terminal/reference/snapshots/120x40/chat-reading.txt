@@ -1,0 +1,40 @@
+ # (1) ACTIVE                      │ ● b2  aibo   Make the three panels stable                                          
+                                   │ project  —   goal  ready   tokens  0   elapsed  0s                                 
+ 0 ▏ ● b2  aibo  Make the three p… │  user                                                                              
+                                   │ ▏ Message 5: Please inspect the next workspace behavior and explain the result.    
+ # (2) UNREAD                      │                                                                                    
+                                   │  ● b2  aibo                                                                        
+ 1  ●  b21                     18m │ ▏ Message 6: This answer adds a little more detail to the conversation.            
+    Fix notification refresh and … │                                                                                    
+    Sidebar refresh preserves      │  user                                                                              
+    your place while new           │ ▏ Message 7: Please inspect the next workspace behavior and explain the result.    
+    notifications arrive.          │                                                                                    
+                                   │  ● b2  aibo                                                                        
+ 2  ●  b8                       1h │ ▏ Message 8: This answer adds a little more detail to the conversation.            
+    Inspect the location change    │                                                                                    
+    Interrupted during the         │  user                                                                              
+    location change. No files      │ ▏ Message 9: Please inspect the next workspace behavior and explain the result.    
+    were lost.                     │                                                                                    
+                                   │  ● b2  aibo                                                                        
+ # (1) READ                        │ ▏ Message 10: This answer adds a little more detail to the conversation.           
+                                   │                                                                                    
+ 3  ●  m0                       2h │  user                                                                              
+    Plan the workspace redesign    │ ▏ Message 11: Please inspect the next workspace behavior and explain the result.   
+    The layout checklist is ready  │                                                                                    
+    to review.                     │  ● b2  aibo                                                                        
+                                   │ ▏ Message 12: This answer adds a little more detail to the conversation.           
+                                   │                                                                                    
+                                   │  user                                                                              
+                                   │ ▏ Message 13: Please inspect the next workspace behavior and explain the result.   
+                                   │                                                                                    
+                                   │  ● b2  aibo                                                                        
+                                   │ ▏ Message 14: This answer adds a little more detail to the conversation.           
+                                   │                                                                                    
+                                   │  user                                                                              
+                                   │ ▏ Message 15: Please inspect the next workspace behavior and explain the result.   
+                                   │                                                                                  ↓ 
+           ● M-1 Make the th…  M-2 Fix notificat…  ● M-3 Inspect the…                                                   
+ M-0 new   cb0 Plan the work…  cb1 Review termin…                                                                       
+ ●  b2  aibo   continue 'Make the three panels stable'                                                                  
+                                                                                                                        
+b2 running · newer messages below                                                                                       

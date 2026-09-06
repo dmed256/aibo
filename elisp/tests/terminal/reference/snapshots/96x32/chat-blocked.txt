@@ -1,0 +1,32 @@
+ # (0) ACTIVE                      │ ● b2  aibo   Make the three panels stable                  
+                                   │ project  —   goal  ready   tokens  0   elapsed  0s         
+ # (2) UNREAD                      │ [2 hidden messages] ▸                                      
+                                   │                                                            
+ 0  ●  b21                     18m │  user                                                      
+    Fix notification refresh and … │ ▏ I want three stable panels: notifications on the left,   
+    Sidebar refresh preserves      │ ▏ the page I am viewing on the right, and a normally       
+    your place while new           │ ▏ growing input across the bottom.                         
+    notifications arrive.          │                                                            
+                                   │  ● b2  aibo                                                
+ 1  ●  b8                       1h │ ▏ The workspace keeps its three panels while pages change  
+    Inspect the location change    │ ▏ and messages arrive.                                     
+    Interrupted during the         │ ▏                                                          
+    location change. No files      │ ▏ What changed                                             
+    were lost.                     │ ▏ The sidebar keeps its scroll position. C-o switches      
+                                   │ ▏ between the main page and input. M-/ selects the         
+ # (1) READ                        │ ▏ conversation you are looking at.                         
+                                   │                                                            
+ 2  ●  m0                       2h │ Blocked: the selected working directory does not exist.    
+    Plan the workspace redesign    │                                                            
+    The layout checklist is ready  │                                                            
+    to review.                     │                                                            
+                                   │                                                            
+                                   │                                                            
+                                   │                                                            
+                                   │                                                            
+                                   │                                                            
+           ● M-1 Make the th…  M-2 Fix notificat…  ● M-3 Inspect the…                           
+ M-0 new   cb0 Plan the work…  cb1 Review termin…                                               
+ ●  b2  aibo   continue 'Make the three panels stable'                                          
+                                                                                                
+b2 needs a valid location                                                                       

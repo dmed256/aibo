@@ -1,0 +1,1326 @@
+{
+  "scenario": "delegation",
+  "columns": 96,
+  "rows": 32,
+  "cursor": {
+    "row": 30,
+    "col": 1
+  },
+  "regions": {
+    "main": {
+      "x": 36,
+      "y": 0,
+      "width": 60,
+      "height": 27
+    },
+    "sidebar": {
+      "x": 0,
+      "y": 0,
+      "width": 35,
+      "height": 27
+    },
+    "input": {
+      "x": 1,
+      "y": 30,
+      "width": 94,
+      "height": 1
+    },
+    "bars": {
+      "x": 0,
+      "y": 27,
+      "width": 96,
+      "height": 3
+    }
+  },
+  "runs": [
+    [
+      {
+        "col": 0,
+        "text": " ",
+        "face": "base"
+      },
+      {
+        "col": 1,
+        "text": "# (1) ACTIVE",
+        "face": "orange"
+      },
+      {
+        "col": 13,
+        "text": "                      ",
+        "face": "base"
+      },
+      {
+        "col": 35,
+        "text": "│",
+        "face": "rule"
+      },
+      {
+        "col": 36,
+        "text": " ",
+        "face": "botBadge"
+      },
+      {
+        "col": 37,
+        "text": "●",
+        "face": "greenOnbotBadge"
+      },
+      {
+        "col": 38,
+        "text": " b2 ",
+        "face": "botBadge"
+      },
+      {
+        "col": 42,
+        "text": " aibo ",
+        "face": "location"
+      },
+      {
+        "col": 48,
+        "text": "  ",
+        "face": "base"
+      },
+      {
+        "col": 50,
+        "text": "Make the three panels stable",
+        "face": "orange"
+      },
+      {
+        "col": 78,
+        "text": "                  ",
+        "face": "base"
+      }
+    ],
+    [
+      {
+        "col": 0,
+        "text": "                                   ",
+        "face": "base"
+      },
+      {
+        "col": 35,
+        "text": "│",
+        "face": "rule"
+      },
+      {
+        "col": 36,
+        "text": " project ",
+        "face": "location"
+      },
+      {
+        "col": 45,
+        "text": " — ",
+        "face": "metadataValue"
+      },
+      {
+        "col": 48,
+        "text": " ",
+        "face": "base"
+      },
+      {
+        "col": 49,
+        "text": " goal ",
+        "face": "location"
+      },
+      {
+        "col": 55,
+        "text": " ready ",
+        "face": "metadataValue"
+      },
+      {
+        "col": 62,
+        "text": " ",
+        "face": "base"
+      },
+      {
+        "col": 63,
+        "text": " tokens ",
+        "face": "location"
+      },
+      {
+        "col": 71,
+        "text": " 0 ",
+        "face": "metadataValue"
+      },
+      {
+        "col": 74,
+        "text": " ",
+        "face": "base"
+      },
+      {
+        "col": 75,
+        "text": " elapsed ",
+        "face": "location"
+      },
+      {
+        "col": 84,
+        "text": " 0s ",
+        "face": "metadataValue"
+      },
+      {
+        "col": 88,
+        "text": "        ",
+        "face": "base"
+      }
+    ],
+    [
+      {
+        "col": 0,
+        "text": " ",
+        "face": "base"
+      },
+      {
+        "col": 1,
+        "text": "0 ",
+        "face": "base",
+        "action": "chat:b2"
+      },
+      {
+        "col": 3,
+        "text": "▏",
+        "face": "orange",
+        "action": "chat:b2"
+      },
+      {
+        "col": 4,
+        "text": " ",
+        "face": "botBadge",
+        "action": "chat:b2"
+      },
+      {
+        "col": 5,
+        "text": "●",
+        "face": "greenOnbotBadge",
+        "action": "chat:b2"
+      },
+      {
+        "col": 6,
+        "text": " b2 ",
+        "face": "botBadge",
+        "action": "chat:b2"
+      },
+      {
+        "col": 10,
+        "text": " aibo ",
+        "face": "location",
+        "action": "chat:b2"
+      },
+      {
+        "col": 16,
+        "text": " ",
+        "face": "base",
+        "action": "chat:b2"
+      },
+      {
+        "col": 17,
+        "text": "Make the three p…",
+        "face": "muted",
+        "action": "chat:b2"
+      },
+      {
+        "col": 34,
+        "text": " ",
+        "face": "base",
+        "action": "chat:b2"
+      },
+      {
+        "col": 35,
+        "text": "│",
+        "face": "rule"
+      },
+      {
+        "col": 36,
+        "text": " ",
+        "face": "base"
+      },
+      {
+        "col": 37,
+        "text": "[1 hidden message] ▸",
+        "face": "muted",
+        "action": "hidden:toggle"
+      },
+      {
+        "col": 57,
+        "text": "                                       ",
+        "face": "base"
+      }
+    ],
+    [
+      {
+        "col": 0,
+        "text": "                                   ",
+        "face": "base"
+      },
+      {
+        "col": 35,
+        "text": "│",
+        "face": "rule"
+      },
+      {
+        "col": 36,
+        "text": "                                                            ",
+        "face": "base"
+      }
+    ],
+    [
+      {
+        "col": 0,
+        "text": " ",
+        "face": "base"
+      },
+      {
+        "col": 1,
+        "text": "# (2) UNREAD",
+        "face": "orange"
+      },
+      {
+        "col": 13,
+        "text": "                      ",
+        "face": "base"
+      },
+      {
+        "col": 35,
+        "text": "│",
+        "face": "rule"
+      },
+      {
+        "col": 36,
+        "text": " ",
+        "face": "base"
+      },
+      {
+        "col": 37,
+        "text": " user ",
+        "face": "userBadge"
+      },
+      {
+        "col": 43,
+        "text": "                                                     ",
+        "face": "base"
+      }
+    ],
+    [
+      {
+        "col": 0,
+        "text": "                                   ",
+        "face": "base"
+      },
+      {
+        "col": 35,
+        "text": "│",
+        "face": "rule"
+      },
+      {
+        "col": 36,
+        "text": " ",
+        "face": "base"
+      },
+      {
+        "col": 37,
+        "text": "▏",
+        "face": "blueOnuser"
+      },
+      {
+        "col": 38,
+        "text": " ",
+        "face": "user"
+      },
+      {
+        "col": 39,
+        "text": "user message",
+        "face": "orangeOnuser"
+      },
+      {
+        "col": 51,
+        "text": "                                             ",
+        "face": "user"
+      }
+    ],
+    [
+      {
+        "col": 0,
+        "text": " ",
+        "face": "base"
+      },
+      {
+        "col": 1,
+        "text": "1",
+        "face": "muted",
+        "action": "chat:b21"
+      },
+      {
+        "col": 2,
+        "text": "  ",
+        "face": "base",
+        "action": "chat:b21"
+      },
+      {
+        "col": 4,
+        "text": "●",
+        "face": "mutedOnbase",
+        "action": "chat:b21"
+      },
+      {
+        "col": 5,
+        "text": " ",
+        "face": "base",
+        "action": "chat:b21"
+      },
+      {
+        "col": 6,
+        "text": " b21 ",
+        "face": "botBadge",
+        "action": "chat:b21"
+      },
+      {
+        "col": 11,
+        "text": "                    ",
+        "face": "base",
+        "action": "chat:b21"
+      },
+      {
+        "col": 31,
+        "text": "18m",
+        "face": "muted",
+        "action": "chat:b21"
+      },
+      {
+        "col": 34,
+        "text": " ",
+        "face": "base",
+        "action": "chat:b21"
+      },
+      {
+        "col": 35,
+        "text": "│",
+        "face": "rule"
+      },
+      {
+        "col": 36,
+        "text": " ",
+        "face": "base"
+      },
+      {
+        "col": 37,
+        "text": "▏",
+        "face": "blueOnuser"
+      },
+      {
+        "col": 38,
+        "text": "                                                          ",
+        "face": "user"
+      }
+    ],
+    [
+      {
+        "col": 0,
+        "text": " ",
+        "face": "base"
+      },
+      {
+        "col": 1,
+        "text": "   ",
+        "face": "base",
+        "action": "chat:b21"
+      },
+      {
+        "col": 4,
+        "text": "Fix notification refresh and …",
+        "face": "orange",
+        "action": "chat:b21"
+      },
+      {
+        "col": 34,
+        "text": " ",
+        "face": "base",
+        "action": "chat:b21"
+      },
+      {
+        "col": 35,
+        "text": "│",
+        "face": "rule"
+      },
+      {
+        "col": 36,
+        "text": " ",
+        "face": "base"
+      },
+      {
+        "col": 37,
+        "text": "▏",
+        "face": "blueOnuser"
+      },
+      {
+        "col": 38,
+        "text": " Fix the sidebar in aibo.                                 ",
+        "face": "user"
+      }
+    ],
+    [
+      {
+        "col": 0,
+        "text": " ",
+        "face": "base"
+      },
+      {
+        "col": 1,
+        "text": "   ",
+        "face": "base",
+        "action": "chat:b21"
+      },
+      {
+        "col": 4,
+        "text": "Sidebar refresh preserves",
+        "face": "muted",
+        "action": "chat:b21"
+      },
+      {
+        "col": 29,
+        "text": "      ",
+        "face": "base",
+        "action": "chat:b21"
+      },
+      {
+        "col": 35,
+        "text": "│",
+        "face": "rule"
+      },
+      {
+        "col": 36,
+        "text": " ",
+        "face": "base"
+      },
+      {
+        "col": 37,
+        "text": "▏",
+        "face": "blueOnuser"
+      },
+      {
+        "col": 38,
+        "text": "                                                          ",
+        "face": "user"
+      }
+    ],
+    [
+      {
+        "col": 0,
+        "text": " ",
+        "face": "base"
+      },
+      {
+        "col": 1,
+        "text": "   ",
+        "face": "base",
+        "action": "chat:b21"
+      },
+      {
+        "col": 4,
+        "text": "your place while new",
+        "face": "muted",
+        "action": "chat:b21"
+      },
+      {
+        "col": 24,
+        "text": "           ",
+        "face": "base",
+        "action": "chat:b21"
+      },
+      {
+        "col": 35,
+        "text": "│",
+        "face": "rule"
+      },
+      {
+        "col": 36,
+        "text": " ",
+        "face": "base"
+      },
+      {
+        "col": 37,
+        "text": "▏",
+        "face": "blueOnuser"
+      },
+      {
+        "col": 38,
+        "text": " ",
+        "face": "user"
+      },
+      {
+        "col": 39,
+        "text": "m context",
+        "face": "orangeOnuser"
+      },
+      {
+        "col": 48,
+        "text": "                                                ",
+        "face": "user"
+      }
+    ],
+    [
+      {
+        "col": 0,
+        "text": " ",
+        "face": "base"
+      },
+      {
+        "col": 1,
+        "text": "   ",
+        "face": "base",
+        "action": "chat:b21"
+      },
+      {
+        "col": 4,
+        "text": "notifications arrive.",
+        "face": "muted",
+        "action": "chat:b21"
+      },
+      {
+        "col": 25,
+        "text": "          ",
+        "face": "base",
+        "action": "chat:b21"
+      },
+      {
+        "col": 35,
+        "text": "│",
+        "face": "rule"
+      },
+      {
+        "col": 36,
+        "text": " ",
+        "face": "base"
+      },
+      {
+        "col": 37,
+        "text": "▏",
+        "face": "blueOnuser"
+      },
+      {
+        "col": 38,
+        "text": "                                                          ",
+        "face": "user"
+      }
+    ],
+    [
+      {
+        "col": 0,
+        "text": "                                   ",
+        "face": "base"
+      },
+      {
+        "col": 35,
+        "text": "│",
+        "face": "rule"
+      },
+      {
+        "col": 36,
+        "text": " ",
+        "face": "base"
+      },
+      {
+        "col": 37,
+        "text": "▏",
+        "face": "blueOnuser"
+      },
+      {
+        "col": 38,
+        "text": " Project: aibo. Location: aibo (~/git/aibo). Preserve     ",
+        "face": "user"
+      }
+    ],
+    [
+      {
+        "col": 0,
+        "text": " ",
+        "face": "base"
+      },
+      {
+        "col": 1,
+        "text": "2",
+        "face": "muted",
+        "action": "chat:b8"
+      },
+      {
+        "col": 2,
+        "text": "  ",
+        "face": "base",
+        "action": "chat:b8"
+      },
+      {
+        "col": 4,
+        "text": "●",
+        "face": "errorOnbase",
+        "action": "chat:b8"
+      },
+      {
+        "col": 5,
+        "text": " ",
+        "face": "base",
+        "action": "chat:b8"
+      },
+      {
+        "col": 6,
+        "text": " b8 ",
+        "face": "botBadge",
+        "action": "chat:b8"
+      },
+      {
+        "col": 10,
+        "text": "                      ",
+        "face": "base",
+        "action": "chat:b8"
+      },
+      {
+        "col": 32,
+        "text": "1h",
+        "face": "muted",
+        "action": "chat:b8"
+      },
+      {
+        "col": 34,
+        "text": " ",
+        "face": "base",
+        "action": "chat:b8"
+      },
+      {
+        "col": 35,
+        "text": "│",
+        "face": "rule"
+      },
+      {
+        "col": 36,
+        "text": " ",
+        "face": "base"
+      },
+      {
+        "col": 37,
+        "text": "▏",
+        "face": "blueOnuser"
+      },
+      {
+        "col": 38,
+        "text": " scroll and do not rebuild the three windows.             ",
+        "face": "user"
+      }
+    ],
+    [
+      {
+        "col": 0,
+        "text": " ",
+        "face": "base"
+      },
+      {
+        "col": 1,
+        "text": "   ",
+        "face": "base",
+        "action": "chat:b8"
+      },
+      {
+        "col": 4,
+        "text": "Inspect the location change",
+        "face": "orange",
+        "action": "chat:b8"
+      },
+      {
+        "col": 31,
+        "text": "    ",
+        "face": "base",
+        "action": "chat:b8"
+      },
+      {
+        "col": 35,
+        "text": "│",
+        "face": "rule"
+      },
+      {
+        "col": 36,
+        "text": "                                                            ",
+        "face": "base"
+      }
+    ],
+    [
+      {
+        "col": 0,
+        "text": " ",
+        "face": "base"
+      },
+      {
+        "col": 1,
+        "text": "   ",
+        "face": "base",
+        "action": "chat:b8"
+      },
+      {
+        "col": 4,
+        "text": "Interrupted during the",
+        "face": "muted",
+        "action": "chat:b8"
+      },
+      {
+        "col": 26,
+        "text": "         ",
+        "face": "base",
+        "action": "chat:b8"
+      },
+      {
+        "col": 35,
+        "text": "│",
+        "face": "rule"
+      },
+      {
+        "col": 36,
+        "text": "                                                            ",
+        "face": "base"
+      }
+    ],
+    [
+      {
+        "col": 0,
+        "text": " ",
+        "face": "base"
+      },
+      {
+        "col": 1,
+        "text": "   ",
+        "face": "base",
+        "action": "chat:b8"
+      },
+      {
+        "col": 4,
+        "text": "location change. No files",
+        "face": "muted",
+        "action": "chat:b8"
+      },
+      {
+        "col": 29,
+        "text": "      ",
+        "face": "base",
+        "action": "chat:b8"
+      },
+      {
+        "col": 35,
+        "text": "│",
+        "face": "rule"
+      },
+      {
+        "col": 36,
+        "text": "                                                            ",
+        "face": "base"
+      }
+    ],
+    [
+      {
+        "col": 0,
+        "text": " ",
+        "face": "base"
+      },
+      {
+        "col": 1,
+        "text": "   ",
+        "face": "base",
+        "action": "chat:b8"
+      },
+      {
+        "col": 4,
+        "text": "were lost.",
+        "face": "muted",
+        "action": "chat:b8"
+      },
+      {
+        "col": 14,
+        "text": "                     ",
+        "face": "base",
+        "action": "chat:b8"
+      },
+      {
+        "col": 35,
+        "text": "│",
+        "face": "rule"
+      },
+      {
+        "col": 36,
+        "text": "                                                            ",
+        "face": "base"
+      }
+    ],
+    [
+      {
+        "col": 0,
+        "text": "                                   ",
+        "face": "base"
+      },
+      {
+        "col": 35,
+        "text": "│",
+        "face": "rule"
+      },
+      {
+        "col": 36,
+        "text": "                                                            ",
+        "face": "base"
+      }
+    ],
+    [
+      {
+        "col": 0,
+        "text": " ",
+        "face": "base"
+      },
+      {
+        "col": 1,
+        "text": "# (1) READ",
+        "face": "orange"
+      },
+      {
+        "col": 11,
+        "text": "                        ",
+        "face": "base"
+      },
+      {
+        "col": 35,
+        "text": "│",
+        "face": "rule"
+      },
+      {
+        "col": 36,
+        "text": "                                                            ",
+        "face": "base"
+      }
+    ],
+    [
+      {
+        "col": 0,
+        "text": "                                   ",
+        "face": "base"
+      },
+      {
+        "col": 35,
+        "text": "│",
+        "face": "rule"
+      },
+      {
+        "col": 36,
+        "text": "                                                            ",
+        "face": "base"
+      }
+    ],
+    [
+      {
+        "col": 0,
+        "text": " ",
+        "face": "base"
+      },
+      {
+        "col": 1,
+        "text": "3",
+        "face": "muted",
+        "action": "chat:m0"
+      },
+      {
+        "col": 2,
+        "text": "  ",
+        "face": "base",
+        "action": "chat:m0"
+      },
+      {
+        "col": 4,
+        "text": "●",
+        "face": "mutedOnbase",
+        "action": "chat:m0"
+      },
+      {
+        "col": 5,
+        "text": " ",
+        "face": "base",
+        "action": "chat:m0"
+      },
+      {
+        "col": 6,
+        "text": " m0 ",
+        "face": "managerBadge",
+        "action": "chat:m0"
+      },
+      {
+        "col": 10,
+        "text": "                      ",
+        "face": "base",
+        "action": "chat:m0"
+      },
+      {
+        "col": 32,
+        "text": "2h",
+        "face": "muted",
+        "action": "chat:m0"
+      },
+      {
+        "col": 34,
+        "text": " ",
+        "face": "base",
+        "action": "chat:m0"
+      },
+      {
+        "col": 35,
+        "text": "│",
+        "face": "rule"
+      },
+      {
+        "col": 36,
+        "text": "                                                            ",
+        "face": "base"
+      }
+    ],
+    [
+      {
+        "col": 0,
+        "text": " ",
+        "face": "base"
+      },
+      {
+        "col": 1,
+        "text": "   ",
+        "face": "base",
+        "action": "chat:m0"
+      },
+      {
+        "col": 4,
+        "text": "Plan the workspace redesign",
+        "face": "orange",
+        "action": "chat:m0"
+      },
+      {
+        "col": 31,
+        "text": "    ",
+        "face": "base",
+        "action": "chat:m0"
+      },
+      {
+        "col": 35,
+        "text": "│",
+        "face": "rule"
+      },
+      {
+        "col": 36,
+        "text": "                                                            ",
+        "face": "base"
+      }
+    ],
+    [
+      {
+        "col": 0,
+        "text": " ",
+        "face": "base"
+      },
+      {
+        "col": 1,
+        "text": "   ",
+        "face": "base",
+        "action": "chat:m0"
+      },
+      {
+        "col": 4,
+        "text": "The layout checklist is ready",
+        "face": "muted",
+        "action": "chat:m0"
+      },
+      {
+        "col": 33,
+        "text": "  ",
+        "face": "base",
+        "action": "chat:m0"
+      },
+      {
+        "col": 35,
+        "text": "│",
+        "face": "rule"
+      },
+      {
+        "col": 36,
+        "text": "                                                            ",
+        "face": "base"
+      }
+    ],
+    [
+      {
+        "col": 0,
+        "text": " ",
+        "face": "base"
+      },
+      {
+        "col": 1,
+        "text": "   ",
+        "face": "base",
+        "action": "chat:m0"
+      },
+      {
+        "col": 4,
+        "text": "to review.",
+        "face": "muted",
+        "action": "chat:m0"
+      },
+      {
+        "col": 14,
+        "text": "                     ",
+        "face": "base",
+        "action": "chat:m0"
+      },
+      {
+        "col": 35,
+        "text": "│",
+        "face": "rule"
+      },
+      {
+        "col": 36,
+        "text": "                                                            ",
+        "face": "base"
+      }
+    ],
+    [
+      {
+        "col": 0,
+        "text": "                                   ",
+        "face": "base"
+      },
+      {
+        "col": 35,
+        "text": "│",
+        "face": "rule"
+      },
+      {
+        "col": 36,
+        "text": "                                                            ",
+        "face": "base"
+      }
+    ],
+    [
+      {
+        "col": 0,
+        "text": "                                   ",
+        "face": "base"
+      },
+      {
+        "col": 35,
+        "text": "│",
+        "face": "rule"
+      },
+      {
+        "col": 36,
+        "text": "                                                            ",
+        "face": "base"
+      }
+    ],
+    [
+      {
+        "col": 0,
+        "text": "                                   ",
+        "face": "base"
+      },
+      {
+        "col": 35,
+        "text": "│",
+        "face": "rule"
+      },
+      {
+        "col": 36,
+        "text": "                                                            ",
+        "face": "base"
+      }
+    ],
+    [
+      {
+        "col": 0,
+        "text": "          ",
+        "face": "purpleBar"
+      },
+      {
+        "col": 10,
+        "text": " ",
+        "face": "botShortcutOnbotBadge",
+        "action": "target:b2"
+      },
+      {
+        "col": 11,
+        "text": "●",
+        "face": "greenOnbotShortcutOnbotBadge",
+        "action": "target:b2"
+      },
+      {
+        "col": 12,
+        "text": " M-1 Make the th… ",
+        "face": "botShortcutOnbotBadge",
+        "action": "target:b2"
+      },
+      {
+        "col": 30,
+        "text": " ",
+        "face": "botShortcutOnpurpleBar",
+        "action": "target:b21"
+      },
+      {
+        "col": 31,
+        "text": "M-2",
+        "face": "botShortcutOnbotShortcutOnpurpleBar",
+        "action": "target:b21"
+      },
+      {
+        "col": 34,
+        "text": " Fix notificat… ",
+        "face": "botShortcutOnpurpleBar",
+        "action": "target:b21"
+      },
+      {
+        "col": 50,
+        "text": " ",
+        "face": "botShortcutOnpurpleBar",
+        "action": "target:b8"
+      },
+      {
+        "col": 51,
+        "text": "●",
+        "face": "errorOnbotShortcutOnpurpleBar",
+        "action": "target:b8"
+      },
+      {
+        "col": 52,
+        "text": " ",
+        "face": "botShortcutOnpurpleBar",
+        "action": "target:b8"
+      },
+      {
+        "col": 53,
+        "text": "M-3",
+        "face": "botShortcutOnbotShortcutOnpurpleBar",
+        "action": "target:b8"
+      },
+      {
+        "col": 56,
+        "text": " Inspect the… ",
+        "face": "botShortcutOnpurpleBar",
+        "action": "target:b8"
+      },
+      {
+        "col": 70,
+        "text": "                          ",
+        "face": "purpleBar"
+      }
+    ],
+    [
+      {
+        "col": 0,
+        "text": " M-0 new ",
+        "face": "managerShortcutOnorangeBar",
+        "action": "new-manager"
+      },
+      {
+        "col": 9,
+        "text": " ",
+        "face": "orangeBar"
+      },
+      {
+        "col": 10,
+        "text": " ",
+        "face": "managerShortcutOnorangeBar",
+        "action": "target:m0"
+      },
+      {
+        "col": 11,
+        "text": "cb0",
+        "face": "managerShortcutOnmanagerShortcutOnorangeBar",
+        "action": "target:m0"
+      },
+      {
+        "col": 14,
+        "text": " Plan the work… ",
+        "face": "managerShortcutOnorangeBar",
+        "action": "target:m0"
+      },
+      {
+        "col": 30,
+        "text": " ",
+        "face": "managerShortcutOnorangeBar",
+        "action": "target:m1"
+      },
+      {
+        "col": 31,
+        "text": "cb1",
+        "face": "managerShortcutOnmanagerShortcutOnorangeBar",
+        "action": "target:m1"
+      },
+      {
+        "col": 34,
+        "text": " Review termin… ",
+        "face": "managerShortcutOnorangeBar",
+        "action": "target:m1"
+      },
+      {
+        "col": 50,
+        "text": "                                              ",
+        "face": "orangeBar"
+      }
+    ],
+    [
+      {
+        "col": 0,
+        "text": " ",
+        "face": "base"
+      },
+      {
+        "col": 1,
+        "text": "●",
+        "face": "greenOnbase"
+      },
+      {
+        "col": 2,
+        "text": " ",
+        "face": "base"
+      },
+      {
+        "col": 3,
+        "text": " b2 ",
+        "face": "botBadge"
+      },
+      {
+        "col": 7,
+        "text": " aibo ",
+        "face": "location"
+      },
+      {
+        "col": 13,
+        "text": "  ",
+        "face": "base"
+      },
+      {
+        "col": 15,
+        "text": "continue 'Make the three panels stable'",
+        "face": "muted"
+      },
+      {
+        "col": 54,
+        "text": "                                          ",
+        "face": "base"
+      }
+    ],
+    [
+      {
+        "col": 0,
+        "text": " ",
+        "face": "botInput"
+      },
+      {
+        "col": 1,
+        "text": " ",
+        "face": "cursor"
+      },
+      {
+        "col": 2,
+        "text": "                                                                                              ",
+        "face": "botInput"
+      }
+    ],
+    [
+      {
+        "col": 0,
+        "text": "                                                                                                ",
+        "face": "echo"
+      }
+    ]
+  ]
+}

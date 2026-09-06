@@ -1,0 +1,448 @@
+{
+  "scenario": "help-cowork",
+  "columns": 96,
+  "rows": 32,
+  "cursor": {
+    "row": 2,
+    "col": 1
+  },
+  "regions": {
+    "main": {
+      "x": 0,
+      "y": 0,
+      "width": 96,
+      "height": 31
+    }
+  },
+  "runs": [
+    [
+      {
+        "col": 0,
+        "text": " ",
+        "face": "base"
+      },
+      {
+        "col": 1,
+        "text": "# Help",
+        "face": "orange"
+      },
+      {
+        "col": 7,
+        "text": "                                                                                         ",
+        "face": "base"
+      }
+    ],
+    [
+      {
+        "col": 0,
+        "text": "                                                                                                ",
+        "face": "base"
+      }
+    ],
+    [
+      {
+        "col": 0,
+        "text": " ",
+        "face": "base"
+      },
+      {
+        "col": 1,
+        "text": "C",
+        "face": "cursor"
+      },
+      {
+        "col": 2,
+        "text": "-M-h               ",
+        "face": "key"
+      },
+      {
+        "col": 21,
+        "text": "  Home / return to full mode                                               ",
+        "face": "base"
+      }
+    ],
+    [
+      {
+        "col": 0,
+        "text": " ",
+        "face": "base"
+      },
+      {
+        "col": 1,
+        "text": "M-0                 ",
+        "face": "key"
+      },
+      {
+        "col": 21,
+        "text": "  New m# chat                                                              ",
+        "face": "base"
+      }
+    ],
+    [
+      {
+        "col": 0,
+        "text": " ",
+        "face": "base"
+      },
+      {
+        "col": 1,
+        "text": "M-1 … M-9           ",
+        "face": "key"
+      },
+      {
+        "col": 21,
+        "text": "  Open b# from the purple bar                                              ",
+        "face": "base"
+      }
+    ],
+    [
+      {
+        "col": 0,
+        "text": " ",
+        "face": "base"
+      },
+      {
+        "col": 1,
+        "text": "C-c b 0 … 9         ",
+        "face": "key"
+      },
+      {
+        "col": 21,
+        "text": "  Open m# from the orange bar                                              ",
+        "face": "base"
+      }
+    ],
+    [
+      {
+        "col": 0,
+        "text": " ",
+        "face": "base"
+      },
+      {
+        "col": 1,
+        "text": "C-c b               ",
+        "face": "key"
+      },
+      {
+        "col": 21,
+        "text": "  Search chats (cowork mode)                                               ",
+        "face": "base"
+      }
+    ],
+    [
+      {
+        "col": 0,
+        "text": " ",
+        "face": "base"
+      },
+      {
+        "col": 1,
+        "text": "C-c p s             ",
+        "face": "key"
+      },
+      {
+        "col": 21,
+        "text": "  Search chats in either mode                                              ",
+        "face": "base"
+      }
+    ],
+    [
+      {
+        "col": 0,
+        "text": " ",
+        "face": "base"
+      },
+      {
+        "col": 1,
+        "text": "C-c n 0 … z         ",
+        "face": "key"
+      },
+      {
+        "col": 21,
+        "text": "  Open a notification                                                      ",
+        "face": "base"
+      }
+    ],
+    [
+      {
+        "col": 0,
+        "text": " ",
+        "face": "base"
+      },
+      {
+        "col": 1,
+        "text": "C-c p n             ",
+        "face": "key"
+      },
+      {
+        "col": 21,
+        "text": "  Focus and scroll notifications                                           ",
+        "face": "base"
+      }
+    ],
+    [
+      {
+        "col": 0,
+        "text": " ",
+        "face": "base"
+      },
+      {
+        "col": 1,
+        "text": "C-c p l             ",
+        "face": "key"
+      },
+      {
+        "col": 21,
+        "text": "  Locations                                                                ",
+        "face": "base"
+      }
+    ],
+    [
+      {
+        "col": 0,
+        "text": " ",
+        "face": "base"
+      },
+      {
+        "col": 1,
+        "text": "C-c p p             ",
+        "face": "key"
+      },
+      {
+        "col": 21,
+        "text": "  Projects                                                                 ",
+        "face": "base"
+      }
+    ],
+    [
+      {
+        "col": 0,
+        "text": " ",
+        "face": "base"
+      },
+      {
+        "col": 1,
+        "text": "C-c p h             ",
+        "face": "key"
+      },
+      {
+        "col": 21,
+        "text": "  Help                                                                     ",
+        "face": "base"
+      }
+    ],
+    [
+      {
+        "col": 0,
+        "text": " ",
+        "face": "base"
+      },
+      {
+        "col": 1,
+        "text": "M-/                 ",
+        "face": "key"
+      },
+      {
+        "col": 21,
+        "text": "  Focus input; repeat to cycle targets                                     ",
+        "face": "base"
+      }
+    ],
+    [
+      {
+        "col": 0,
+        "text": " ",
+        "face": "base"
+      },
+      {
+        "col": 1,
+        "text": "C-o                 ",
+        "face": "key"
+      },
+      {
+        "col": 21,
+        "text": "  Cycle content / input; skip sidebar                                      ",
+        "face": "base"
+      }
+    ],
+    [
+      {
+        "col": 0,
+        "text": " ",
+        "face": "base"
+      },
+      {
+        "col": 1,
+        "text": "RET                 ",
+        "face": "key"
+      },
+      {
+        "col": 21,
+        "text": "  Newline in input; activate links/buttons                                 ",
+        "face": "base"
+      }
+    ],
+    [
+      {
+        "col": 0,
+        "text": " ",
+        "face": "base"
+      },
+      {
+        "col": 1,
+        "text": "M-RET               ",
+        "face": "key"
+      },
+      {
+        "col": 21,
+        "text": "  Send draft                                                               ",
+        "face": "base"
+      }
+    ],
+    [
+      {
+        "col": 0,
+        "text": " ",
+        "face": "base"
+      },
+      {
+        "col": 1,
+        "text": "C-g                 ",
+        "face": "key"
+      },
+      {
+        "col": 21,
+        "text": "  Clear; also close input in cowork                                        ",
+        "face": "base"
+      }
+    ],
+    [
+      {
+        "col": 0,
+        "text": " ",
+        "face": "base"
+      },
+      {
+        "col": 1,
+        "text": "C-c C-i             ",
+        "face": "key"
+      },
+      {
+        "col": 21,
+        "text": "  Attach clipboard image                                                   ",
+        "face": "base"
+      }
+    ],
+    [
+      {
+        "col": 0,
+        "text": " ",
+        "face": "base"
+      },
+      {
+        "col": 1,
+        "text": "M-w                 ",
+        "face": "key"
+      },
+      {
+        "col": 21,
+        "text": "  Copy literal selected text                                               ",
+        "face": "base"
+      }
+    ],
+    [
+      {
+        "col": 0,
+        "text": " ",
+        "face": "base"
+      },
+      {
+        "col": 1,
+        "text": "C-x 0/1/2/3         ",
+        "face": "key"
+      },
+      {
+        "col": 21,
+        "text": "  Leave full mode; normal window command                                   ",
+        "face": "base"
+      }
+    ],
+    [
+      {
+        "col": 0,
+        "text": "                                                                                                ",
+        "face": "base"
+      }
+    ],
+    [
+      {
+        "col": 0,
+        "text": "                                                                                                ",
+        "face": "base"
+      }
+    ],
+    [
+      {
+        "col": 0,
+        "text": "                                                                                                ",
+        "face": "base"
+      }
+    ],
+    [
+      {
+        "col": 0,
+        "text": "                                                                                                ",
+        "face": "base"
+      }
+    ],
+    [
+      {
+        "col": 0,
+        "text": "                                                                                                ",
+        "face": "base"
+      }
+    ],
+    [
+      {
+        "col": 0,
+        "text": "                                                                                                ",
+        "face": "base"
+      }
+    ],
+    [
+      {
+        "col": 0,
+        "text": "                                                                                                ",
+        "face": "base"
+      }
+    ],
+    [
+      {
+        "col": 0,
+        "text": "                                                                                                ",
+        "face": "base"
+      }
+    ],
+    [
+      {
+        "col": 0,
+        "text": "                                                                                                ",
+        "face": "base"
+      }
+    ],
+    [
+      {
+        "col": 0,
+        "text": "                                                                                                ",
+        "face": "base"
+      }
+    ],
+    [
+      {
+        "col": 0,
+        "text": "                                                                                                ",
+        "face": "echo"
+      }
+    ]
+  ]
+}

@@ -1,7 +1,65 @@
-# Python
-*.egg-info
-*.pyc
-__pycache__
-python/dist
+# Python dependencies, bytecode and packaging
+__pycache__/
+*.py[cod]
+*.egg-info/
+.eggs/
+.venv/
+venv/
+/python/build/
+/python/dist/
 
-# ELisp
+# Test, type-check and coverage caches
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.dmypy.json
+.tox/
+.nox/
+.coverage
+.coverage.*
+coverage.xml
+htmlcov/
+
+# Frontend dependencies and generated assets
+node_modules/
+*.tsbuildinfo
+/web/dist/
+/web/coverage/
+/python/src/aibo/resources/web/
+/web/src/tutorial/frames.json
+
+# Generated terminal gallery (reference snapshots remain versioned)
+/elisp/tests/terminal/reference/index.html
+/elisp/tests/terminal/reference/views/
+/elisp/tests/terminal/reference/renders/
+
+# Emacs compilation, backups, autosaves and editor/OS state
+*.elc
+*~
+\#*\#
+.\#*
+*.swp
+*.swo
+.DS_Store
+
+# Local configuration, credentials and runtime data (never source fixtures)
+.env
+.env.*
+!.env.example
+!.env.sample
+!.env.template
+/.cache/
+/.aibo/
+/logs/
+/tmp/
+*.log
+
+# Local databases and backups
+*.db
+*.db-*
+*.sqlite
+*.sqlite-*
+*.sqlite3
+*.sqlite3-*
+*.dump
+*.sql.gz

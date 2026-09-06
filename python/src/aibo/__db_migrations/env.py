@@ -1,8 +1,7 @@
 from alembic import context
-from sqlalchemy import engine_from_config, pool
 
 from aibo.db.client import get_sync_engine
-from aibo.db.models.base_db_model import BaseDBModel
+from aibo.db.models import BaseDBModel
 
 config = context.config
 target_metadata = BaseDBModel.metadata
@@ -26,7 +25,7 @@ def run_migrations_online() -> None:
         context.configure(
             connection=conn,
             target_metadata=target_metadata,
-            render_as_batch=True,
+            render_as_batch=conn.dialect.name == "sqlite",
         )
 
         with context.begin_transaction():

@@ -16,22 +16,16 @@ repos:
     stages: [push]
     additional_dependencies:
       [
-        "aiocache",
         "aiosqlite",
         "alembic",
-        "async-lru",
-        "cachetools",
+        "asyncpg",
         "fastapi",
         "fire",
         "greenlet",
-        "numpy",
-        "openai",
-        "Pillow",
         "pydantic",
+        "psycopg[binary]",
         "sqlalchemy[asyncio]",
-        "termcolor",
-        "tiktoken",
-        "types-cachetools",
+        "websockets",
       ]
 
 - repo: https://github.com/pycqa/isort
@@ -39,4 +33,14 @@ repos:
   hooks:
   - id: isort
     types_or: [python]
+    stages: [push]
+
+- repo: local
+  hooks:
+  - id: web
+    name: web
+    entry: bun run --cwd web check
+    language: system
+    pass_filenames: false
+    files: ^web/
     stages: [push]

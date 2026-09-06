@@ -1,0 +1,32 @@
+ # (0) ACTIVE                      │ ●  b2   Make the three panels stable                       
+                                   │ ●  m0   Plan the workspace redesign                        
+ # (3) UNREAD                      │                                                            
+                                   │ # research                                                 
+ 0  ●  b21                      2m │                                                            
+    Fix notification refresh and … │                                                            
+    A result from a few minutes    │ # aibo                                                     
+    ago.                           │                                                            
+                                   │ ●  b21   Fix notification refresh and scroll               
+ 1  ●  b8                       3h │ ●  b8   Inspect the location change                        
+    Inspect the location change    │ ●  m1   Review terminal acceptance cases                   
+    A result from earlier today.   │                                                            
+                                   │ old-prototype                                              
+ 2  ●  m0                   Aug 13 │                                                            
+    Plan the workspace redesign    │                                                            
+    A result from a previous day.  │                                                            
+                                   │                                                            
+ # (1) READ                        │                                                            
+                                   │                                                            
+ 3  ●  m0                       2h │                                                            
+    Plan the workspace redesign    │                                                            
+    The layout checklist is ready  │                                                            
+    to review.                     │                                                            
+                                   │                                                            
+                                   │                                                            
+                                   │                                                            
+                                   │                                                            
+           M-1 Make the thre…  M-2 Fix notificat…  ● M-3 Inspect the…                           
+ M-0 new   cb0 Plan the work…  cb1 Review termin…                                               
+ ●  m0   continue 'Plan the workspace redesign'                                                 
+                                                                                                
+                                                                                                

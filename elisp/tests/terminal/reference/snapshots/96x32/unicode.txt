@@ -1,0 +1,32 @@
+ # (1) ACTIVE                      │ ● b2  aibo   Make the three panels stable                  
+                                   │ project  —   goal  ready   tokens  0   elapsed  0s         
+ 0 ▏ ● b2  aibo  Make the three p… │  user                                                      
+                                   │ ▏ Test café, 猫, and an exact path:                        
+ # (2) UNREAD                      │ ▏ ~/git/aibo/elisp/aibo-ui.el                              
+                                   │                                                            
+ 1  ●  b21                     18m │  ● b2  aibo                                                
+    Fix notification refresh and … │ ▏ These characters must not shift the border or corrupt    
+    Sidebar refresh preserves      │ ▏ the copied text.                                         
+    your place while new           │                                                            
+    notifications arrive.          │                                                            
+                                   │                                                            
+ 2  ●  b8                       1h │                                                            
+    Inspect the location change    │                                                            
+    Interrupted during the         │                                                            
+    location change. No files      │                                                            
+    were lost.                     │                                                            
+                                   │                                                            
+ # (1) READ                        │                                                            
+                                   │                                                            
+ 3  ●  m0                       2h │                                                            
+    Plan the workspace redesign    │                                                            
+    The layout checklist is ready  │                                                            
+    to review.                     │                                                            
+                                   │                                                            
+                                   │                                                            
+                                   │                                                            
+           ● M-1 Make the th…  M-2 Fix notificat…  ● M-3 Inspect the…                           
+ M-0 new   cb0 Plan the work…  cb1 Review termin…                                               
+ ●  b2  aibo   continue 'Make the three panels stable'                                          
+ Check 猫 and café; keep ~/git/aibo unchanged.                                                  
+                                                                                                

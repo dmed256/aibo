@@ -1,0 +1,20 @@
+# Replace __AIBO_DEPLOY_DIR__ with ~/.cache/aibo/deploy and include this file
+# from nginx.conf. The redeploy command atomically rewrites only the included
+# upstream file.
+upstream aibo_server {
+    include __AIBO_DEPLOY_DIR__/active-upstream.conf;
+}
+
+server {
+    listen 127.0.0.1:5000;
+
+    location / {
+        proxy_pass http://aibo_server;
+        proxy_http_version 1.1;
+        proxy_set_header Host $host;
+        proxy_set_header Upgrade $http_upgrade;
+        proxy_set_header Connection "upgrade";
+        proxy_read_timeout 1d;
+        proxy_send_timeout 1d;
+    }
+}

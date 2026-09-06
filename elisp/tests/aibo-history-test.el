@@ -1,0 +1,121 @@
+;;; aibo-history-test.el --- Compact transcript contracts -*- lexical-binding: t -*-
+(require 'aibo-test)
+
+(ert-deftest aibo-history:requests ()
+  (let (paths)
+    (cl-letf (((symbol-function 'aibo:api--request)
+               (lambda (_method path &rest _) (push path paths))))
+      (aibo:api-get-chat "chat" #'ignore)
+      (aibo:api-submit "chat" "literal" nil #'ignore)
+      (should (equal paths '("/api/chats/chat/submit?compact=true" "/api/chats/chat/history")))
+      (should (string-suffix-p "/api/events?compact=true" (aibo:api--event-url))))))
+
+(ert-deftest aibo-history:lazy-details ()
+  (let* ((chat (aibo-test:chat)) (aibo:sidebar nil) (aibo:layout 'cowork)
+         (group (aibo-test:hash "id" "group" "kind" "event" "content" ""
+                                "data" (aibo-test:hash "hidden_count" 100 "first_id" "group" "last_id" "end")))
+         success (requests 0))
+    (puthash "id" "lazy-history" chat)
+    (puthash "messages" (list group) chat)
+    (unwind-protect
+        (save-window-excursion
+          (cl-letf (((symbol-function 'aibo:render-input) #'ignore)
+                    ((symbol-function 'aibo:api--request)
+                     (lambda (_method path _body callback &rest _)
+                       (should (equal path "/api/chats/lazy-history/details?first=group&last=end"))
+                       (cl-incf requests) (setq success callback))))
+            (aibo:render-chat chat)
+            (should (= requests 0))
+            (should (< (buffer-size) 100))
+            (push-button (point-min))
+            (should (= requests 1))
+            (should (string-match-p "Loading details" (buffer-string)))
+            ;; Collapse while loading; the late response must not expand or navigate.
+            (push-button (point-min))
+            (funcall success (aibo-test:hash "messages" (list (aibo-test:hash "id" "detail" "kind" "assistant" "content" "Hidden commentary"))))
+            (should-not (string-match-p "Hidden commentary" (buffer-string)))
+            (push-button (point-min))
+            (should (= requests 1))
+            (should (string-match-p "Hidden commentary" (buffer-string)))
+            (aibo:render-chat (copy-hash-table chat) t)
+            (should (string-match-p "Hidden commentary" (buffer-string)))))
+      (kill-buffer (aibo:--chat-buffer chat)))))
+
+(ert-deftest aibo-history:cache-and-races ()
+  (let* ((chat (aibo-test:chat)) (aibo:sidebar nil) (aibo:layout 'cowork)
+         (aibo:open-generation 0) callbacks (renders 0)
+         (insert-messages (symbol-function 'aibo:--insert-messages)))
+    (puthash "id" "cached-history" chat)
+    (puthash "history_version" "2026-09-05T12:00:00+00:00" chat)
+    (unwind-protect
+        (save-window-excursion
+          (cl-letf (((symbol-function 'aibo:render-input) #'ignore)
+                    ((symbol-function 'aibo:api-get-chat)
+                     (lambda (_id callback &rest _) (push callback callbacks)))
+                    ((symbol-function 'aibo:--insert-messages)
+                     (lambda (value) (cl-incf renders) (funcall insert-messages value))))
+            (aibo:render-chat chat t)
+            (aibo:open-chat-id "cached-history")
+            (should (equal (aibo:--get aibo:buffer-chat "id") "cached-history"))
+            (should (= renders 1))
+            (aibo:open-chat-id "newer-navigation")
+            (funcall (cadr callbacks) chat)
+            (should (= renders 1))
+            (let ((old (copy-hash-table chat)))
+              (puthash "history_version" "2026-09-05T11:00:00+00:00" old)
+              (puthash "messages" nil old)
+              (aibo:render-chat old t)
+              (should (equal (gethash "history_version" aibo:buffer-chat) "2026-09-05T12:00:00+00:00"))
+              (should (= renders 1)))))
+      (kill-buffer (aibo:--chat-buffer chat)))))
+
+(ert-deftest aibo-history:older-refresh ()
+  (with-temp-buffer
+    (let* ((aibo:history-loaded-p t)
+           (older (aibo-test:hash "id" "old" "created_at" "2026-09-01"))
+           (latest (aibo-test:hash "id" "new" "created_at" "2026-09-05"))
+           (aibo:buffer-chat (aibo-test:hash "messages" (list older latest) "older_before" nil))
+           (page (aibo-test:hash "messages" (list latest) "older_before" "new"))
+           (merged (aibo:--retain-history page)))
+      (should (equal (gethash "messages" merged) (list older latest)))
+      (should-not (gethash "older_before" merged))
+      (should (equal (gethash "messages" page) (list latest))))))
+
+(ert-deftest aibo-history:detail-bookkeeping ()
+  (with-temp-buffer
+    (setq-local aibo:buffer-chat (aibo-test:chat))
+    (setq-local aibo:expanded-groups '("first"))
+    (setq-local aibo:detail-cache (make-hash-table :test #'equal))
+    (let ((group (aibo-test:hash "data" (aibo-test:hash "hidden_count" 4 "first_id" "first" "last_id" "last")))
+          (done (aibo-test:hash "kind" "event" "content" "Codex turn completed"))
+          (started (aibo-test:hash "kind" "event" "content" "Starting"
+                                   "data" (aibo-test:hash "event" "turn/started")))
+          (failed (aibo-test:hash "kind" "event" "content" "Codex turn failed"))
+          (literal (aibo-test:hash "kind" "assistant" "content" "Literal answer")))
+      (puthash "first" (list :last "last" :messages (list done started failed literal)) aibo:detail-cache)
+      (aibo:--insert-details group)
+      (should-not (string-match-p "Codex turn completed\\|Starting" (buffer-string)))
+      (should (string-match-p "Codex turn failed" (buffer-string)))
+      (should (string-match-p "Literal answer" (buffer-string))))))
+
+(provide 'aibo-history-test)
+
+
+(ert-deftest aibo-history:progress-inline ()
+  (let* ((chat (aibo-test:chat)) (aibo:expanded-groups nil)
+         (progress (aibo-test:hash "id" "progress" "kind" "assistant"
+                                   "content" "Checking the layout."
+                                   "data" (aibo-test:hash "item" (aibo-test:hash "phase" "commentary")))))
+    (puthash "messages"
+             (list (aibo-test:hash "id" "request" "kind" "user" "content" "Request")
+                   progress
+                   (aibo-test:hash "id" "tool" "kind" "tool" "content" "Tool payload")) chat)
+    (with-temp-buffer
+      (aibo:--insert-messages chat)
+      (should (string-match-p "Request" (buffer-string)))
+      (should (string-match-p "Checking the layout\\." (buffer-string)))
+      (should (string-match-p "1 hidden message" (buffer-string)))
+      (should-not (string-match-p "Tool payload" (buffer-string)))
+      (goto-char (point-min))
+      (search-forward "Checking the layout.")
+      (should-not (get-text-property (1- (point)) 'aibo-hidden-group)))))

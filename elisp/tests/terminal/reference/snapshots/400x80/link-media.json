@@ -1,0 +1,2117 @@
+{
+  "scenario": "link-media",
+  "columns": 400,
+  "rows": 80,
+  "cursor": {
+    "row": 78,
+    "col": 32
+  },
+  "regions": {
+    "main": {
+      "x": 36,
+      "y": 0,
+      "width": 364,
+      "height": 75
+    },
+    "sidebar": {
+      "x": 0,
+      "y": 0,
+      "width": 35,
+      "height": 75
+    },
+    "input": {
+      "x": 1,
+      "y": 78,
+      "width": 398,
+      "height": 1
+    },
+    "bars": {
+      "x": 0,
+      "y": 75,
+      "width": 400,
+      "height": 3
+    }
+  },
+  "runs": [
+    [
+      {
+        "col": 0,
+        "text": " ",
+        "face": "base"
+      },
+      {
+        "col": 1,
+        "text": "# (1) ACTIVE",
+        "face": "orange"
+      },
+      {
+        "col": 13,
+        "text": "                      ",
+        "face": "base"
+      },
+      {
+        "col": 35,
+        "text": "│",
+        "face": "rule"
+      },
+      {
+        "col": 36,
+        "text": " ",
+        "face": "botBadge"
+      },
+      {
+        "col": 37,
+        "text": "●",
+        "face": "greenOnbotBadge"
+      },
+      {
+        "col": 38,
+        "text": " b2 ",
+        "face": "botBadge"
+      },
+      {
+        "col": 42,
+        "text": " aibo ",
+        "face": "location"
+      },
+      {
+        "col": 48,
+        "text": "  ",
+        "face": "base"
+      },
+      {
+        "col": 50,
+        "text": "Make the three panels stable",
+        "face": "orange"
+      },
+      {
+        "col": 78,
+        "text": "                                                                                                                                                                                                                                                                                                                                  ",
+        "face": "base"
+      }
+    ],
+    [
+      {
+        "col": 0,
+        "text": "                                   ",
+        "face": "base"
+      },
+      {
+        "col": 35,
+        "text": "│",
+        "face": "rule"
+      },
+      {
+        "col": 36,
+        "text": " project ",
+        "face": "location"
+      },
+      {
+        "col": 45,
+        "text": " — ",
+        "face": "metadataValue"
+      },
+      {
+        "col": 48,
+        "text": " ",
+        "face": "base"
+      },
+      {
+        "col": 49,
+        "text": " goal ",
+        "face": "location"
+      },
+      {
+        "col": 55,
+        "text": " ready ",
+        "face": "metadataValue"
+      },
+      {
+        "col": 62,
+        "text": " ",
+        "face": "base"
+      },
+      {
+        "col": 63,
+        "text": " tokens ",
+        "face": "location"
+      },
+      {
+        "col": 71,
+        "text": " 0 ",
+        "face": "metadataValue"
+      },
+      {
+        "col": 74,
+        "text": " ",
+        "face": "base"
+      },
+      {
+        "col": 75,
+        "text": " elapsed ",
+        "face": "location"
+      },
+      {
+        "col": 84,
+        "text": " 0s ",
+        "face": "metadataValue"
+      },
+      {
+        "col": 88,
+        "text": "                                                                                                                                                                                                                                                                                                                        ",
+        "face": "base"
+      }
+    ],
+    [
+      {
+        "col": 0,
+        "text": " ",
+        "face": "base"
+      },
+      {
+        "col": 1,
+        "text": "0 ",
+        "face": "base",
+        "action": "chat:b2"
+      },
+      {
+        "col": 3,
+        "text": "▏",
+        "face": "orange",
+        "action": "chat:b2"
+      },
+      {
+        "col": 4,
+        "text": " ",
+        "face": "botBadge",
+        "action": "chat:b2"
+      },
+      {
+        "col": 5,
+        "text": "●",
+        "face": "greenOnbotBadge",
+        "action": "chat:b2"
+      },
+      {
+        "col": 6,
+        "text": " b2 ",
+        "face": "botBadge",
+        "action": "chat:b2"
+      },
+      {
+        "col": 10,
+        "text": " aibo ",
+        "face": "location",
+        "action": "chat:b2"
+      },
+      {
+        "col": 16,
+        "text": " ",
+        "face": "base",
+        "action": "chat:b2"
+      },
+      {
+        "col": 17,
+        "text": "Make the three p…",
+        "face": "muted",
+        "action": "chat:b2"
+      },
+      {
+        "col": 34,
+        "text": " ",
+        "face": "base",
+        "action": "chat:b2"
+      },
+      {
+        "col": 35,
+        "text": "│",
+        "face": "rule"
+      },
+      {
+        "col": 36,
+        "text": " ",
+        "face": "base"
+      },
+      {
+        "col": 37,
+        "text": "[2 hidden messages] ▸",
+        "face": "muted",
+        "action": "hidden:toggle"
+      },
+      {
+        "col": 58,
+        "text": "                                                                                                                                                                                                                                                                                                                                                      ",
+        "face": "base"
+      }
+    ],
+    [
+      {
+        "col": 0,
+        "text": "                                   ",
+        "face": "base"
+      },
+      {
+        "col": 35,
+        "text": "│",
+        "face": "rule"
+      },
+      {
+        "col": 36,
+        "text": "                                                                                                                                                                                                                                                                                                                                                                            ",
+        "face": "base"
+      }
+    ],
+    [
+      {
+        "col": 0,
+        "text": " ",
+        "face": "base"
+      },
+      {
+        "col": 1,
+        "text": "# (2) UNREAD",
+        "face": "orange"
+      },
+      {
+        "col": 13,
+        "text": "                      ",
+        "face": "base"
+      },
+      {
+        "col": 35,
+        "text": "│",
+        "face": "rule"
+      },
+      {
+        "col": 36,
+        "text": " ",
+        "face": "base"
+      },
+      {
+        "col": 37,
+        "text": " user ",
+        "face": "userBadge"
+      },
+      {
+        "col": 43,
+        "text": "                                                                                                                                                                                                                                                                                                                                                                     ",
+        "face": "base"
+      }
+    ],
+    [
+      {
+        "col": 0,
+        "text": "                                   ",
+        "face": "base"
+      },
+      {
+        "col": 35,
+        "text": "│",
+        "face": "rule"
+      },
+      {
+        "col": 36,
+        "text": " ",
+        "face": "base"
+      },
+      {
+        "col": 37,
+        "text": "▏",
+        "face": "blueOnuser"
+      },
+      {
+        "col": 38,
+        "text": " I want three stable panels: notifications on the left, the page I am viewing on the right, and a normally growing input across the bottom.                                                                                                                                                                                                                               ",
+        "face": "user"
+      }
+    ],
+    [
+      {
+        "col": 0,
+        "text": " ",
+        "face": "base"
+      },
+      {
+        "col": 1,
+        "text": "1",
+        "face": "muted",
+        "action": "chat:b21"
+      },
+      {
+        "col": 2,
+        "text": "  ",
+        "face": "base",
+        "action": "chat:b21"
+      },
+      {
+        "col": 4,
+        "text": "●",
+        "face": "mutedOnbase",
+        "action": "chat:b21"
+      },
+      {
+        "col": 5,
+        "text": " ",
+        "face": "base",
+        "action": "chat:b21"
+      },
+      {
+        "col": 6,
+        "text": " b21 ",
+        "face": "botBadge",
+        "action": "chat:b21"
+      },
+      {
+        "col": 11,
+        "text": "                    ",
+        "face": "base",
+        "action": "chat:b21"
+      },
+      {
+        "col": 31,
+        "text": "18m",
+        "face": "muted",
+        "action": "chat:b21"
+      },
+      {
+        "col": 34,
+        "text": " ",
+        "face": "base",
+        "action": "chat:b21"
+      },
+      {
+        "col": 35,
+        "text": "│",
+        "face": "rule"
+      },
+      {
+        "col": 36,
+        "text": "                                                                                                                                                                                                                                                                                                                                                                            ",
+        "face": "base"
+      }
+    ],
+    [
+      {
+        "col": 0,
+        "text": " ",
+        "face": "base"
+      },
+      {
+        "col": 1,
+        "text": "   ",
+        "face": "base",
+        "action": "chat:b21"
+      },
+      {
+        "col": 4,
+        "text": "Fix notification refresh and …",
+        "face": "orange",
+        "action": "chat:b21"
+      },
+      {
+        "col": 34,
+        "text": " ",
+        "face": "base",
+        "action": "chat:b21"
+      },
+      {
+        "col": 35,
+        "text": "│",
+        "face": "rule"
+      },
+      {
+        "col": 36,
+        "text": " ",
+        "face": "base"
+      },
+      {
+        "col": 37,
+        "text": " ",
+        "face": "botBadge"
+      },
+      {
+        "col": 38,
+        "text": "●",
+        "face": "greenOnbotBadge"
+      },
+      {
+        "col": 39,
+        "text": " b2 ",
+        "face": "botBadge"
+      },
+      {
+        "col": 43,
+        "text": " aibo ",
+        "face": "location"
+      },
+      {
+        "col": 49,
+        "text": "                                                                                                                                                                                                                                                                                                                                                               ",
+        "face": "base"
+      }
+    ],
+    [
+      {
+        "col": 0,
+        "text": " ",
+        "face": "base"
+      },
+      {
+        "col": 1,
+        "text": "   ",
+        "face": "base",
+        "action": "chat:b21"
+      },
+      {
+        "col": 4,
+        "text": "Sidebar refresh preserves",
+        "face": "muted",
+        "action": "chat:b21"
+      },
+      {
+        "col": 29,
+        "text": "      ",
+        "face": "base",
+        "action": "chat:b21"
+      },
+      {
+        "col": 35,
+        "text": "│",
+        "face": "rule"
+      },
+      {
+        "col": 36,
+        "text": " ",
+        "face": "base"
+      },
+      {
+        "col": 37,
+        "text": "▏",
+        "face": "purpleOnbot"
+      },
+      {
+        "col": 38,
+        "text": " The workspace keeps its three panels while pages change and messages arrive.                                                                                                                                                                                                                                                                                             ",
+        "face": "bot"
+      }
+    ],
+    [
+      {
+        "col": 0,
+        "text": " ",
+        "face": "base"
+      },
+      {
+        "col": 1,
+        "text": "   ",
+        "face": "base",
+        "action": "chat:b21"
+      },
+      {
+        "col": 4,
+        "text": "your place while new",
+        "face": "muted",
+        "action": "chat:b21"
+      },
+      {
+        "col": 24,
+        "text": "           ",
+        "face": "base",
+        "action": "chat:b21"
+      },
+      {
+        "col": 35,
+        "text": "│",
+        "face": "rule"
+      },
+      {
+        "col": 36,
+        "text": " ",
+        "face": "base"
+      },
+      {
+        "col": 37,
+        "text": "▏",
+        "face": "purpleOnbot"
+      },
+      {
+        "col": 38,
+        "text": "                                                                                                                                                                                                                                                                                                                                                                          ",
+        "face": "bot"
+      }
+    ],
+    [
+      {
+        "col": 0,
+        "text": " ",
+        "face": "base"
+      },
+      {
+        "col": 1,
+        "text": "   ",
+        "face": "base",
+        "action": "chat:b21"
+      },
+      {
+        "col": 4,
+        "text": "notifications arrive.",
+        "face": "muted",
+        "action": "chat:b21"
+      },
+      {
+        "col": 25,
+        "text": "          ",
+        "face": "base",
+        "action": "chat:b21"
+      },
+      {
+        "col": 35,
+        "text": "│",
+        "face": "rule"
+      },
+      {
+        "col": 36,
+        "text": " ",
+        "face": "base"
+      },
+      {
+        "col": 37,
+        "text": "▏",
+        "face": "purpleOnbot"
+      },
+      {
+        "col": 38,
+        "text": " What changed                                                                                                                                                                                                                                                                                                                                                             ",
+        "face": "bot"
+      }
+    ],
+    [
+      {
+        "col": 0,
+        "text": "                                   ",
+        "face": "base"
+      },
+      {
+        "col": 35,
+        "text": "│",
+        "face": "rule"
+      },
+      {
+        "col": 36,
+        "text": " ",
+        "face": "base"
+      },
+      {
+        "col": 37,
+        "text": "▏",
+        "face": "purpleOnbot"
+      },
+      {
+        "col": 38,
+        "text": " The sidebar keeps its scroll position. C-o switches between the main page and input. M-/ selects the conversation you are looking at.                                                                                                                                                                                                                                    ",
+        "face": "bot"
+      }
+    ],
+    [
+      {
+        "col": 0,
+        "text": " ",
+        "face": "base"
+      },
+      {
+        "col": 1,
+        "text": "2",
+        "face": "muted",
+        "action": "chat:b8"
+      },
+      {
+        "col": 2,
+        "text": "  ",
+        "face": "base",
+        "action": "chat:b8"
+      },
+      {
+        "col": 4,
+        "text": "●",
+        "face": "errorOnbase",
+        "action": "chat:b8"
+      },
+      {
+        "col": 5,
+        "text": " ",
+        "face": "base",
+        "action": "chat:b8"
+      },
+      {
+        "col": 6,
+        "text": " b8 ",
+        "face": "botBadge",
+        "action": "chat:b8"
+      },
+      {
+        "col": 10,
+        "text": "                      ",
+        "face": "base",
+        "action": "chat:b8"
+      },
+      {
+        "col": 32,
+        "text": "1h",
+        "face": "muted",
+        "action": "chat:b8"
+      },
+      {
+        "col": 34,
+        "text": " ",
+        "face": "base",
+        "action": "chat:b8"
+      },
+      {
+        "col": 35,
+        "text": "│",
+        "face": "rule"
+      },
+      {
+        "col": 36,
+        "text": "                                                                                                                                                                                                                                                                                                                                                                            ",
+        "face": "base"
+      }
+    ],
+    [
+      {
+        "col": 0,
+        "text": " ",
+        "face": "base"
+      },
+      {
+        "col": 1,
+        "text": "   ",
+        "face": "base",
+        "action": "chat:b8"
+      },
+      {
+        "col": 4,
+        "text": "Inspect the location change",
+        "face": "orange",
+        "action": "chat:b8"
+      },
+      {
+        "col": 31,
+        "text": "    ",
+        "face": "base",
+        "action": "chat:b8"
+      },
+      {
+        "col": 35,
+        "text": "│",
+        "face": "rule"
+      },
+      {
+        "col": 36,
+        "text": "                                                                                                                                                                                                                                                                                                                                                                            ",
+        "face": "base"
+      }
+    ],
+    [
+      {
+        "col": 0,
+        "text": " ",
+        "face": "base"
+      },
+      {
+        "col": 1,
+        "text": "   ",
+        "face": "base",
+        "action": "chat:b8"
+      },
+      {
+        "col": 4,
+        "text": "Interrupted during the",
+        "face": "muted",
+        "action": "chat:b8"
+      },
+      {
+        "col": 26,
+        "text": "         ",
+        "face": "base",
+        "action": "chat:b8"
+      },
+      {
+        "col": 35,
+        "text": "│",
+        "face": "rule"
+      },
+      {
+        "col": 36,
+        "text": "                                                                                                                                                                                                                                                                                                                                                                            ",
+        "face": "base"
+      }
+    ],
+    [
+      {
+        "col": 0,
+        "text": " ",
+        "face": "base"
+      },
+      {
+        "col": 1,
+        "text": "   ",
+        "face": "base",
+        "action": "chat:b8"
+      },
+      {
+        "col": 4,
+        "text": "location change. No files",
+        "face": "muted",
+        "action": "chat:b8"
+      },
+      {
+        "col": 29,
+        "text": "      ",
+        "face": "base",
+        "action": "chat:b8"
+      },
+      {
+        "col": 35,
+        "text": "│",
+        "face": "rule"
+      },
+      {
+        "col": 36,
+        "text": "                                                                                                                                                                                                                                                                                                                                                                            ",
+        "face": "base"
+      }
+    ],
+    [
+      {
+        "col": 0,
+        "text": " ",
+        "face": "base"
+      },
+      {
+        "col": 1,
+        "text": "   ",
+        "face": "base",
+        "action": "chat:b8"
+      },
+      {
+        "col": 4,
+        "text": "were lost.",
+        "face": "muted",
+        "action": "chat:b8"
+      },
+      {
+        "col": 14,
+        "text": "                     ",
+        "face": "base",
+        "action": "chat:b8"
+      },
+      {
+        "col": 35,
+        "text": "│",
+        "face": "rule"
+      },
+      {
+        "col": 36,
+        "text": "                                                                                                                                                                                                                                                                                                                                                                            ",
+        "face": "base"
+      }
+    ],
+    [
+      {
+        "col": 0,
+        "text": "                                   ",
+        "face": "base"
+      },
+      {
+        "col": 35,
+        "text": "│",
+        "face": "rule"
+      },
+      {
+        "col": 36,
+        "text": "                                                                                                                                                                                                                                                                                                                                                                            ",
+        "face": "base"
+      }
+    ],
+    [
+      {
+        "col": 0,
+        "text": " ",
+        "face": "base"
+      },
+      {
+        "col": 1,
+        "text": "# (1) READ",
+        "face": "orange"
+      },
+      {
+        "col": 11,
+        "text": "                        ",
+        "face": "base"
+      },
+      {
+        "col": 35,
+        "text": "│",
+        "face": "rule"
+      },
+      {
+        "col": 36,
+        "text": "                                                                                                                                                                                                                                                                                                                                                                            ",
+        "face": "base"
+      }
+    ],
+    [
+      {
+        "col": 0,
+        "text": "                                   ",
+        "face": "base"
+      },
+      {
+        "col": 35,
+        "text": "│",
+        "face": "rule"
+      },
+      {
+        "col": 36,
+        "text": "                                                                                                                                                                                                                                                                                                                                                                            ",
+        "face": "base"
+      }
+    ],
+    [
+      {
+        "col": 0,
+        "text": " ",
+        "face": "base"
+      },
+      {
+        "col": 1,
+        "text": "3",
+        "face": "muted",
+        "action": "chat:m0"
+      },
+      {
+        "col": 2,
+        "text": "  ",
+        "face": "base",
+        "action": "chat:m0"
+      },
+      {
+        "col": 4,
+        "text": "●",
+        "face": "mutedOnbase",
+        "action": "chat:m0"
+      },
+      {
+        "col": 5,
+        "text": " ",
+        "face": "base",
+        "action": "chat:m0"
+      },
+      {
+        "col": 6,
+        "text": " m0 ",
+        "face": "managerBadge",
+        "action": "chat:m0"
+      },
+      {
+        "col": 10,
+        "text": "                      ",
+        "face": "base",
+        "action": "chat:m0"
+      },
+      {
+        "col": 32,
+        "text": "2h",
+        "face": "muted",
+        "action": "chat:m0"
+      },
+      {
+        "col": 34,
+        "text": " ",
+        "face": "base",
+        "action": "chat:m0"
+      },
+      {
+        "col": 35,
+        "text": "│",
+        "face": "rule"
+      },
+      {
+        "col": 36,
+        "text": "                                                                                                                                                                                                                                                                                                                                                                            ",
+        "face": "base"
+      }
+    ],
+    [
+      {
+        "col": 0,
+        "text": " ",
+        "face": "base"
+      },
+      {
+        "col": 1,
+        "text": "   ",
+        "face": "base",
+        "action": "chat:m0"
+      },
+      {
+        "col": 4,
+        "text": "Plan the workspace redesign",
+        "face": "orange",
+        "action": "chat:m0"
+      },
+      {
+        "col": 31,
+        "text": "    ",
+        "face": "base",
+        "action": "chat:m0"
+      },
+      {
+        "col": 35,
+        "text": "│",
+        "face": "rule"
+      },
+      {
+        "col": 36,
+        "text": "                                                                                                                                                                                                                                                                                                                                                                            ",
+        "face": "base"
+      }
+    ],
+    [
+      {
+        "col": 0,
+        "text": " ",
+        "face": "base"
+      },
+      {
+        "col": 1,
+        "text": "   ",
+        "face": "base",
+        "action": "chat:m0"
+      },
+      {
+        "col": 4,
+        "text": "The layout checklist is ready",
+        "face": "muted",
+        "action": "chat:m0"
+      },
+      {
+        "col": 33,
+        "text": "  ",
+        "face": "base",
+        "action": "chat:m0"
+      },
+      {
+        "col": 35,
+        "text": "│",
+        "face": "rule"
+      },
+      {
+        "col": 36,
+        "text": "                                                                                                                                                                                                                                                                                                                                                                            ",
+        "face": "base"
+      }
+    ],
+    [
+      {
+        "col": 0,
+        "text": " ",
+        "face": "base"
+      },
+      {
+        "col": 1,
+        "text": "   ",
+        "face": "base",
+        "action": "chat:m0"
+      },
+      {
+        "col": 4,
+        "text": "to review.",
+        "face": "muted",
+        "action": "chat:m0"
+      },
+      {
+        "col": 14,
+        "text": "                     ",
+        "face": "base",
+        "action": "chat:m0"
+      },
+      {
+        "col": 35,
+        "text": "│",
+        "face": "rule"
+      },
+      {
+        "col": 36,
+        "text": "                                                                                                                                                                                                                                                                                                                                                                            ",
+        "face": "base"
+      }
+    ],
+    [
+      {
+        "col": 0,
+        "text": "                                   ",
+        "face": "base"
+      },
+      {
+        "col": 35,
+        "text": "│",
+        "face": "rule"
+      },
+      {
+        "col": 36,
+        "text": "                                                                                                                                                                                                                                                                                                                                                                            ",
+        "face": "base"
+      }
+    ],
+    [
+      {
+        "col": 0,
+        "text": "                                   ",
+        "face": "base"
+      },
+      {
+        "col": 35,
+        "text": "│",
+        "face": "rule"
+      },
+      {
+        "col": 36,
+        "text": "                                                                                                                                                                                                                                                                                                                                                                            ",
+        "face": "base"
+      }
+    ],
+    [
+      {
+        "col": 0,
+        "text": "                                   ",
+        "face": "base"
+      },
+      {
+        "col": 35,
+        "text": "│",
+        "face": "rule"
+      },
+      {
+        "col": 36,
+        "text": "                                                                                                                                                                                                                                                                                                                                                                            ",
+        "face": "base"
+      }
+    ],
+    [
+      {
+        "col": 0,
+        "text": "                                   ",
+        "face": "base"
+      },
+      {
+        "col": 35,
+        "text": "│",
+        "face": "rule"
+      },
+      {
+        "col": 36,
+        "text": "                                                                                                                                                                                                                                                                                                                                                                            ",
+        "face": "base"
+      }
+    ],
+    [
+      {
+        "col": 0,
+        "text": "                                   ",
+        "face": "base"
+      },
+      {
+        "col": 35,
+        "text": "│",
+        "face": "rule"
+      },
+      {
+        "col": 36,
+        "text": "                                                                                                                                                                                                                                                                                                                                                                            ",
+        "face": "base"
+      }
+    ],
+    [
+      {
+        "col": 0,
+        "text": "                                   ",
+        "face": "base"
+      },
+      {
+        "col": 35,
+        "text": "│",
+        "face": "rule"
+      },
+      {
+        "col": 36,
+        "text": "                                                                                                                                                                                                                                                                                                                                                                            ",
+        "face": "base"
+      }
+    ],
+    [
+      {
+        "col": 0,
+        "text": "                                   ",
+        "face": "base"
+      },
+      {
+        "col": 35,
+        "text": "│",
+        "face": "rule"
+      },
+      {
+        "col": 36,
+        "text": "                                                                                                                                                                                                                                                                                                                                                                            ",
+        "face": "base"
+      }
+    ],
+    [
+      {
+        "col": 0,
+        "text": "                                   ",
+        "face": "base"
+      },
+      {
+        "col": 35,
+        "text": "│",
+        "face": "rule"
+      },
+      {
+        "col": 36,
+        "text": "                                                                                                                                                                                                                                                                                                                                                                            ",
+        "face": "base"
+      }
+    ],
+    [
+      {
+        "col": 0,
+        "text": "                                   ",
+        "face": "base"
+      },
+      {
+        "col": 35,
+        "text": "│",
+        "face": "rule"
+      },
+      {
+        "col": 36,
+        "text": "                                                                                                                                                                                                                                                                                                                                                                            ",
+        "face": "base"
+      }
+    ],
+    [
+      {
+        "col": 0,
+        "text": "                                   ",
+        "face": "base"
+      },
+      {
+        "col": 35,
+        "text": "│",
+        "face": "rule"
+      },
+      {
+        "col": 36,
+        "text": "                                                                                                                                                                                                                                                                                                                                                                            ",
+        "face": "base"
+      }
+    ],
+    [
+      {
+        "col": 0,
+        "text": "                                   ",
+        "face": "base"
+      },
+      {
+        "col": 35,
+        "text": "│",
+        "face": "rule"
+      },
+      {
+        "col": 36,
+        "text": "                                                                                                                                                                                                                                                                                                                                                                            ",
+        "face": "base"
+      }
+    ],
+    [
+      {
+        "col": 0,
+        "text": "                                   ",
+        "face": "base"
+      },
+      {
+        "col": 35,
+        "text": "│",
+        "face": "rule"
+      },
+      {
+        "col": 36,
+        "text": "                                                                                                                                                                                                                                                                                                                                                                            ",
+        "face": "base"
+      }
+    ],
+    [
+      {
+        "col": 0,
+        "text": "                                   ",
+        "face": "base"
+      },
+      {
+        "col": 35,
+        "text": "│",
+        "face": "rule"
+      },
+      {
+        "col": 36,
+        "text": "                                                                                                                                                                                                                                                                                                                                                                            ",
+        "face": "base"
+      }
+    ],
+    [
+      {
+        "col": 0,
+        "text": "                                   ",
+        "face": "base"
+      },
+      {
+        "col": 35,
+        "text": "│",
+        "face": "rule"
+      },
+      {
+        "col": 36,
+        "text": "                                                                                                                                                                                                                                                                                                                                                                            ",
+        "face": "base"
+      }
+    ],
+    [
+      {
+        "col": 0,
+        "text": "                                   ",
+        "face": "base"
+      },
+      {
+        "col": 35,
+        "text": "│",
+        "face": "rule"
+      },
+      {
+        "col": 36,
+        "text": "                                                                                                                                                                                                                                                                                                                                                                            ",
+        "face": "base"
+      }
+    ],
+    [
+      {
+        "col": 0,
+        "text": "                                   ",
+        "face": "base"
+      },
+      {
+        "col": 35,
+        "text": "│",
+        "face": "rule"
+      },
+      {
+        "col": 36,
+        "text": "                                                                                                                                                                                                                                                                                                                                                                            ",
+        "face": "base"
+      }
+    ],
+    [
+      {
+        "col": 0,
+        "text": "                                   ",
+        "face": "base"
+      },
+      {
+        "col": 35,
+        "text": "│",
+        "face": "rule"
+      },
+      {
+        "col": 36,
+        "text": "                                                                                                                                                                                                                                                                                                                                                                            ",
+        "face": "base"
+      }
+    ],
+    [
+      {
+        "col": 0,
+        "text": "                                   ",
+        "face": "base"
+      },
+      {
+        "col": 35,
+        "text": "│",
+        "face": "rule"
+      },
+      {
+        "col": 36,
+        "text": "                                                                                                                                                                                                                                                                                                                                                                            ",
+        "face": "base"
+      }
+    ],
+    [
+      {
+        "col": 0,
+        "text": "                                   ",
+        "face": "base"
+      },
+      {
+        "col": 35,
+        "text": "│",
+        "face": "rule"
+      },
+      {
+        "col": 36,
+        "text": "                                                                                                                                                                                                                                                                                                                                                                            ",
+        "face": "base"
+      }
+    ],
+    [
+      {
+        "col": 0,
+        "text": "                                   ",
+        "face": "base"
+      },
+      {
+        "col": 35,
+        "text": "│",
+        "face": "rule"
+      },
+      {
+        "col": 36,
+        "text": "                                                                                                                                                                                                                                                                                                                                                                            ",
+        "face": "base"
+      }
+    ],
+    [
+      {
+        "col": 0,
+        "text": "                                   ",
+        "face": "base"
+      },
+      {
+        "col": 35,
+        "text": "│",
+        "face": "rule"
+      },
+      {
+        "col": 36,
+        "text": "                                                                                                                                                                                                                                                                                                                                                                            ",
+        "face": "base"
+      }
+    ],
+    [
+      {
+        "col": 0,
+        "text": "                                   ",
+        "face": "base"
+      },
+      {
+        "col": 35,
+        "text": "│",
+        "face": "rule"
+      },
+      {
+        "col": 36,
+        "text": "                                                                                                                                                                                                                                                                                                                                                                            ",
+        "face": "base"
+      }
+    ],
+    [
+      {
+        "col": 0,
+        "text": "                                   ",
+        "face": "base"
+      },
+      {
+        "col": 35,
+        "text": "│",
+        "face": "rule"
+      },
+      {
+        "col": 36,
+        "text": "                                                                                                                                                                                                                                                                                                                                                                            ",
+        "face": "base"
+      }
+    ],
+    [
+      {
+        "col": 0,
+        "text": "                                   ",
+        "face": "base"
+      },
+      {
+        "col": 35,
+        "text": "│",
+        "face": "rule"
+      },
+      {
+        "col": 36,
+        "text": "                                                                                                                                                                                                                                                                                                                                                                            ",
+        "face": "base"
+      }
+    ],
+    [
+      {
+        "col": 0,
+        "text": "                                   ",
+        "face": "base"
+      },
+      {
+        "col": 35,
+        "text": "│",
+        "face": "rule"
+      },
+      {
+        "col": 36,
+        "text": "                                                                                                                                                                                                                                                                                                                                                                            ",
+        "face": "base"
+      }
+    ],
+    [
+      {
+        "col": 0,
+        "text": "                                   ",
+        "face": "base"
+      },
+      {
+        "col": 35,
+        "text": "│",
+        "face": "rule"
+      },
+      {
+        "col": 36,
+        "text": "                                                                                                                                                                                                                                                                                                                                                                            ",
+        "face": "base"
+      }
+    ],
+    [
+      {
+        "col": 0,
+        "text": "                                   ",
+        "face": "base"
+      },
+      {
+        "col": 35,
+        "text": "│",
+        "face": "rule"
+      },
+      {
+        "col": 36,
+        "text": "                                                                                                                                                                                                                                                                                                                                                                            ",
+        "face": "base"
+      }
+    ],
+    [
+      {
+        "col": 0,
+        "text": "                                   ",
+        "face": "base"
+      },
+      {
+        "col": 35,
+        "text": "│",
+        "face": "rule"
+      },
+      {
+        "col": 36,
+        "text": "                                                                                                                                                                                                                                                                                                                                                                            ",
+        "face": "base"
+      }
+    ],
+    [
+      {
+        "col": 0,
+        "text": "                                   ",
+        "face": "base"
+      },
+      {
+        "col": 35,
+        "text": "│",
+        "face": "rule"
+      },
+      {
+        "col": 36,
+        "text": "                                                                                                                                                                                                                                                                                                                                                                            ",
+        "face": "base"
+      }
+    ],
+    [
+      {
+        "col": 0,
+        "text": "                                   ",
+        "face": "base"
+      },
+      {
+        "col": 35,
+        "text": "│",
+        "face": "rule"
+      },
+      {
+        "col": 36,
+        "text": "                                                                                                                                                                                                                                                                                                                                                                            ",
+        "face": "base"
+      }
+    ],
+    [
+      {
+        "col": 0,
+        "text": "                                   ",
+        "face": "base"
+      },
+      {
+        "col": 35,
+        "text": "│",
+        "face": "rule"
+      },
+      {
+        "col": 36,
+        "text": "                                                                                                                                                                                                                                                                                                                                                                            ",
+        "face": "base"
+      }
+    ],
+    [
+      {
+        "col": 0,
+        "text": "                                   ",
+        "face": "base"
+      },
+      {
+        "col": 35,
+        "text": "│",
+        "face": "rule"
+      },
+      {
+        "col": 36,
+        "text": "                                                                                                                                                                                                                                                                                                                                                                            ",
+        "face": "base"
+      }
+    ],
+    [
+      {
+        "col": 0,
+        "text": "                                   ",
+        "face": "base"
+      },
+      {
+        "col": 35,
+        "text": "│",
+        "face": "rule"
+      },
+      {
+        "col": 36,
+        "text": "                                                                                                                                                                                                                                                                                                                                                                            ",
+        "face": "base"
+      }
+    ],
+    [
+      {
+        "col": 0,
+        "text": "                                   ",
+        "face": "base"
+      },
+      {
+        "col": 35,
+        "text": "│",
+        "face": "rule"
+      },
+      {
+        "col": 36,
+        "text": "                                                                                                                                                                                                                                                                                                                                                                            ",
+        "face": "base"
+      }
+    ],
+    [
+      {
+        "col": 0,
+        "text": "                                   ",
+        "face": "base"
+      },
+      {
+        "col": 35,
+        "text": "│",
+        "face": "rule"
+      },
+      {
+        "col": 36,
+        "text": "                                                                                                                                                                                                                                                                                                                                                                            ",
+        "face": "base"
+      }
+    ],
+    [
+      {
+        "col": 0,
+        "text": "                                   ",
+        "face": "base"
+      },
+      {
+        "col": 35,
+        "text": "│",
+        "face": "rule"
+      },
+      {
+        "col": 36,
+        "text": "                                                                                                                                                                                                                                                                                                                                                                            ",
+        "face": "base"
+      }
+    ],
+    [
+      {
+        "col": 0,
+        "text": "                                   ",
+        "face": "base"
+      },
+      {
+        "col": 35,
+        "text": "│",
+        "face": "rule"
+      },
+      {
+        "col": 36,
+        "text": "                                                                                                                                                                                                                                                                                                                                                                            ",
+        "face": "base"
+      }
+    ],
+    [
+      {
+        "col": 0,
+        "text": "                                   ",
+        "face": "base"
+      },
+      {
+        "col": 35,
+        "text": "│",
+        "face": "rule"
+      },
+      {
+        "col": 36,
+        "text": "                                                                                                                                                                                                                                                                                                                                                                            ",
+        "face": "base"
+      }
+    ],
+    [
+      {
+        "col": 0,
+        "text": "                                   ",
+        "face": "base"
+      },
+      {
+        "col": 35,
+        "text": "│",
+        "face": "rule"
+      },
+      {
+        "col": 36,
+        "text": "                                                                                                                                                                                                                                                                                                                                                                            ",
+        "face": "base"
+      }
+    ],
+    [
+      {
+        "col": 0,
+        "text": "                                   ",
+        "face": "base"
+      },
+      {
+        "col": 35,
+        "text": "│",
+        "face": "rule"
+      },
+      {
+        "col": 36,
+        "text": "                                                                                                                                                                                                                                                                                                                                                                            ",
+        "face": "base"
+      }
+    ],
+    [
+      {
+        "col": 0,
+        "text": "                                   ",
+        "face": "base"
+      },
+      {
+        "col": 35,
+        "text": "│",
+        "face": "rule"
+      },
+      {
+        "col": 36,
+        "text": "                                                                                                                                                                                                                                                                                                                                                                            ",
+        "face": "base"
+      }
+    ],
+    [
+      {
+        "col": 0,
+        "text": "                                   ",
+        "face": "base"
+      },
+      {
+        "col": 35,
+        "text": "│",
+        "face": "rule"
+      },
+      {
+        "col": 36,
+        "text": "                                                                                                                                                                                                                                                                                                                                                                            ",
+        "face": "base"
+      }
+    ],
+    [
+      {
+        "col": 0,
+        "text": "                                   ",
+        "face": "base"
+      },
+      {
+        "col": 35,
+        "text": "│",
+        "face": "rule"
+      },
+      {
+        "col": 36,
+        "text": "                                                                                                                                                                                                                                                                                                                                                                            ",
+        "face": "base"
+      }
+    ],
+    [
+      {
+        "col": 0,
+        "text": "                                   ",
+        "face": "base"
+      },
+      {
+        "col": 35,
+        "text": "│",
+        "face": "rule"
+      },
+      {
+        "col": 36,
+        "text": "                                                                                                                                                                                                                                                                                                                                                                            ",
+        "face": "base"
+      }
+    ],
+    [
+      {
+        "col": 0,
+        "text": "                                   ",
+        "face": "base"
+      },
+      {
+        "col": 35,
+        "text": "│",
+        "face": "rule"
+      },
+      {
+        "col": 36,
+        "text": "                                                                                                                                                                                                                                                                                                                                                                            ",
+        "face": "base"
+      }
+    ],
+    [
+      {
+        "col": 0,
+        "text": "                                   ",
+        "face": "base"
+      },
+      {
+        "col": 35,
+        "text": "│",
+        "face": "rule"
+      },
+      {
+        "col": 36,
+        "text": "                                                                                                                                                                                                                                                                                                                                                                            ",
+        "face": "base"
+      }
+    ],
+    [
+      {
+        "col": 0,
+        "text": "                                   ",
+        "face": "base"
+      },
+      {
+        "col": 35,
+        "text": "│",
+        "face": "rule"
+      },
+      {
+        "col": 36,
+        "text": "                                                                                                                                                                                                                                                                                                                                                                            ",
+        "face": "base"
+      }
+    ],
+    [
+      {
+        "col": 0,
+        "text": "                                   ",
+        "face": "base"
+      },
+      {
+        "col": 35,
+        "text": "│",
+        "face": "rule"
+      },
+      {
+        "col": 36,
+        "text": "                                                                                                                                                                                                                                                                                                                                                                            ",
+        "face": "base"
+      }
+    ],
+    [
+      {
+        "col": 0,
+        "text": "                                   ",
+        "face": "base"
+      },
+      {
+        "col": 35,
+        "text": "│",
+        "face": "rule"
+      },
+      {
+        "col": 36,
+        "text": "                                                                                                                                                                                                                                                                                                                                                                            ",
+        "face": "base"
+      }
+    ],
+    [
+      {
+        "col": 0,
+        "text": "                                   ",
+        "face": "base"
+      },
+      {
+        "col": 35,
+        "text": "│",
+        "face": "rule"
+      },
+      {
+        "col": 36,
+        "text": "                                                                                                                                                                                                                                                                                                                                                                            ",
+        "face": "base"
+      }
+    ],
+    [
+      {
+        "col": 0,
+        "text": "                                   ",
+        "face": "base"
+      },
+      {
+        "col": 35,
+        "text": "│",
+        "face": "rule"
+      },
+      {
+        "col": 36,
+        "text": "                                                                                                                                                                                                                                                                                                                                                                            ",
+        "face": "base"
+      }
+    ],
+    [
+      {
+        "col": 0,
+        "text": "          ",
+        "face": "purpleBar"
+      },
+      {
+        "col": 10,
+        "text": " ",
+        "face": "botShortcutOnbotBadge",
+        "action": "target:b2"
+      },
+      {
+        "col": 11,
+        "text": "●",
+        "face": "greenOnbotShortcutOnbotBadge",
+        "action": "target:b2"
+      },
+      {
+        "col": 12,
+        "text": " M-1 Make the th… ",
+        "face": "botShortcutOnbotBadge",
+        "action": "target:b2"
+      },
+      {
+        "col": 30,
+        "text": " ",
+        "face": "botShortcutOnpurpleBar",
+        "action": "target:b21"
+      },
+      {
+        "col": 31,
+        "text": "M-2",
+        "face": "botShortcutOnbotShortcutOnpurpleBar",
+        "action": "target:b21"
+      },
+      {
+        "col": 34,
+        "text": " Fix notificat… ",
+        "face": "botShortcutOnpurpleBar",
+        "action": "target:b21"
+      },
+      {
+        "col": 50,
+        "text": " ",
+        "face": "botShortcutOnpurpleBar",
+        "action": "target:b8"
+      },
+      {
+        "col": 51,
+        "text": "●",
+        "face": "errorOnbotShortcutOnpurpleBar",
+        "action": "target:b8"
+      },
+      {
+        "col": 52,
+        "text": " ",
+        "face": "botShortcutOnpurpleBar",
+        "action": "target:b8"
+      },
+      {
+        "col": 53,
+        "text": "M-3",
+        "face": "botShortcutOnbotShortcutOnpurpleBar",
+        "action": "target:b8"
+      },
+      {
+        "col": 56,
+        "text": " Inspect the… ",
+        "face": "botShortcutOnpurpleBar",
+        "action": "target:b8"
+      },
+      {
+        "col": 70,
+        "text": "                                                                                                                                                                                                                                                                                                                                          ",
+        "face": "purpleBar"
+      }
+    ],
+    [
+      {
+        "col": 0,
+        "text": " M-0 new ",
+        "face": "managerShortcutOnorangeBar",
+        "action": "new-manager"
+      },
+      {
+        "col": 9,
+        "text": " ",
+        "face": "orangeBar"
+      },
+      {
+        "col": 10,
+        "text": " ",
+        "face": "managerShortcutOnorangeBar",
+        "action": "target:m0"
+      },
+      {
+        "col": 11,
+        "text": "cb0",
+        "face": "managerShortcutOnmanagerShortcutOnorangeBar",
+        "action": "target:m0"
+      },
+      {
+        "col": 14,
+        "text": " Plan the work… ",
+        "face": "managerShortcutOnorangeBar",
+        "action": "target:m0"
+      },
+      {
+        "col": 30,
+        "text": " ",
+        "face": "managerShortcutOnorangeBar",
+        "action": "target:m1"
+      },
+      {
+        "col": 31,
+        "text": "cb1",
+        "face": "managerShortcutOnmanagerShortcutOnorangeBar",
+        "action": "target:m1"
+      },
+      {
+        "col": 34,
+        "text": " Review termin… ",
+        "face": "managerShortcutOnorangeBar",
+        "action": "target:m1"
+      },
+      {
+        "col": 50,
+        "text": "                                                                                                                                                                                                                                                                                                                                                              ",
+        "face": "orangeBar"
+      }
+    ],
+    [
+      {
+        "col": 0,
+        "text": " ",
+        "face": "base"
+      },
+      {
+        "col": 1,
+        "text": "●",
+        "face": "greenOnbase"
+      },
+      {
+        "col": 2,
+        "text": " ",
+        "face": "base"
+      },
+      {
+        "col": 3,
+        "text": " b2 ",
+        "face": "botBadge"
+      },
+      {
+        "col": 7,
+        "text": " aibo ",
+        "face": "location"
+      },
+      {
+        "col": 13,
+        "text": "  ",
+        "face": "base"
+      },
+      {
+        "col": 15,
+        "text": "continue 'Make the three panels stable'",
+        "face": "muted"
+      },
+      {
+        "col": 54,
+        "text": "                                                                                                                                                                                                                                                                                                                                                          ",
+        "face": "base"
+      }
+    ],
+    [
+      {
+        "col": 0,
+        "text": " Compare this with the original.",
+        "face": "botInput"
+      },
+      {
+        "col": 32,
+        "text": " ",
+        "face": "cursor"
+      },
+      {
+        "col": 33,
+        "text": "                                                                                                                                                                                                                                                                                                                                                                               ",
+        "face": "botInput"
+      }
+    ],
+    [
+      {
+        "col": 0,
+        "text": "Opened /tmp/aibo/assets/layout.png externally                                                                                                                                                                                                                                                                                                                                                                   ",
+        "face": "echo"
+      }
+    ]
+  ]
+}

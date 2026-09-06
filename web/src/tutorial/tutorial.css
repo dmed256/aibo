@@ -1,0 +1,22 @@
+.shell.tutorial { grid-template-rows:minmax(0,1fr); grid-template-areas:"sidebar workspace"; }
+.tutorial-sidebar { overflow:auto; padding:48px 8px 16px; }
+.tutorial-chapters { display:flex; flex-direction:column; gap:4px; }
+.tutorial-chapters button { display:flex; gap:10px; text-align:left; border:0; padding:8px; line-height:1.4; }
+.tutorial-chapters button span { color:var(--muted); }
+.tutorial-chapters button[aria-current] { background:var(--orange-bg); color:var(--orange); }
+.tutorial .breadcrumbs [aria-current] { font-size:11px; }
+.tutorial-content { display:flex; flex-direction:column; }
+.tutorial-lesson { flex:1; min-width:0; min-height:0; display:flex; flex-direction:column; max-width:1100px; padding:12px 0; }
+.lesson-copy { max-width:90ch; flex-shrink:0; }
+.lesson-copy h1 { font-size:14px; margin:4px 0 10px; color:var(--text); }
+.lesson-copy p { margin:0 0 8px; }
+.lesson-count { font-size:10px; color:var(--purple); }
+.terminal-scroll { flex:1; min-height:160px; max-height:560px; min-width:0; margin-top:8px; container-type:size; }
+/* 120 monospace columns (~72em) and 40 rows (54em): fit both axes,
+   capped at the prototype's text size rather than growing with the page. */
+.tutorial-terminal { width:max-content; font:min(13px,1.37cqw,1.83cqh)/1.35 "SFMono-Regular",Consolas,"Liberation Mono",monospace; font-variant-ligatures:none; border:1px solid #414550; background:#15171c; }
+.terminal-line { height:1.35em; white-space:pre; }
+@media(max-width:600px), (max-height:450px) {
+  .tutorial-lesson { flex:none; min-height:100%; }
+  .terminal-scroll { flex:none; height:240px; }
+}

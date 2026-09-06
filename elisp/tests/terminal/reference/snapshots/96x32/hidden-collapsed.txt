@@ -1,0 +1,32 @@
+ # (1) ACTIVE                      │ ● b2  aibo   Make the three panels stable                  
+                                   │ project  —   goal  ready   tokens  0   elapsed  0s         
+ 0 ▏ ● b2  aibo  Make the three p… │ [3 hidden messages] ▸                                      
+                                   │                                                            
+ # (2) UNREAD                      │  user                                                      
+                                   │ ▏ Fix the sidebar scrolling.                               
+ 1  ●  b21                     18m │                                                            
+    Fix notification refresh and … │  ● b2  aibo                                                
+    Sidebar refresh preserves      │ ▏ The refresh no longer resets the sidebar to the top.     
+    your place while new           │                                                            
+    notifications arrive.          │                                                            
+                                   │                                                            
+ 2  ●  b8                       1h │                                                            
+    Inspect the location change    │                                                            
+    Interrupted during the         │                                                            
+    location change. No files      │                                                            
+    were lost.                     │                                                            
+                                   │                                                            
+ # (1) READ                        │                                                            
+                                   │                                                            
+ 3  ●  m0                       2h │                                                            
+    Plan the workspace redesign    │                                                            
+    The layout checklist is ready  │                                                            
+    to review.                     │                                                            
+                                   │                                                            
+                                   │                                                            
+                                   │                                                            
+           ● M-1 Make the th…  M-2 Fix notificat…  ● M-3 Inspect the…                           
+ M-0 new   cb0 Plan the work…  cb1 Review termin…                                               
+ ●  b2  aibo   continue 'Make the three panels stable'                                          
+                                                                                                
+                                                                                                

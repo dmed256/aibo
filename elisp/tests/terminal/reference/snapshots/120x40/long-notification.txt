@@ -1,0 +1,40 @@
+ # (1) ACTIVE                      │ ● b2  aibo   Make the three panels stable                                          
+                                   │ project  —   goal  ready   tokens  0   elapsed  0s                                 
+ 0 ▏ ● b2  aibo  Make the three p… │ [2 hidden messages] ▸                                                              
+                                   │                                                                                    
+ # (1) UNREAD                      │  user                                                                              
+                                   │ ▏ I want three stable panels: notifications on the left, the page I am viewing on  
+ 1 ▏●  b2                      now │ ▏ the right, and a normally growing input across the bottom.                       
+   ▏Make the three panels stable   │                                                                                    
+   ▏The layout audit found a       │  ● b2  aibo                                                                        
+   ▏refresh path that recreated    │ ▏ The workspace keeps its three panels while pages change and messages arrive.     
+   ▏every window, reset the        │ ▏                                                                                  
+   ▏sidebar scroll, and moved the  │ ▏ What changed                                                                     
+   ▏cursor. The replacement keeps  │ ▏ The sidebar keeps its scroll position. C-o switches between the main page and    
+   ▏all three stable.              │ ▏ input. M-/ selects the conversation you are looking at.                          
+                                   │                                                                                    
+ # (1) READ                        │                                                                                    
+                                   │                                                                                    
+ 2  ●  m0                       2h │                                                                                    
+    Plan the workspace redesign    │                                                                                    
+    The layout checklist is ready  │                                                                                    
+    to review.                     │                                                                                    
+                                   │                                                                                    
+                                   │                                                                                    
+                                   │                                                                                    
+                                   │                                                                                    
+                                   │                                                                                    
+                                   │                                                                                    
+                                   │                                                                                    
+                                   │                                                                                    
+                                   │                                                                                    
+                                   │                                                                                    
+                                   │                                                                                    
+                                   │                                                                                    
+                                   │                                                                                    
+                                   │                                                                                    
+           ● M-1 Make the th…  M-2 Fix notificat…  ● M-3 Inspect the…                                                   
+ M-0 new   cb0 Plan the work…  cb1 Review termin…                                                                       
+ ●  b2  aibo   continue 'Make the three panels stable'                                                                  
+                                                                                                                        
+                                                                                                                        

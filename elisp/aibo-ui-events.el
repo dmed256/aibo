@@ -1,0 +1,115 @@
+;;; aibo-ui-events.el --- Workspace refresh and live events -*- lexical-binding: t -*-
+
+(require 'aibo-ui-base)
+(declare-function aibo:chat-mode "aibo-ui-chat")
+(declare-function aibo:render-chat "aibo-ui-chat")
+(declare-function aibo:--fetch-home-data "aibo-ui-pages")
+(declare-function aibo:--commit-home "aibo-ui-pages")
+(declare-function aibo:--home-error "aibo-ui-pages")
+(declare-function aibo:render-sidebar "aibo-ui-sidebar")
+(declare-function aibo:render-input "aibo-ui-input")
+(declare-function aibo:--echo "aibo-ui-input")
+
+(defun aibo:--refresh-event-state (&optional on-complete)
+  "Reconcile visible state without navigating; call ON-COMPLETE after success."
+  (when (timerp aibo:refresh-timer) (cancel-timer aibo:refresh-timer))
+  (setq aibo:refresh-timer nil aibo:refresh-inflight t aibo:refresh-again nil)
+  (when on-complete (setq aibo:reconcile-callback on-complete))
+  (let* ((generation (cl-incf aibo:refresh-generation))
+         (home-generation (when (eq aibo:page 'home) (cl-incf aibo:home-generation)))
+         (chats (delete-dups (delq nil
+                                   (mapcar (lambda (window)
+                                             (buffer-local-value 'aibo:buffer-chat (window-buffer window)))
+                                           (cl-mapcan (lambda (frame) (window-list frame 'no-minibuffer))
+                                                      (frame-list))))))
+         (pending (+ (if home-generation 1 2) (length chats))) failed)
+    (cl-labels ((done ()
+                  (cl-decf pending)
+                  (when (and (= pending 0) (= generation aibo:refresh-generation))
+                    (setq aibo:refresh-inflight nil)
+                    (when (and (not failed) aibo:reconcile-callback)
+                      (let ((callback aibo:reconcile-callback))
+                        (setq aibo:reconcile-callback nil)
+                        (funcall callback)))
+                    (when aibo:refresh-again (aibo:--handle-event nil))))
+                (reject (_error) (setq failed t) (done)))
+      (if home-generation
+          (aibo:--fetch-home-data
+           (lambda (data)
+             (when (= generation aibo:refresh-generation) (aibo:--commit-home data home-generation))
+             (done))
+           (lambda (error)
+             (when (= generation aibo:refresh-generation) (aibo:--home-error home-generation))
+             (reject error)))
+        (aibo:api-get-sidebar
+         (lambda (sidebar)
+           (when (= generation aibo:refresh-generation) (aibo:render-sidebar sidebar))
+           (done)) #'reject)
+        (aibo:api-get-chats
+         (lambda (recent)
+           (when (= generation aibo:refresh-generation)
+             (setq aibo:chats recent) (aibo:render-input))
+           (done)) nil 100 nil #'reject))
+      (dolist (chat chats)
+        (aibo:api-get-chat
+         (aibo:--get chat "id")
+         (lambda (updated)
+           (when (= generation aibo:refresh-generation) (aibo:render-chat updated t))
+           (done)) #'reject)))))
+
+(defun aibo:--connection-changed (state)
+  (if (eq state 'reconnecting)
+      (progn
+        (cl-incf aibo:refresh-generation)
+        (setq aibo:reconcile-callback nil aibo:refresh-inflight nil aibo:refresh-again nil)
+        (aibo:--echo "Reconnecting… · existing conversation and draft preserved"))
+    (let ((connection aibo:api--connection-generation))
+      (clrhash aibo:title-updates)
+      (aibo:--refresh-event-state
+       (lambda ()
+         (when (= connection aibo:api--connection-generation)
+           (aibo:--echo "Connected · missed events reconciled")))))))
+
+(defun aibo:--update-title (event)
+  "Patch title spans in place; leave conversation bodies and drafts intact."
+  (let ((id (aibo:--get event "chat_id")) (title (aibo:--get event "title")))
+    (when (and (stringp id) (stringp title))
+      (puthash id title aibo:title-updates)
+      (dolist (buffer (buffer-list))
+        (with-current-buffer buffer
+          (when (derived-mode-p 'aibo:chat-mode)
+            (let ((inhibit-read-only t) (inhibit-modification-hooks t) (buffer-undo-list t))
+              (save-excursion
+                (goto-char (point-min))
+                (while (< (point) (point-max))
+                  (let ((end (next-single-property-change (point) 'aibo-title-chat-id nil (point-max))))
+                    (if (equal (get-text-property (point) 'aibo-title-chat-id) id)
+                        (let* ((properties (text-properties-at (point)))
+                               (text (truncate-string-to-width title (plist-get properties 'aibo-title-width) nil nil "…")))
+                          (delete-region (point) end)
+                          (insert (apply #'propertize text properties)))
+                      (goto-char end)))))
+              (when (equal (aibo:--get aibo:buffer-chat "id") id)
+                (puthash "title" title aibo:buffer-chat)
+                (rename-buffer (aibo:--chat-buffer-name aibo:buffer-chat) t))))))
+      (aibo:render-input))))
+
+(defun aibo:--handle-event (event)
+  (if (equal (aibo:--get event "kind") "chat_title_updated")
+      (aibo:--update-title event)
+    (aibo:--handle-workspace-event event)))
+
+(defun aibo:--handle-workspace-event (event)
+  (when (equal (aibo:--get event "kind") "notification_created")
+    (when-let ((chat (or (aibo:--get (aibo:--get event "notification") "chat")
+                         (seq-find (lambda (item) (equal (aibo:--get item "id") (aibo:--get event "chat_id")))
+                                   aibo:chats))))
+      (when (aibo:--public-chat-p chat)
+        (aibo:--echo (format "New notification from %s" (aibo:--chat-label chat))))))
+  (if aibo:refresh-inflight
+      (setq aibo:refresh-again t)
+    (unless (timerp aibo:refresh-timer)
+      (setq aibo:refresh-timer (run-with-timer 0.1 nil #'aibo:--refresh-event-state)))))
+
+(provide 'aibo-ui-events)
+;;; aibo-ui-events.el ends here

@@ -1,0 +1,32 @@
+ # (1) ACTIVE                      │ # Help                                                     
+                                   │                                                            
+ 0   ● b2  aibo  Make the three p… │ C-M-h                 Home / return to full mode           
+                                   │ M-0                   New m# chat                          
+ # (2) UNREAD                      │ M-1 … M-9             Open b# from the purple bar          
+                                   │ C-c b 0 … 9           Open m# from the orange bar          
+ 1  ●  b21                     18m │ C-c b                 Search chats (cowork mode)           
+    Fix notification refresh and … │ C-c p s               Search chats in either mode          
+    Sidebar refresh preserves      │ C-c n 0 … z           Open a notification                  
+    your place while new           │ C-c p n               Focus and scroll notifications       
+    notifications arrive.          │ C-c p l               Locations                            
+                                   │ C-c p p               Projects                             
+ 2  ●  b8                       1h │ C-c p h               Help                                 
+    Inspect the location change    │ M-/                   Focus input; repeat to cycle targets 
+    Interrupted during the         │ C-o                   Cycle content / input; skip sidebar  
+    location change. No files      │ RET                   Newline in input; activate links/but 
+    were lost.                     │ M-RET                 Send draft                           
+                                   │ C-g                   Clear; also close input in cowork    
+ # (1) READ                        │ C-c C-i               Attach clipboard image               
+                                   │ M-w                   Copy literal selected text           
+ 3  ●  m0                       2h │ C-x 0/1/2/3           Leave full mode; normal window comma 
+    Plan the workspace redesign    │                                                            
+    The layout checklist is ready  │                                                            
+    to review.                     │                                                            
+                                   │                                                            
+                                   │                                                            
+                                   │                                                            
+           ● M-1 Make the th…  M-2 Fix notificat…  ● M-3 Inspect the…                           
+ M-0 new   cb0 Plan the work…  cb1 Review termin…                                               
+ ●  m0   continue 'Plan the workspace redesign'                                                 
+                                                                                                
+                                                                                                

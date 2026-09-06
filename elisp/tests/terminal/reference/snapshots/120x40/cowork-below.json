@@ -1,0 +1,697 @@
+{
+  "scenario": "cowork-below",
+  "columns": 120,
+  "rows": 40,
+  "cursor": {
+    "row": 2,
+    "col": 1
+  },
+  "regions": {
+    "main": {
+      "x": 0,
+      "y": 0,
+      "width": 120,
+      "height": 39
+    }
+  },
+  "runs": [
+    [
+      {
+        "col": 0,
+        "text": " ",
+        "face": "botBadge"
+      },
+      {
+        "col": 1,
+        "text": "●",
+        "face": "greenOnbotBadge"
+      },
+      {
+        "col": 2,
+        "text": " b2 ",
+        "face": "botBadge"
+      },
+      {
+        "col": 6,
+        "text": " aibo ",
+        "face": "location"
+      },
+      {
+        "col": 12,
+        "text": "  ",
+        "face": "base"
+      },
+      {
+        "col": 14,
+        "text": "Make the three panels stable",
+        "face": "orange"
+      },
+      {
+        "col": 42,
+        "text": "                                                                              ",
+        "face": "base"
+      }
+    ],
+    [
+      {
+        "col": 0,
+        "text": " project ",
+        "face": "location"
+      },
+      {
+        "col": 9,
+        "text": " — ",
+        "face": "metadataValue"
+      },
+      {
+        "col": 12,
+        "text": " ",
+        "face": "base"
+      },
+      {
+        "col": 13,
+        "text": " goal ",
+        "face": "location"
+      },
+      {
+        "col": 19,
+        "text": " ready ",
+        "face": "metadataValue"
+      },
+      {
+        "col": 26,
+        "text": " ",
+        "face": "base"
+      },
+      {
+        "col": 27,
+        "text": " tokens ",
+        "face": "location"
+      },
+      {
+        "col": 35,
+        "text": " 0 ",
+        "face": "metadataValue"
+      },
+      {
+        "col": 38,
+        "text": " ",
+        "face": "base"
+      },
+      {
+        "col": 39,
+        "text": " elapsed ",
+        "face": "location"
+      },
+      {
+        "col": 48,
+        "text": " 0s ",
+        "face": "metadataValue"
+      },
+      {
+        "col": 52,
+        "text": "                                                                    ",
+        "face": "base"
+      }
+    ],
+    [
+      {
+        "col": 0,
+        "text": " ",
+        "face": "base"
+      },
+      {
+        "col": 1,
+        "text": "[",
+        "face": "cursor",
+        "action": "hidden:toggle"
+      },
+      {
+        "col": 2,
+        "text": "2 hidden messages] ▸",
+        "face": "muted",
+        "action": "hidden:toggle"
+      },
+      {
+        "col": 22,
+        "text": "                                                                                                  ",
+        "face": "base"
+      }
+    ],
+    [
+      {
+        "col": 0,
+        "text": "                                                                                                                        ",
+        "face": "base"
+      }
+    ],
+    [
+      {
+        "col": 0,
+        "text": " ",
+        "face": "base"
+      },
+      {
+        "col": 1,
+        "text": " user ",
+        "face": "userBadge"
+      },
+      {
+        "col": 7,
+        "text": "                                                                                                                 ",
+        "face": "base"
+      }
+    ],
+    [
+      {
+        "col": 0,
+        "text": " ",
+        "face": "base"
+      },
+      {
+        "col": 1,
+        "text": "▏",
+        "face": "blueOnuser"
+      },
+      {
+        "col": 2,
+        "text": " I want three stable panels: notifications on the left, the page I am viewing on the right, and a normally growing    ",
+        "face": "user"
+      }
+    ],
+    [
+      {
+        "col": 0,
+        "text": " ",
+        "face": "base"
+      },
+      {
+        "col": 1,
+        "text": "▏",
+        "face": "blueOnuser"
+      },
+      {
+        "col": 2,
+        "text": " input across the bottom.                                                                                             ",
+        "face": "user"
+      }
+    ],
+    [
+      {
+        "col": 0,
+        "text": "                                                                                                                        ",
+        "face": "base"
+      }
+    ],
+    [
+      {
+        "col": 0,
+        "text": " ",
+        "face": "base"
+      },
+      {
+        "col": 1,
+        "text": " ",
+        "face": "botBadge"
+      },
+      {
+        "col": 2,
+        "text": "●",
+        "face": "greenOnbotBadge"
+      },
+      {
+        "col": 3,
+        "text": " b2 ",
+        "face": "botBadge"
+      },
+      {
+        "col": 7,
+        "text": " aibo ",
+        "face": "location"
+      },
+      {
+        "col": 13,
+        "text": "                                                                                                           ",
+        "face": "base"
+      }
+    ],
+    [
+      {
+        "col": 0,
+        "text": " ",
+        "face": "base"
+      },
+      {
+        "col": 1,
+        "text": "▏",
+        "face": "purpleOnbot"
+      },
+      {
+        "col": 2,
+        "text": " The workspace keeps its three panels while pages change and messages arrive.                                         ",
+        "face": "bot"
+      }
+    ],
+    [
+      {
+        "col": 0,
+        "text": " ",
+        "face": "base"
+      },
+      {
+        "col": 1,
+        "text": "▏",
+        "face": "purpleOnbot"
+      },
+      {
+        "col": 2,
+        "text": "                                                                                                                      ",
+        "face": "bot"
+      }
+    ],
+    [
+      {
+        "col": 0,
+        "text": " ",
+        "face": "base"
+      },
+      {
+        "col": 1,
+        "text": "▏",
+        "face": "purpleOnbot"
+      },
+      {
+        "col": 2,
+        "text": " What changed                                                                                                         ",
+        "face": "bot"
+      }
+    ],
+    [
+      {
+        "col": 0,
+        "text": " ",
+        "face": "base"
+      },
+      {
+        "col": 1,
+        "text": "▏",
+        "face": "purpleOnbot"
+      },
+      {
+        "col": 2,
+        "text": " The sidebar keeps its scroll position. C-o switches between the main page and input. M-/ selects the conversation    ",
+        "face": "bot"
+      }
+    ],
+    [
+      {
+        "col": 0,
+        "text": " ",
+        "face": "base"
+      },
+      {
+        "col": 1,
+        "text": "▏",
+        "face": "purpleOnbot"
+      },
+      {
+        "col": 2,
+        "text": " you are looking at.                                                                                                  ",
+        "face": "bot"
+      }
+    ],
+    [
+      {
+        "col": 0,
+        "text": "                                                                                                                        ",
+        "face": "base"
+      }
+    ],
+    [
+      {
+        "col": 0,
+        "text": "                                                                                                                        ",
+        "face": "base"
+      }
+    ],
+    [
+      {
+        "col": 0,
+        "text": "                                                                                                                        ",
+        "face": "base"
+      }
+    ],
+    [
+      {
+        "col": 0,
+        "text": "                                                                                                                        ",
+        "face": "base"
+      }
+    ],
+    [
+      {
+        "col": 0,
+        "text": "                                                                                                                        ",
+        "face": "base"
+      }
+    ],
+    [
+      {
+        "col": 0,
+        "text": "────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────",
+        "face": "rule"
+      }
+    ],
+    [
+      {
+        "col": 0,
+        "text": " ",
+        "face": "managerBadge"
+      },
+      {
+        "col": 1,
+        "text": "●",
+        "face": "mutedOnmanagerBadge"
+      },
+      {
+        "col": 2,
+        "text": " m0 ",
+        "face": "managerBadge"
+      },
+      {
+        "col": 6,
+        "text": "  ",
+        "face": "base"
+      },
+      {
+        "col": 8,
+        "text": "Plan the workspace redesign",
+        "face": "orange"
+      },
+      {
+        "col": 35,
+        "text": "                                                                                     ",
+        "face": "base"
+      }
+    ],
+    [
+      {
+        "col": 0,
+        "text": " project ",
+        "face": "location"
+      },
+      {
+        "col": 9,
+        "text": " — ",
+        "face": "metadataValue"
+      },
+      {
+        "col": 12,
+        "text": " ",
+        "face": "base"
+      },
+      {
+        "col": 13,
+        "text": " goal ",
+        "face": "location"
+      },
+      {
+        "col": 19,
+        "text": " ready ",
+        "face": "metadataValue"
+      },
+      {
+        "col": 26,
+        "text": " ",
+        "face": "base"
+      },
+      {
+        "col": 27,
+        "text": " tokens ",
+        "face": "location"
+      },
+      {
+        "col": 35,
+        "text": " 0 ",
+        "face": "metadataValue"
+      },
+      {
+        "col": 38,
+        "text": " ",
+        "face": "base"
+      },
+      {
+        "col": 39,
+        "text": " elapsed ",
+        "face": "location"
+      },
+      {
+        "col": 48,
+        "text": " 0s ",
+        "face": "metadataValue"
+      },
+      {
+        "col": 52,
+        "text": "                                                                    ",
+        "face": "base"
+      }
+    ],
+    [
+      {
+        "col": 0,
+        "text": " ",
+        "face": "base"
+      },
+      {
+        "col": 1,
+        "text": "[2 hidden messages] ▸",
+        "face": "muted",
+        "action": "hidden:toggle"
+      },
+      {
+        "col": 22,
+        "text": "                                                                                                  ",
+        "face": "base"
+      }
+    ],
+    [
+      {
+        "col": 0,
+        "text": "                                                                                                                        ",
+        "face": "base"
+      }
+    ],
+    [
+      {
+        "col": 0,
+        "text": " ",
+        "face": "base"
+      },
+      {
+        "col": 1,
+        "text": " user ",
+        "face": "userBadge"
+      },
+      {
+        "col": 7,
+        "text": "                                                                                                                 ",
+        "face": "base"
+      }
+    ],
+    [
+      {
+        "col": 0,
+        "text": " ",
+        "face": "base"
+      },
+      {
+        "col": 1,
+        "text": "▏",
+        "face": "blueOnuser"
+      },
+      {
+        "col": 2,
+        "text": " I want three stable panels: notifications on the left, the page I am viewing on the right, and a normally growing    ",
+        "face": "user"
+      }
+    ],
+    [
+      {
+        "col": 0,
+        "text": " ",
+        "face": "base"
+      },
+      {
+        "col": 1,
+        "text": "▏",
+        "face": "blueOnuser"
+      },
+      {
+        "col": 2,
+        "text": " input across the bottom.                                                                                             ",
+        "face": "user"
+      }
+    ],
+    [
+      {
+        "col": 0,
+        "text": "                                                                                                                        ",
+        "face": "base"
+      }
+    ],
+    [
+      {
+        "col": 0,
+        "text": " ",
+        "face": "base"
+      },
+      {
+        "col": 1,
+        "text": " ",
+        "face": "managerBadge"
+      },
+      {
+        "col": 2,
+        "text": "●",
+        "face": "mutedOnmanagerBadge"
+      },
+      {
+        "col": 3,
+        "text": " m0 ",
+        "face": "managerBadge"
+      },
+      {
+        "col": 7,
+        "text": "                                                                                                                 ",
+        "face": "base"
+      }
+    ],
+    [
+      {
+        "col": 0,
+        "text": " ",
+        "face": "base"
+      },
+      {
+        "col": 1,
+        "text": "▏",
+        "face": "orangeOnmanager"
+      },
+      {
+        "col": 2,
+        "text": " The workspace keeps its three panels while pages change and messages arrive.                                         ",
+        "face": "manager"
+      }
+    ],
+    [
+      {
+        "col": 0,
+        "text": " ",
+        "face": "base"
+      },
+      {
+        "col": 1,
+        "text": "▏",
+        "face": "orangeOnmanager"
+      },
+      {
+        "col": 2,
+        "text": "                                                                                                                      ",
+        "face": "manager"
+      }
+    ],
+    [
+      {
+        "col": 0,
+        "text": " ",
+        "face": "base"
+      },
+      {
+        "col": 1,
+        "text": "▏",
+        "face": "orangeOnmanager"
+      },
+      {
+        "col": 2,
+        "text": " What changed                                                                                                         ",
+        "face": "manager"
+      }
+    ],
+    [
+      {
+        "col": 0,
+        "text": " ",
+        "face": "base"
+      },
+      {
+        "col": 1,
+        "text": "▏",
+        "face": "orangeOnmanager"
+      },
+      {
+        "col": 2,
+        "text": " The sidebar keeps its scroll position. C-o switches between the main page and input. M-/ selects the conversation    ",
+        "face": "manager"
+      }
+    ],
+    [
+      {
+        "col": 0,
+        "text": " ",
+        "face": "base"
+      },
+      {
+        "col": 1,
+        "text": "▏",
+        "face": "orangeOnmanager"
+      },
+      {
+        "col": 2,
+        "text": " you are looking at.                                                                                                  ",
+        "face": "manager"
+      }
+    ],
+    [
+      {
+        "col": 0,
+        "text": "                                                                                                                        ",
+        "face": "base"
+      }
+    ],
+    [
+      {
+        "col": 0,
+        "text": "                                                                                                                        ",
+        "face": "base"
+      }
+    ],
+    [
+      {
+        "col": 0,
+        "text": "                                                                                                                        ",
+        "face": "base"
+      }
+    ],
+    [
+      {
+        "col": 0,
+        "text": "                                                                                                                        ",
+        "face": "base"
+      }
+    ],
+    [
+      {
+        "col": 0,
+        "text": "                                                                                                                        ",
+        "face": "base"
+      }
+    ],
+    [
+      {
+        "col": 0,
+        "text": "                                                                                                                        ",
+        "face": "echo"
+      }
+    ]
+  ]
+}

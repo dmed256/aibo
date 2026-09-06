@@ -1,0 +1,40 @@
+ ● b2  aibo   Make the three panels stable                                                                              
+ project  —   goal  ready   tokens  0   elapsed  0s                                                                     
+ [2 hidden messages] ▸                                                                                                  
+                                                                                                                        
+  user                                                                                                                  
+ ▏ I want three stable panels: notifications on the left, the page I am viewing on the right, and a normally growing    
+ ▏ input across the bottom.                                                                                             
+                                                                                                                        
+  ● b2  aibo                                                                                                            
+ ▏ The workspace keeps its three panels while pages change and messages arrive.                                         
+ ▏                                                                                                                      
+ ▏ What changed                                                                                                         
+ ▏ The sidebar keeps its scroll position. C-o switches between the main page and input. M-/ selects the conversation    
+ ▏ you are looking at.                                                                                                  
+                                                                                                                        
+                                                                                                                        
+                                                                                                                        
+                                                                                                                        
+                                                                                                                        
+                                                                                                                        
+                                                                                                                        
+                                                                                                                        
+                                                                                                                        
+                                                                                                                        
+                                                                                                                        
+                                                                                                                        
+                                                                                                                        
+                                                                                                                        
+                                                                                                                        
+                                                                                                                        
+                                                                                                                        
+                                                                                                                        
+                                                                                                                        
+                                                                                                                        
+                                                                                                                        
+                                                                                                                        
+                                                                                                                        
+                                                                                                                        
+                                                                                                                        
+                                                                                                                        

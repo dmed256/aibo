@@ -1,0 +1,40 @@
+ ● b2  aibo   Make the three panels stable                  │(defun aibo:cycle-focus ()                                 
+ project  —   goal  ready   tokens  0   elapsed  0s         │  "Switch between the main page and input."                
+ [2 hidden messages] ▸                                      │  (interactive)                                            
+                                                            │  (select-window                                           
+  user                                                      │   (if (eq (selected-window) aibo:input-window)            
+ ▏ I want three stable panels: notifications on the left,   │       aibo:main-window                                    
+ ▏ the page I am viewing on the right, and a normally       │     aibo:input-window)))                                  
+ ▏ growing input across the bottom.                         │                                                           
+                                                            │                                                           
+  ● b2  aibo                                                │                                                           
+ ▏ The workspace keeps its three panels while pages change  │                                                           
+ ▏ and messages arrive.                                     │                                                           
+ ▏                                                          │                                                           
+ ▏ What changed                                             │                                                           
+ ▏ The sidebar keeps its scroll position. C-o switches      │                                                           
+ ▏ between the main page and input. M-/ selects the         │                                                           
+ ▏ conversation you are looking at.                         │                                                           
+                                                            │                                                           
+                                                            │                                                           
+                                                            │                                                           
+                                                            │                                                           
+                                                            │                                                           
+                                                            │                                                           
+                                                            │                                                           
+                                                            │                                                           
+                                                            │                                                           
+                                                            │                                                           
+                                                            │                                                           
+                                                            │                                                           
+                                                            │                                                           
+                                                            │                                                           
+                                                            │                                                           
+                                                            │                                                           
+                                                            │                                                           
+                                                            │                                                           
+                                                            │                                                           
+                                                            │                                                           
+                                                            │                                                           
+                                                            │                                                           
+                                                                                                                        

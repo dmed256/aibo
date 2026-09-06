@@ -1,13 +1,5 @@
 (define-package "aibo"
-  "0.1.0"
-  "AI partner"
-  '((counsel "20211230.1909")
-    (dash "20230714.723")
-    (ht "20230703.558")
-    (ivy "20211231.1730")
-    (projectile "20230713.1023")
-    (request "20230127.417")
-    (s "20220902.1511")
-    (ts "20220822.2313")
-    (uuidgen "20220405.1345")
-    (websocket "20230730.517")))
+                "0.2.0"
+                "Codex conversations in Emacs"
+                '((emacs "29.1")
+                  (websocket "1.15")))
